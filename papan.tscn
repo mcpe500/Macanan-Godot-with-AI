@@ -2,10 +2,9 @@
 
 [ext_resource type="Script" path="res://generate_papan.gd" id="1_papan"]
 
-[node name="Papan" type="Node3D"]
+[node name="Papan" type="Node2D"]
 script = ExtResource("1_papan")
 
-[node name="Camera3D" type="Camera3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 0.866025, 0.5, 0, -0.5, 0.866025, 0, 2, 4)
+[node name="Camera2D" type="Camera2D" parent="."]
 
-[node name="papan_place" type="Node3D" parent="."]
+[node name="papan_place" type="Node2D" parent="."]

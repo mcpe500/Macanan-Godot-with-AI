@@ -1,83 +1,97 @@
-extends Node3D
+extends Node2D
 
-func create_ball(pos: Vector3, color: Color = Color(1, 0, 0)) -> MeshInstance3D:
-	# Create a new spherical mesh
-	var sphere_mesh = SphereMesh.new()
-	
-	# Make the sphere more visible
-	sphere_mesh.radius = 0.25
-	sphere_mesh.height = 0.5
-	
-	# Create a MeshInstance3D to render the sphere
-	var mesh_instance = MeshInstance3D.new()
-	mesh_instance.mesh = sphere_mesh
-	
-	# Add material
-	var material = StandardMaterial3D.new()
-	material.albedo_color = color
-	mesh_instance.material_override = material
-	
-	# Set position
-	mesh_instance.position = pos
-	
-	return mesh_instance
+const BoardConstants = preload("res://board_constants.gd")
+const BoardPositions = preload("res://board_positions.gd")
 
-func create_line(start_pos: Vector3, end_pos: Vector3) -> MeshInstance3D:
-	# Create a cylinder to represent the line
-	var cylinder = CylinderMesh.new()
+func create_circle(pos: Vector2) -> Node2D:
+	var circle = Node2D.new()
+	circle.position = pos
 	
-	# Calculate length and position
-	var length = start_pos.distance_to(end_pos)
-	cylinder.height = length
-	cylinder.top_radius = 0.1
-	cylinder.bottom_radius = 0.1
+	var draw_circle = func():
+		circle.draw_circle(Vector2.ZERO, 10, BoardConstants.CIRCLE_COLOR)
 	
-	# Create mesh instance
-	var mesh_instance = MeshInstance3D.new()
-	mesh_instance.mesh = cylinder
+	circle.draw.connect(draw_circle)
+	return circle
+
+func create_line(start_pos: Vector2, end_pos: Vector2) -> Node2D:
+	var line = Node2D.new()
 	
-	# Position and rotate the cylinder
-	var mid_point = (start_pos + end_pos) / 2
-	mesh_instance.position = mid_point
-	
-	# Make the cylinder look at the end position
-	mesh_instance.look_at_from_position(mid_point, end_pos, Vector3.UP)
-	mesh_instance.rotate_object_local(Vector3.RIGHT, PI / 2)
-	
-	return mesh_instance
+	var draw_line = func():
+		var local_start = start_pos - line.position
+		var local_end = end_pos - line.position
+		line.draw_line(local_start, local_end, BoardConstants.LINE_COLOR, BoardConstants.LINE_WIDTH)
+		
+	line.position = (start_pos + end_pos) / 2
+	line.draw.connect(draw_line)
+	return line
+
+func connect_middle_section(papan_place: Node2D, positions: Array) -> void:
+	for i in range(25):
+		var row = i / 5
+		var col = i % 5
+		
+		# Horizontal connections
+		if col < 4:
+			papan_place.add_child(create_line(positions[i], positions[i + 1]))
+		
+		# Vertical connections
+		if row < 4:
+			papan_place.add_child(create_line(positions[i], positions[i + 5]))
+		
+		# Diagonal connections (modified to match image)
+		if col < 4 and row < 4:
+			papan_place.add_child(create_line(positions[i], positions[i + 6]))
+			papan_place.add_child(create_line(positions[i + 1], positions[i + 5]))
+
+func connect_triangle_section(papan_place: Node2D, positions: Array, start_idx: int, connections: Array) -> void:
+	for conn in connections:
+		var start_pos = positions[start_idx + conn[0]]
+		var end_pos = positions[start_idx + conn[1]]
+		papan_place.add_child(create_line(start_pos, end_pos))
 
 func _ready() -> void:
-	# Get the papan_place node - Change this line
 	var papan_place = get_node("papan_place")
-	
-	# Create 2x2 grid of balls
-	var spacing = 1.5
 	var positions = []
-
-	for i in range(5):
-		for j in range(5):
-			positions.append(Vector3(i * spacing - 2 * spacing, 0.5, j * spacing - 2 * spacing))
 	
+	# Get all positions
+	positions.append_array(BoardPositions.get_middle_positions())
+	positions.append_array(BoardPositions.get_left_triangle_positions())
+	positions.append_array(BoardPositions.get_right_triangle_positions())
 	
-	# Create balls
-	var balls = []
+	# Create all circles
 	for pos in positions:
-		var ball = create_ball(pos)
-		papan_place.add_child(ball)
-		balls.append(ball)
+		papan_place.add_child(create_circle(pos))
 	
-	# Create connections (lines between balls)
-	# Horizontal connections
+	# Connect middle section
+	connect_middle_section(papan_place, positions)
 	
-	for i in range(5):
-		for j in range(5):
-			if i != j:
-				papan_place.add_child(create_line(positions[j], positions[i]))
+	# Left triangle connections
+	var left_connections = [
+		[25, 26], [26, 27], [27, 28],  # Horizontal
+		[29, 30], [30, 31],            # Horizontal second row
+		[26, 29], [27, 30], [28, 31],  # Vertical
+		[26, 30], [27, 31]             # Diagonal
+	]
 	
+	# Right triangle connections
+	var right_connections = [
+		[32, 33], [33, 34], [34, 35],  # Horizontal
+		[36, 37], [37, 38],            # Horizontal second row
+		[33, 36], [34, 37], [35, 38],  # Vertical
+		[33, 37], [34, 38]             # Diagonal
+	]
 	
-	# papan_place.add_child(create_line(positions[0], positions[1]))
-	# papan_place.add_child(create_line(positions[2], positions[3]))
+	# Connect triangles
+	connect_triangle_section(papan_place, positions, 0, left_connections)
+	connect_triangle_section(papan_place, positions, 0, right_connections)
 	
-	# # Vertical connections
-	# papan_place.add_child(create_line(positions[0], positions[2]))
-	# papan_place.add_child(create_line(positions[1], positions[3]))
+	# Connect triangles to middle section
+	# Left side
+	papan_place.add_child(create_line(positions[25], positions[5]))   # Top
+	papan_place.add_child(create_line(positions[27], positions[10]))  # Middle
+	papan_place.add_child(create_line(positions[30], positions[15]))  # Bottom
+	
+	# Right side
+	papan_place.add_child(create_line(positions[32], positions[9]))   # Top
+	papan_place.add_child(create_line(positions[34], positions[14]))  # Middle
+	papan_place.add_child(create_line(positions[37], positions[19]))  # Bottom
