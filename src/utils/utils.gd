@@ -7,13 +7,19 @@ static func find_index(nodes: Array[MapNode], pos: Vector2) -> int:
 			return i
 	return -1
 
-static func create_circle(pos: Vector2, color: Color = preload("res://src/constants/board_constants.gd").CIRCLE_COLOR) -> Node2D:
+static func create_circle(pos: Vector2, id: int, color: Color = preload("res://src/constants/board_constants.gd").CIRCLE_COLOR) -> Node2D:
 	var circle = Node2D.new()
 	circle.position = pos
 	
 	# Create a draw function
 	var draw_circle = func():
 		circle.draw_circle(Vector2.ZERO, 10, color)
+		# Draw the ID
+		var label = Label.new()
+		label.text = str(id)
+		label.position = Vector2(-5, -5)  # Adjust position to center the label on the circle
+		label.add_to_group("circle_label")
+		circle.add_child(label)
 	
 	circle.draw.connect(draw_circle)
 	return circle

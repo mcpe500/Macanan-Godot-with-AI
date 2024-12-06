@@ -43,14 +43,47 @@ func _ready() -> void:
 			var neighbor_pos = current_pos + direction
 			var neighbor_index = Utils.find_index(nodes, neighbor_pos)
 			if neighbor_index != -1:
-				current_node.connected.append(nodes[neighbor_index])
+				# Exclude specific connections
+				if not (
+					(current_node.id == 2 and nodes[neighbor_index].id == 8) or
+					(current_node.id == 8 and nodes[neighbor_index].id == 2) or
+					(current_node.id == 9 and nodes[neighbor_index].id == 8) or
+					(current_node.id == 8 and nodes[neighbor_index].id == 9) or
+					(current_node.id == 9 and nodes[neighbor_index].id == 7) or
+					(current_node.id == 7 and nodes[neighbor_index].id == 9) or
+					(current_node.id == 7 and nodes[neighbor_index].id == 27) or
+					(current_node.id == 27 and nodes[neighbor_index].id == 7) or
+					(current_node.id == 26 and nodes[neighbor_index].id == 27) or
+					(current_node.id == 27 and nodes[neighbor_index].id == 26) or
+					(current_node.id == 26 and nodes[neighbor_index].id == 35) or
+					(current_node.id == 35 and nodes[neighbor_index].id == 26) or
+					(current_node.id == 1 and nodes[neighbor_index].id == 8) or
+					(current_node.id == 8 and nodes[neighbor_index].id == 1) or
+					(current_node.id == 9 and nodes[neighbor_index].id == 17) or
+					(current_node.id == 17 and nodes[neighbor_index].id == 9) or
+					(current_node.id == 17 and nodes[neighbor_index].id == 27) or
+					(current_node.id == 27 and nodes[neighbor_index].id == 17) or
+					(current_node.id == 5 and nodes[neighbor_index].id == 14) or
+					(current_node.id == 14 and nodes[neighbor_index].id == 5) or
+					(current_node.id == 13 and nodes[neighbor_index].id == 14) or
+					(current_node.id == 14 and nodes[neighbor_index].id == 13) or
+					(current_node.id == 23 and nodes[neighbor_index].id == 13) or
+					(current_node.id == 13 and nodes[neighbor_index].id == 23) or
+					(current_node.id == 23 and nodes[neighbor_index].id == 31) or
+					(current_node.id == 31 and nodes[neighbor_index].id == 23) or
+					(current_node.id == 32 and nodes[neighbor_index].id == 31) or
+					(current_node.id == 31 and nodes[neighbor_index].id == 32) or
+					(current_node.id == 39 and nodes[neighbor_index].id == 32) or
+					(current_node.id == 32 and nodes[neighbor_index].id == 39)
+				):
+					current_node.connected.append(nodes[neighbor_index])
 
 	# Get the papan_place node
 	var papan_place = $papan_place
 	
 	# Create visual elements
 	for node in nodes:
-		papan_place.add_child(Utils.create_circle(node.position))
+		papan_place.add_child(Utils.create_circle(node.position, node.id))
 		
 		# Create lines to connected nodes
 		for connected in node.connected:
