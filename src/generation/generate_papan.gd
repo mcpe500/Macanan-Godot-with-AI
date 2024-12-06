@@ -50,6 +50,9 @@ func _ready() -> void:
 			var neighbor_pos = current_pos + direction
 			var neighbor_index = Utils.find_index(nodes, neighbor_pos)
 			if neighbor_index != -1:
+				# Skip specific connections
+				if (i == 0 and neighbor_index == 6) or (i == 6 and neighbor_index == 7) or (i == 5 and neighbor_index == 7) or (i == 5 and neighbor_index == 25) or (i == 24 and neighbor_index == 25) or (i == 24 and neighbor_index == 32):
+					continue
 				current_node.connected.append(nodes[neighbor_index])
 
 	# Get the papan_place node
