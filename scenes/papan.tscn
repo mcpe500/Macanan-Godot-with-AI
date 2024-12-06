@@ -1,15 +1,15 @@
-[gd_scene load_steps=3 format=3 uid="uid://cfsd0xmik5874"]
+[gd_scene load_steps=2 format=3 uid="uid://cfsd0xmik5874"]
 
-[ext_resource type="Script" path="res://generate_papan.gd" id="1_d8xsu"]
 [ext_resource type="PackedScene" uid="uid://bxu52bvkbtpcq" path="res://scenes/movement_node.tscn" id="2_4fpt8"]
 
 [node name="Papan" type="Node2D"]
-script = ExtResource("1_d8xsu")
 
-[node name="Camera2D" type="Camera2D" parent="."]
+[node name="MainCamera" type="Camera2D" parent="."]
+offset = Vector2(200, 0)
+zoom = Vector2(0.8, 0.8)
 
 [node name="LeftSideArena" type="Node2D" parent="."]
-position = Vector2(-64, 0)
+position = Vector2(64, 0)
 
 [node name="MovementNode" parent="LeftSideArena" instance=ExtResource("2_4fpt8")]
 position = Vector2(-432, -240)
@@ -29,8 +29,65 @@ position = Vector2(-304, -48)
 [node name="MovementNode6" parent="LeftSideArena" instance=ExtResource("2_4fpt8")]
 position = Vector2(-304, 80)
 
-[node name="MovementNode7" parent="LeftSideArena" instance=ExtResource("2_4fpt8")]
-position = Vector2(-176, -48)
+[node name="Line2D" type="Line2D" parent="LeftSideArena"]
+position = Vector2(-400, -40)
+points = PackedVector2Array(-16, -153, -16, -24)
+width = 2.0
+default_color = Color(0, 0, 0, 1)
+
+[node name="Line2D2" type="Line2D" parent="LeftSideArena"]
+position = Vector2(-400, 152)
+points = PackedVector2Array(-16, -153, -16, -24)
+width = 2.0
+default_color = Color(0, 0, 0, 1)
+
+[node name="Line2D3" type="Line2D" parent="LeftSideArena"]
+position = Vector2(-344, 176)
+points = PackedVector2Array(26, -73, -44, -25)
+width = 2.0
+default_color = Color(0, 0, 0, 1)
+
+[node name="Line2D4" type="Line2D" parent="LeftSideArena"]
+position = Vector2(-340, -143)
+points = PackedVector2Array(22, -26, -48, -74)
+width = 2.0
+default_color = Color(0, 0, 0, 1)
+
+[node name="Line2D5" type="Line2D" parent="LeftSideArena"]
+position = Vector2(-274, -40)
+points = PackedVector2Array(-15, -25, -15, -89)
+width = 2.0
+default_color = Color(0, 0, 0, 1)
+
+[node name="Line2D6" type="Line2D" parent="LeftSideArena"]
+position = Vector2(-274, 88)
+points = PackedVector2Array(-15, -25, -15, -89)
+width = 2.0
+default_color = Color(0, 0, 0, 1)
+
+[node name="Line2D7" type="Line2D" parent="LeftSideArena"]
+position = Vector2(-336, 25)
+points = PackedVector2Array(-51, -58, 17, -58)
+width = 2.0
+default_color = Color(0, 0, 0, 1)
+
+[node name="Line2D8" type="Line2D" parent="LeftSideArena"]
+position = Vector2(-208, 25)
+points = PackedVector2Array(-51, -58, 17, -58)
+width = 2.0
+default_color = Color(0, 0, 0, 1)
+
+[node name="Line2D9" type="Line2D" parent="LeftSideArena"]
+position = Vector2(-218, 106)
+points = PackedVector2Array(40, -113, -48, -31)
+width = 2.0
+default_color = Color(0, 0, 0, 1)
+
+[node name="Line2D10" type="Line2D" parent="LeftSideArena"]
+position = Vector2(-216, -69)
+points = PackedVector2Array(37, 10, -48, -74)
+width = 2.0
+default_color = Color(0, 0, 0, 1)
 
 [node name="MiddleSideArena" type="Node2D" parent="."]
 
@@ -109,8 +166,506 @@ position = Vector2(400, 80)
 [node name="MovementNode25" parent="MiddleSideArena" instance=ExtResource("2_4fpt8")]
 position = Vector2(400, 208)
 
+[node name="Line2D17" type="Line2D" parent="MiddleSideArena"]
+position = Vector2(368, 152)
+points = PackedVector2Array(-51, -58, 17, -58)
+width = 2.0
+default_color = Color(0, 0, 0, 1)
+
+[node name="Line2D16" type="Line2D" parent="MiddleSideArena"]
+position = Vector2(240, 152)
+points = PackedVector2Array(-51, -58, 17, -58)
+width = 2.0
+default_color = Color(0, 0, 0, 1)
+
+[node name="Line2D15" type="Line2D" parent="MiddleSideArena"]
+position = Vector2(112, 152)
+points = PackedVector2Array(-51, -58, 17, -58)
+width = 2.0
+default_color = Color(0, 0, 0, 1)
+
+[node name="Line2D" type="Line2D" parent="MiddleSideArena"]
+position = Vector2(-16, 24)
+points = PackedVector2Array(-51, -58, 17, -58)
+width = 2.0
+default_color = Color(0, 0, 0, 1)
+
+[node name="Line2D1" type="Line2D" parent="MiddleSideArena"]
+position = Vector2(-16, 152)
+points = PackedVector2Array(-51, -58, 17, -58)
+width = 2.0
+default_color = Color(0, 0, 0, 1)
+
+[node name="Line2D20" type="Line2D" parent="MiddleSideArena"]
+position = Vector2(368, 280)
+points = PackedVector2Array(-51, -58, 17, -58)
+width = 2.0
+default_color = Color(0, 0, 0, 1)
+
+[node name="Line2D19" type="Line2D" parent="MiddleSideArena"]
+position = Vector2(240, 280)
+points = PackedVector2Array(-51, -58, 17, -58)
+width = 2.0
+default_color = Color(0, 0, 0, 1)
+
+[node name="Line2D18" type="Line2D" parent="MiddleSideArena"]
+position = Vector2(112, 280)
+points = PackedVector2Array(-51, -58, 17, -58)
+width = 2.0
+default_color = Color(0, 0, 0, 1)
+
+[node name="Line2D2" type="Line2D" parent="MiddleSideArena"]
+position = Vector2(-16, 280)
+points = PackedVector2Array(-51, -58, 17, -58)
+width = 2.0
+default_color = Color(0, 0, 0, 1)
+
+[node name="Line2D3" type="Line2D" parent="MiddleSideArena"]
+position = Vector2(368, -104)
+points = PackedVector2Array(-51, -58, 17, -58)
+width = 2.0
+default_color = Color(0, 0, 0, 1)
+
+[node name="Line2D4" type="Line2D" parent="MiddleSideArena"]
+position = Vector2(240, -104)
+points = PackedVector2Array(-51, -58, 17, -58)
+width = 2.0
+default_color = Color(0, 0, 0, 1)
+
+[node name="Line2D5" type="Line2D" parent="MiddleSideArena"]
+position = Vector2(112, -104)
+points = PackedVector2Array(-51, -58, 17, -58)
+width = 2.0
+default_color = Color(0, 0, 0, 1)
+
+[node name="Line2D6" type="Line2D" parent="MiddleSideArena"]
+position = Vector2(-16, -104)
+points = PackedVector2Array(-51, -58, 17, -58)
+width = 2.0
+default_color = Color(0, 0, 0, 1)
+
+[node name="Line2D7" type="Line2D" parent="MiddleSideArena"]
+position = Vector2(-16, -232)
+points = PackedVector2Array(-51, -58, 17, -58)
+width = 2.0
+default_color = Color(0, 0, 0, 1)
+
+[node name="Line2D8" type="Line2D" parent="MiddleSideArena"]
+position = Vector2(112, -232)
+points = PackedVector2Array(-51, -58, 17, -58)
+width = 2.0
+default_color = Color(0, 0, 0, 1)
+
+[node name="Line2D9" type="Line2D" parent="MiddleSideArena"]
+position = Vector2(240, -232)
+points = PackedVector2Array(-51, -58, 17, -58)
+width = 2.0
+default_color = Color(0, 0, 0, 1)
+
+[node name="Line2D10" type="Line2D" parent="MiddleSideArena"]
+position = Vector2(368, -232)
+points = PackedVector2Array(-51, -58, 17, -58)
+width = 2.0
+default_color = Color(0, 0, 0, 1)
+
+[node name="Line2D11" type="Line2D" parent="MiddleSideArena"]
+position = Vector2(112, 24)
+points = PackedVector2Array(-51, -58, 17, -58)
+width = 2.0
+default_color = Color(0, 0, 0, 1)
+
+[node name="Line2D12" type="Line2D" parent="MiddleSideArena"]
+position = Vector2(240, 24)
+points = PackedVector2Array(-51, -58, 17, -58)
+width = 2.0
+default_color = Color(0, 0, 0, 1)
+
+[node name="Line2D13" type="Line2D" parent="MiddleSideArena"]
+position = Vector2(368, 24)
+points = PackedVector2Array(-51, -58, 17, -58)
+width = 2.0
+default_color = Color(0, 0, 0, 1)
+
+[node name="Line2D78" type="Line2D" parent="MiddleSideArena"]
+position = Vector2(624, 24)
+points = PackedVector2Array(-51, -58, 17, -58)
+width = 2.0
+default_color = Color(0, 0, 0, 1)
+
+[node name="Line2D24" type="Line2D" parent="MiddleSideArena"]
+position = Vector2(-80, 216)
+points = PackedVector2Array(-15, -25, -15, -89)
+width = 2.0
+default_color = Color(0, 0, 0, 1)
+
+[node name="Line2D23" type="Line2D" parent="MiddleSideArena"]
+position = Vector2(-80, 88)
+points = PackedVector2Array(-15, -25, -15, -89)
+width = 2.0
+default_color = Color(0, 0, 0, 1)
+
+[node name="Line2D22" type="Line2D" parent="MiddleSideArena"]
+position = Vector2(-80, -40)
+points = PackedVector2Array(-15, -25, -15, -89)
+width = 2.0
+default_color = Color(0, 0, 0, 1)
+
+[node name="Line2D28" type="Line2D" parent="MiddleSideArena"]
+position = Vector2(48, 216)
+points = PackedVector2Array(-15, -25, -15, -89)
+width = 2.0
+default_color = Color(0, 0, 0, 1)
+
+[node name="Line2D27" type="Line2D" parent="MiddleSideArena"]
+position = Vector2(48, 88)
+points = PackedVector2Array(-15, -25, -15, -89)
+width = 2.0
+default_color = Color(0, 0, 0, 1)
+
+[node name="Line2D26" type="Line2D" parent="MiddleSideArena"]
+position = Vector2(48, -40)
+points = PackedVector2Array(-15, -25, -15, -89)
+width = 2.0
+default_color = Color(0, 0, 0, 1)
+
+[node name="Line2D38" type="Line2D" parent="MiddleSideArena"]
+position = Vector2(432, 216)
+points = PackedVector2Array(-15, -25, -15, -89)
+width = 2.0
+default_color = Color(0, 0, 0, 1)
+
+[node name="Line2D37" type="Line2D" parent="MiddleSideArena"]
+position = Vector2(432, 88)
+points = PackedVector2Array(-15, -25, -15, -89)
+width = 2.0
+default_color = Color(0, 0, 0, 1)
+
+[node name="Line2D36" type="Line2D" parent="MiddleSideArena"]
+position = Vector2(432, -40)
+points = PackedVector2Array(-15, -25, -15, -89)
+width = 2.0
+default_color = Color(0, 0, 0, 1)
+
+[node name="Line2D31" type="Line2D" parent="MiddleSideArena"]
+position = Vector2(432, -168)
+points = PackedVector2Array(-15, -25, -15, -89)
+width = 2.0
+default_color = Color(0, 0, 0, 1)
+
+[node name="Line2D35" type="Line2D" parent="MiddleSideArena"]
+position = Vector2(304, 216)
+points = PackedVector2Array(-15, -25, -15, -89)
+width = 2.0
+default_color = Color(0, 0, 0, 1)
+
+[node name="Line2D34" type="Line2D" parent="MiddleSideArena"]
+position = Vector2(304, 88)
+points = PackedVector2Array(-15, -25, -15, -89)
+width = 2.0
+default_color = Color(0, 0, 0, 1)
+
+[node name="Line2D33" type="Line2D" parent="MiddleSideArena"]
+position = Vector2(304, -40)
+points = PackedVector2Array(-15, -25, -15, -89)
+width = 2.0
+default_color = Color(0, 0, 0, 1)
+
+[node name="Line2D30" type="Line2D" parent="MiddleSideArena"]
+position = Vector2(304, -168)
+points = PackedVector2Array(-15, -25, -15, -89)
+width = 2.0
+default_color = Color(0, 0, 0, 1)
+
+[node name="Line2D40" type="Line2D" parent="MiddleSideArena"]
+position = Vector2(176, 216)
+points = PackedVector2Array(-15, -25, -15, -89)
+width = 2.0
+default_color = Color(0, 0, 0, 1)
+
+[node name="Line2D41" type="Line2D" parent="MiddleSideArena"]
+position = Vector2(176, 88)
+points = PackedVector2Array(-15, -25, -15, -89)
+width = 2.0
+default_color = Color(0, 0, 0, 1)
+
+[node name="Line2D32" type="Line2D" parent="MiddleSideArena"]
+position = Vector2(176, -40)
+points = PackedVector2Array(-15, -25, -15, -89)
+width = 2.0
+default_color = Color(0, 0, 0, 1)
+
+[node name="Line2D29" type="Line2D" parent="MiddleSideArena"]
+position = Vector2(176, -168)
+points = PackedVector2Array(-15, -25, -15, -89)
+width = 2.0
+default_color = Color(0, 0, 0, 1)
+
+[node name="Line2D25" type="Line2D" parent="MiddleSideArena"]
+position = Vector2(48, -168)
+points = PackedVector2Array(-15, -25, -15, -89)
+width = 2.0
+default_color = Color(0, 0, 0, 1)
+
+[node name="Line2D21" type="Line2D" parent="MiddleSideArena"]
+position = Vector2(-80, -168)
+points = PackedVector2Array(-15, -25, -15, -89)
+width = 2.0
+default_color = Color(0, 0, 0, 1)
+
+[node name="Line2D44" type="Line2D" parent="MiddleSideArena"]
+position = Vector2(360, -49)
+points = PackedVector2Array(30, -2, -56, -86)
+width = 2.0
+default_color = Color(0, 0, 0, 1)
+
+[node name="Line2D43" type="Line2D" parent="MiddleSideArena"]
+position = Vector2(232, -54)
+points = PackedVector2Array(30, 3, -54, -83)
+width = 2.0
+default_color = Color(0, 0, 0, 1)
+
+[node name="Line2D42" type="Line2D" parent="MiddleSideArena"]
+position = Vector2(102, -62)
+points = PackedVector2Array(36, 7, -49, -77)
+width = 2.0
+default_color = Color(0, 0, 0, 1)
+
+[node name="Line2D48" type="Line2D" parent="MiddleSideArena"]
+position = Vector2(358, -190)
+points = PackedVector2Array(34, 9, -50, -77)
+width = 2.0
+default_color = Color(0, 0, 0, 1)
+
+[node name="Line2D47" type="Line2D" parent="MiddleSideArena"]
+position = Vector2(230, -190)
+points = PackedVector2Array(34, 9, -50, -77)
+width = 2.0
+default_color = Color(0, 0, 0, 1)
+
+[node name="Line2D46" type="Line2D" parent="MiddleSideArena"]
+position = Vector2(102, -190)
+points = PackedVector2Array(34, 9, -50, -77)
+width = 2.0
+default_color = Color(0, 0, 0, 1)
+
+[node name="Line2D72" type="Line2D" parent="MiddleSideArena"]
+position = Vector2(365, 187)
+points = PackedVector2Array(-57, 14, 27, -72)
+width = 2.0
+default_color = Color(0, 0, 0, 1)
+
+[node name="Line2D71" type="Line2D" parent="MiddleSideArena"]
+position = Vector2(367, 61)
+points = PackedVector2Array(-57, 14, 27, -72)
+width = 2.0
+default_color = Color(0, 0, 0, 1)
+
+[node name="Line2D70" type="Line2D" parent="MiddleSideArena"]
+position = Vector2(369, -65)
+points = PackedVector2Array(-57, 14, 27, -72)
+width = 2.0
+default_color = Color(0, 0, 0, 1)
+
+[node name="Line2D58" type="Line2D" parent="MiddleSideArena"]
+position = Vector2(371, -191)
+points = PackedVector2Array(-57, 14, 27, -72)
+width = 2.0
+default_color = Color(0, 0, 0, 1)
+
+[node name="Line2D69" type="Line2D" parent="MiddleSideArena"]
+position = Vector2(235, 185)
+points = PackedVector2Array(-57, 14, 27, -72)
+width = 2.0
+default_color = Color(0, 0, 0, 1)
+
+[node name="Line2D68" type="Line2D" parent="MiddleSideArena"]
+position = Vector2(237, 59)
+points = PackedVector2Array(-57, 14, 27, -72)
+width = 2.0
+default_color = Color(0, 0, 0, 1)
+
+[node name="Line2D67" type="Line2D" parent="MiddleSideArena"]
+position = Vector2(239, -67)
+points = PackedVector2Array(-57, 14, 27, -72)
+width = 2.0
+default_color = Color(0, 0, 0, 1)
+
+[node name="Line2D57" type="Line2D" parent="MiddleSideArena"]
+position = Vector2(241, -193)
+points = PackedVector2Array(-57, 14, 27, -72)
+width = 2.0
+default_color = Color(0, 0, 0, 1)
+
+[node name="Line2D66" type="Line2D" parent="MiddleSideArena"]
+position = Vector2(111, 189)
+points = PackedVector2Array(-57, 14, 27, -72)
+width = 2.0
+default_color = Color(0, 0, 0, 1)
+
+[node name="Line2D65" type="Line2D" parent="MiddleSideArena"]
+position = Vector2(111, 61)
+points = PackedVector2Array(-57, 14, 27, -72)
+width = 2.0
+default_color = Color(0, 0, 0, 1)
+
+[node name="Line2D64" type="Line2D" parent="MiddleSideArena"]
+position = Vector2(111, -67)
+points = PackedVector2Array(-57, 14, 27, -72)
+width = 2.0
+default_color = Color(0, 0, 0, 1)
+
+[node name="Line2D59" type="Line2D" parent="MiddleSideArena"]
+position = Vector2(111, -195)
+points = PackedVector2Array(-57, 14, 27, -72)
+width = 2.0
+default_color = Color(0, 0, 0, 1)
+
+[node name="Line2D63" type="Line2D" parent="MiddleSideArena"]
+position = Vector2(-13, 193)
+points = PackedVector2Array(-57, 14, 27, -72)
+width = 2.0
+default_color = Color(0, 0, 0, 1)
+
+[node name="Line2D62" type="Line2D" parent="MiddleSideArena"]
+position = Vector2(-15, 63)
+points = PackedVector2Array(-57, 14, 27, -72)
+width = 2.0
+default_color = Color(0, 0, 0, 1)
+
+[node name="Line2D61" type="Line2D" parent="MiddleSideArena"]
+position = Vector2(-17, -67)
+points = PackedVector2Array(-57, 14, 27, -72)
+width = 2.0
+default_color = Color(0, 0, 0, 1)
+
+[node name="Line2D60" type="Line2D" parent="MiddleSideArena"]
+position = Vector2(-19, -197)
+points = PackedVector2Array(-57, 14, 27, -72)
+width = 2.0
+default_color = Color(0, 0, 0, 1)
+
+[node name="Line2D45" type="Line2D" parent="MiddleSideArena"]
+position = Vector2(-26, -190)
+points = PackedVector2Array(34, 9, -50, -77)
+width = 2.0
+default_color = Color(0, 0, 0, 1)
+
+[node name="Line2D56" type="Line2D" parent="MiddleSideArena"]
+position = Vector2(353, 70)
+points = PackedVector2Array(35, 9, -49, -77)
+width = 2.0
+default_color = Color(0, 0, 0, 1)
+
+[node name="Line2D55" type="Line2D" parent="MiddleSideArena"]
+position = Vector2(227, 68)
+points = PackedVector2Array(35, 9, -49, -77)
+width = 2.0
+default_color = Color(0, 0, 0, 1)
+
+[node name="Line2D54" type="Line2D" parent="MiddleSideArena"]
+position = Vector2(101, 66)
+points = PackedVector2Array(35, 9, -49, -77)
+width = 2.0
+default_color = Color(0, 0, 0, 1)
+
+[node name="Line2D49" type="Line2D" parent="MiddleSideArena"]
+position = Vector2(-25, 64)
+points = PackedVector2Array(35, 9, -49, -77)
+width = 2.0
+default_color = Color(0, 0, 0, 1)
+
+[node name="Line2D53" type="Line2D" parent="MiddleSideArena"]
+position = Vector2(361, 192)
+points = PackedVector2Array(35, 9, -49, -77)
+width = 2.0
+default_color = Color(0, 0, 0, 1)
+
+[node name="Line2D52" type="Line2D" parent="MiddleSideArena"]
+position = Vector2(232, 192)
+points = PackedVector2Array(35, 9, -49, -77)
+width = 2.0
+default_color = Color(0, 0, 0, 1)
+
+[node name="Line2D51" type="Line2D" parent="MiddleSideArena"]
+position = Vector2(103, 192)
+points = PackedVector2Array(35, 9, -49, -77)
+width = 2.0
+default_color = Color(0, 0, 0, 1)
+
+[node name="Line2D50" type="Line2D" parent="MiddleSideArena"]
+position = Vector2(-26, 192)
+points = PackedVector2Array(35, 9, -49, -77)
+width = 2.0
+default_color = Color(0, 0, 0, 1)
+
+[node name="Line2D39" type="Line2D" parent="MiddleSideArena"]
+position = Vector2(-24, -64)
+points = PackedVector2Array(34, 9, -49, -77)
+width = 2.0
+default_color = Color(0, 0, 0, 1)
+
 [node name="RightSideArena" type="Node2D" parent="."]
 position = Vector2(960, 0)
+
+[node name="Line2D77" type="Line2D" parent="RightSideArena"]
+position = Vector2(-208, 24)
+points = PackedVector2Array(-51, -58, 17, -58)
+width = 2.0
+default_color = Color(0, 0, 0, 1)
+
+[node name="Line2D14" type="Line2D" parent="RightSideArena"]
+position = Vector2(-464, 24)
+points = PackedVector2Array(-51, -58, 17, -58)
+width = 2.0
+default_color = Color(0, 0, 0, 1)
+
+[node name="Line2D74" type="Line2D" parent="RightSideArena"]
+position = Vector2(-274, 87)
+points = PackedVector2Array(-15, -23, -15, -89)
+width = 2.0
+default_color = Color(0, 0, 0, 1)
+
+[node name="Line2D76" type="Line2D" parent="RightSideArena"]
+position = Vector2(-142, 88)
+points = PackedVector2Array(-15, 40, -15, -89)
+width = 2.0
+default_color = Color(0, 0, 0, 1)
+
+[node name="Line2D75" type="Line2D" parent="RightSideArena"]
+position = Vector2(-144, -104)
+points = PackedVector2Array(-15, 40, -15, -89)
+width = 2.0
+default_color = Color(0, 0, 0, 1)
+
+[node name="Line2D73" type="Line2D" parent="RightSideArena"]
+position = Vector2(-274, -41)
+points = PackedVector2Array(-15, -23, -15, -89)
+width = 2.0
+default_color = Color(0, 0, 0, 1)
+
+[node name="Line2D80" type="Line2D" parent="RightSideArena"]
+position = Vector2(-208, 199)
+points = PackedVector2Array(17, -35, -56, -86)
+width = 2.0
+default_color = Color(0, 0, 0, 1)
+
+[node name="Line2D79" type="Line2D" parent="RightSideArena"]
+position = Vector2(-342, 77)
+points = PackedVector2Array(30, -2, -56, -86)
+width = 2.0
+default_color = Color(0, 0, 0, 1)
+
+[node name="Line2D71" type="Line2D" parent="RightSideArena"]
+position = Vector2(-209, -195)
+points = PackedVector2Array(-53, 20, 18, -37)
+width = 2.0
+default_color = Color(0, 0, 0, 1)
+
+[node name="Line2D70" type="Line2D" parent="RightSideArena"]
+position = Vector2(-339, -69)
+points = PackedVector2Array(-57, 14, 27, -72)
+width = 2.0
+default_color = Color(0, 0, 0, 1)
 
 [node name="MovementNode" parent="RightSideArena" instance=ExtResource("2_4fpt8")]
 position = Vector2(-176, -240)
