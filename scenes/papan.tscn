@@ -104,7 +104,7 @@ next_node = [NodePath("../MovementNode2"), NodePath("../MovementNode7"), NodePat
 
 [node name="MovementNode2" parent="MiddleSideArena" node_paths=PackedStringArray("next_node") instance=ExtResource("2_4fpt8")]
 position = Vector2(-112, -176)
-next_node = [NodePath("../MovementNode"), NodePath("../MovementNode6"), NodePath("../MovementNode7"), NodePath("../MovementNode8"), NodePath("../MovementNode3")]
+next_node = [NodePath("../MovementNode"), NodePath("../MovementNode7"), NodePath("../MovementNode3")]
 
 [node name="MovementNode3" parent="MiddleSideArena" node_paths=PackedStringArray("next_node") instance=ExtResource("2_4fpt8")]
 position = Vector2(-112, -48)
@@ -112,7 +112,7 @@ next_node = [NodePath("../MovementNode2"), NodePath("../MovementNode4"), NodePat
 
 [node name="MovementNode4" parent="MiddleSideArena" node_paths=PackedStringArray("next_node") instance=ExtResource("2_4fpt8")]
 position = Vector2(-112, 80)
-next_node = [NodePath("../MovementNode3"), NodePath("../MovementNode5"), NodePath("../MovementNode8"), NodePath("../MovementNode9"), NodePath("../MovementNode10")]
+next_node = [NodePath("../MovementNode3"), NodePath("../MovementNode5"), NodePath("../MovementNode9")]
 
 [node name="MovementNode5" parent="MiddleSideArena" node_paths=PackedStringArray("next_node") instance=ExtResource("2_4fpt8")]
 position = Vector2(-112, 208)
@@ -120,7 +120,7 @@ next_node = [NodePath("../MovementNode4"), NodePath("../MovementNode9"), NodePat
 
 [node name="MovementNode6" parent="MiddleSideArena" node_paths=PackedStringArray("next_node") instance=ExtResource("2_4fpt8")]
 position = Vector2(16, -304)
-next_node = [NodePath("../MovementNode"), NodePath("../MovementNode2"), NodePath("../MovementNode7"), NodePath("../MovementNode11"), NodePath("../MovementNode12")]
+next_node = [NodePath("../MovementNode"), NodePath("../MovementNode7"), NodePath("../MovementNode11")]
 
 [node name="MovementNode7" parent="MiddleSideArena" node_paths=PackedStringArray("next_node") instance=ExtResource("2_4fpt8")]
 position = Vector2(16, -176)
@@ -128,7 +128,7 @@ next_node = [NodePath("../MovementNode2"), NodePath("../MovementNode"), NodePath
 
 [node name="MovementNode8" parent="MiddleSideArena" node_paths=PackedStringArray("next_node") instance=ExtResource("2_4fpt8")]
 position = Vector2(16, -48)
-next_node = [NodePath("../MovementNode3"), NodePath("../MovementNode2"), NodePath("../MovementNode7"), NodePath("../MovementNode12"), NodePath("../MovementNode13"), NodePath("../MovementNode14"), NodePath("../MovementNode9"), NodePath("../MovementNode4")]
+next_node = [NodePath("../MovementNode3"), NodePath("../MovementNode7"), NodePath("../MovementNode13"), NodePath("../MovementNode9")]
 
 [node name="MovementNode9" parent="MiddleSideArena" node_paths=PackedStringArray("next_node") instance=ExtResource("2_4fpt8")]
 position = Vector2(16, 80)
@@ -144,7 +144,7 @@ next_node = [NodePath("../MovementNode6"), NodePath("../MovementNode7"), NodePat
 
 [node name="MovementNode12" parent="MiddleSideArena" node_paths=PackedStringArray("next_node") instance=ExtResource("2_4fpt8")]
 position = Vector2(144, -176)
-next_node = [NodePath("../MovementNode7"), NodePath("../MovementNode6"), NodePath("../MovementNode11"), NodePath("../MovementNode16"), NodePath("../MovementNode17"), NodePath("../MovementNode18"), NodePath("../MovementNode13"), NodePath("../MovementNode8")]
+next_node = [NodePath("../MovementNode7"), NodePath("../MovementNode11"), NodePath("../MovementNode17"), NodePath("../MovementNode13")]
 
 [node name="MovementNode13" parent="MiddleSideArena" node_paths=PackedStringArray("next_node") instance=ExtResource("2_4fpt8")]
 position = Vector2(144, -48)
@@ -152,7 +152,7 @@ next_node = [NodePath("../MovementNode8"), NodePath("../MovementNode7"), NodePat
 
 [node name="MovementNode14" parent="MiddleSideArena" node_paths=PackedStringArray("next_node") instance=ExtResource("2_4fpt8")]
 position = Vector2(144, 80)
-next_node = [NodePath("../MovementNode9"), NodePath("../MovementNode8"), NodePath("../MovementNode13"), NodePath("../MovementNode18"), NodePath("../MovementNode19"), NodePath("../MovementNode20"), NodePath("../MovementNode15"), NodePath("../MovementNode10")]
+next_node = [NodePath("../MovementNode9"), NodePath("../MovementNode13"), NodePath("../MovementNode19"), NodePath("../MovementNode15")]
 
 [node name="MovementNode15" parent="MiddleSideArena" node_paths=PackedStringArray("next_node") instance=ExtResource("2_4fpt8")]
 position = Vector2(144, 208)
@@ -160,7 +160,7 @@ next_node = [NodePath("../MovementNode10"), NodePath("../MovementNode9"), NodePa
 
 [node name="MovementNode16" parent="MiddleSideArena" node_paths=PackedStringArray("next_node") instance=ExtResource("2_4fpt8")]
 position = Vector2(272, -304)
-next_node = [NodePath("../MovementNode11"), NodePath("../MovementNode12"), NodePath("../MovementNode17"), NodePath("../MovementNode21"), NodePath("../MovementNode22")]
+next_node = [NodePath("../MovementNode11"), NodePath("../MovementNode17"), NodePath("../MovementNode21")]
 
 [node name="MovementNode17" parent="MiddleSideArena" node_paths=PackedStringArray("next_node") instance=ExtResource("2_4fpt8")]
 position = Vector2(272, -176)
@@ -168,14 +168,15 @@ next_node = [NodePath("../MovementNode12"), NodePath("../MovementNode11"), NodeP
 
 [node name="MovementNode18" parent="MiddleSideArena" node_paths=PackedStringArray("next_node") instance=ExtResource("2_4fpt8")]
 position = Vector2(272, -48)
-next_node = [NodePath("../MovementNode13"), NodePath("../MovementNode12"), NodePath("../MovementNode17"), NodePath("../MovementNode22"), NodePath("../MovementNode23"), NodePath("../MovementNode24"), NodePath("../MovementNode19"), NodePath("../MovementNode14")]
+next_node = [NodePath("../MovementNode13"), NodePath("../MovementNode17"), NodePath("../MovementNode23"), NodePath("../MovementNode19")]
 
 [node name="MovementNode19" parent="MiddleSideArena" node_paths=PackedStringArray("next_node") instance=ExtResource("2_4fpt8")]
 position = Vector2(272, 80)
 next_node = [NodePath("../MovementNode14"), NodePath("../MovementNode13"), NodePath("../MovementNode18"), NodePath("../MovementNode23"), NodePath("../MovementNode24"), NodePath("../MovementNode25"), NodePath("../MovementNode20"), NodePath("../MovementNode15")]
 
-[node name="MovementNode20" parent="MiddleSideArena" instance=ExtResource("2_4fpt8")]
+[node name="MovementNode20" parent="MiddleSideArena" node_paths=PackedStringArray("next_node") instance=ExtResource("2_4fpt8")]
 position = Vector2(272, 208)
+next_node = [NodePath("../MovementNode15"), NodePath("../MovementNode19"), NodePath("../MovementNode25")]
 
 [node name="MovementNode21" parent="MiddleSideArena" node_paths=PackedStringArray("next_node") instance=ExtResource("2_4fpt8")]
 position = Vector2(400, -304)
@@ -183,7 +184,7 @@ next_node = [NodePath("../MovementNode16"), NodePath("../MovementNode17"), NodeP
 
 [node name="MovementNode22" parent="MiddleSideArena" node_paths=PackedStringArray("next_node") instance=ExtResource("2_4fpt8")]
 position = Vector2(400, -176)
-next_node = [NodePath("../MovementNode17"), NodePath("../MovementNode16"), NodePath("../MovementNode21"), NodePath("../MovementNode23")]
+next_node = [NodePath("../MovementNode17"), NodePath("../MovementNode21"), NodePath("../MovementNode23")]
 
 [node name="MovementNode23" parent="MiddleSideArena" node_paths=PackedStringArray("next_node") instance=ExtResource("2_4fpt8")]
 position = Vector2(400, -48)
@@ -191,7 +192,7 @@ next_node = [NodePath("../MovementNode18"), NodePath("../MovementNode17"), NodeP
 
 [node name="MovementNode24" parent="MiddleSideArena" node_paths=PackedStringArray("next_node") instance=ExtResource("2_4fpt8")]
 position = Vector2(400, 80)
-next_node = [NodePath("../MovementNode19"), NodePath("../MovementNode18"), NodePath("../MovementNode23"), NodePath("../MovementNode25"), NodePath("../MovementNode20")]
+next_node = [NodePath("../MovementNode19"), NodePath("../MovementNode23"), NodePath("../MovementNode25")]
 
 [node name="MovementNode25" parent="MiddleSideArena" node_paths=PackedStringArray("next_node") instance=ExtResource("2_4fpt8")]
 position = Vector2(400, 208)
@@ -443,21 +444,9 @@ points = PackedVector2Array(30, -2, -56, -86)
 width = 2.0
 default_color = Color(0, 0, 0, 1)
 
-[node name="Line2D43" type="Line2D" parent="MiddleSideArena"]
-position = Vector2(232, -54)
-points = PackedVector2Array(30, 3, -54, -83)
-width = 2.0
-default_color = Color(0, 0, 0, 1)
-
 [node name="Line2D42" type="Line2D" parent="MiddleSideArena"]
 position = Vector2(102, -62)
 points = PackedVector2Array(36, 7, -49, -77)
-width = 2.0
-default_color = Color(0, 0, 0, 1)
-
-[node name="Line2D48" type="Line2D" parent="MiddleSideArena"]
-position = Vector2(358, -190)
-points = PackedVector2Array(34, 9, -50, -77)
 width = 2.0
 default_color = Color(0, 0, 0, 1)
 
@@ -467,26 +456,8 @@ points = PackedVector2Array(34, 9, -50, -77)
 width = 2.0
 default_color = Color(0, 0, 0, 1)
 
-[node name="Line2D46" type="Line2D" parent="MiddleSideArena"]
-position = Vector2(102, -190)
-points = PackedVector2Array(34, 9, -50, -77)
-width = 2.0
-default_color = Color(0, 0, 0, 1)
-
-[node name="Line2D72" type="Line2D" parent="MiddleSideArena"]
-position = Vector2(365, 187)
-points = PackedVector2Array(-57, 14, 27, -72)
-width = 2.0
-default_color = Color(0, 0, 0, 1)
-
 [node name="Line2D71" type="Line2D" parent="MiddleSideArena"]
 position = Vector2(367, 61)
-points = PackedVector2Array(-57, 14, 27, -72)
-width = 2.0
-default_color = Color(0, 0, 0, 1)
-
-[node name="Line2D70" type="Line2D" parent="MiddleSideArena"]
-position = Vector2(369, -65)
 points = PackedVector2Array(-57, 14, 27, -72)
 width = 2.0
 default_color = Color(0, 0, 0, 1)
@@ -503,38 +474,14 @@ points = PackedVector2Array(-57, 14, 27, -72)
 width = 2.0
 default_color = Color(0, 0, 0, 1)
 
-[node name="Line2D68" type="Line2D" parent="MiddleSideArena"]
-position = Vector2(237, 59)
-points = PackedVector2Array(-57, 14, 27, -72)
-width = 2.0
-default_color = Color(0, 0, 0, 1)
-
 [node name="Line2D67" type="Line2D" parent="MiddleSideArena"]
 position = Vector2(239, -67)
 points = PackedVector2Array(-57, 14, 27, -72)
 width = 2.0
 default_color = Color(0, 0, 0, 1)
 
-[node name="Line2D57" type="Line2D" parent="MiddleSideArena"]
-position = Vector2(241, -193)
-points = PackedVector2Array(-57, 14, 27, -72)
-width = 2.0
-default_color = Color(0, 0, 0, 1)
-
-[node name="Line2D66" type="Line2D" parent="MiddleSideArena"]
-position = Vector2(111, 189)
-points = PackedVector2Array(-57, 14, 27, -72)
-width = 2.0
-default_color = Color(0, 0, 0, 1)
-
 [node name="Line2D65" type="Line2D" parent="MiddleSideArena"]
 position = Vector2(111, 61)
-points = PackedVector2Array(-57, 14, 27, -72)
-width = 2.0
-default_color = Color(0, 0, 0, 1)
-
-[node name="Line2D64" type="Line2D" parent="MiddleSideArena"]
-position = Vector2(111, -67)
 points = PackedVector2Array(-57, 14, 27, -72)
 width = 2.0
 default_color = Color(0, 0, 0, 1)
@@ -551,20 +498,8 @@ points = PackedVector2Array(-57, 14, 27, -72)
 width = 2.0
 default_color = Color(0, 0, 0, 1)
 
-[node name="Line2D62" type="Line2D" parent="MiddleSideArena"]
-position = Vector2(-15, 63)
-points = PackedVector2Array(-57, 14, 27, -72)
-width = 2.0
-default_color = Color(0, 0, 0, 1)
-
 [node name="Line2D61" type="Line2D" parent="MiddleSideArena"]
 position = Vector2(-17, -67)
-points = PackedVector2Array(-57, 14, 27, -72)
-width = 2.0
-default_color = Color(0, 0, 0, 1)
-
-[node name="Line2D60" type="Line2D" parent="MiddleSideArena"]
-position = Vector2(-19, -197)
 points = PackedVector2Array(-57, 14, 27, -72)
 width = 2.0
 default_color = Color(0, 0, 0, 1)
@@ -575,20 +510,8 @@ points = PackedVector2Array(34, 9, -50, -77)
 width = 2.0
 default_color = Color(0, 0, 0, 1)
 
-[node name="Line2D56" type="Line2D" parent="MiddleSideArena"]
-position = Vector2(353, 70)
-points = PackedVector2Array(35, 9, -49, -77)
-width = 2.0
-default_color = Color(0, 0, 0, 1)
-
 [node name="Line2D55" type="Line2D" parent="MiddleSideArena"]
 position = Vector2(227, 68)
-points = PackedVector2Array(35, 9, -49, -77)
-width = 2.0
-default_color = Color(0, 0, 0, 1)
-
-[node name="Line2D54" type="Line2D" parent="MiddleSideArena"]
-position = Vector2(101, 66)
 points = PackedVector2Array(35, 9, -49, -77)
 width = 2.0
 default_color = Color(0, 0, 0, 1)
@@ -605,27 +528,9 @@ points = PackedVector2Array(35, 9, -49, -77)
 width = 2.0
 default_color = Color(0, 0, 0, 1)
 
-[node name="Line2D52" type="Line2D" parent="MiddleSideArena"]
-position = Vector2(232, 192)
-points = PackedVector2Array(35, 9, -49, -77)
-width = 2.0
-default_color = Color(0, 0, 0, 1)
-
 [node name="Line2D51" type="Line2D" parent="MiddleSideArena"]
 position = Vector2(103, 192)
 points = PackedVector2Array(35, 9, -49, -77)
-width = 2.0
-default_color = Color(0, 0, 0, 1)
-
-[node name="Line2D50" type="Line2D" parent="MiddleSideArena"]
-position = Vector2(-26, 192)
-points = PackedVector2Array(35, 9, -49, -77)
-width = 2.0
-default_color = Color(0, 0, 0, 1)
-
-[node name="Line2D39" type="Line2D" parent="MiddleSideArena"]
-position = Vector2(-24, -64)
-points = PackedVector2Array(34, 9, -49, -77)
 width = 2.0
 default_color = Color(0, 0, 0, 1)
 
