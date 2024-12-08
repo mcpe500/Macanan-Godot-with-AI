@@ -1,0 +1,128 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scenes/play_menu_options.gd" id="1_options"]
+
+[node name="PlayMenuOptions" type="Node2D"]
+script = ExtResource("1_options")
+
+[node name="Title" type="Label" parent="."]
+offset_left = -200
+offset_top = -250
+offset_right = 200
+offset_bottom = -200
+text = "Game Options"
+horizontal_alignment = 1
+
+[node name="PvPButton" type="Button" parent="."]
+offset_left = -180
+offset_top = -150
+offset_right = -20
+offset_bottom = -110
+text = "Player vs Player"
+
+[node name="PvAIButton" type="Button" parent="."]
+offset_left = 20
+offset_top = -150
+offset_right = 180
+offset_bottom = -110
+text = "Player vs AI"
+
+[node name="GameTypeLabel" type="Label" parent="."]
+offset_left = -200
+offset_top = -90
+offset_right = 200
+offset_bottom = -70
+text = "Game Type"
+horizontal_alignment = 1
+
+[node name="21v1Button" type="Button" parent="."]
+offset_left = -180
+offset_top = -60
+offset_right = -20
+offset_bottom = -20
+text = "21 Uwong vs 1 Macan"
+
+[node name="8v2Button" type="Button" parent="."]
+offset_left = 20
+offset_top = -60
+offset_right = 180
+offset_bottom = -20
+text = "8 Uwong vs 2 Macan"
+
+[node name="AIOptions" type="Control" parent="."]
+visible = false
+
+[node name="DifficultyLabel" type="Label" parent="AIOptions"]
+offset_left = -200
+offset_top = 0
+offset_right = 200
+offset_bottom = 20
+text = "AI Difficulty"
+horizontal_alignment = 1
+
+[node name="EasyButton" type="Button" parent="AIOptions"]
+offset_left = -180
+offset_top = 30
+offset_right = -100
+offset_bottom = 60
+text = "Easy"
+
+[node name="NormalButton" type="Button" parent="AIOptions"]
+offset_left = -90
+offset_top = 30
+offset_right = -10
+offset_bottom = 60
+text = "Normal"
+
+[node name="HardButton" type="Button" parent="AIOptions"]
+offset_left = 10
+offset_top = 30
+offset_right = 90
+offset_bottom = 60
+text = "Hard"
+
+[node name="InsaneButton" type="Button" parent="AIOptions"]
+offset_left = 100
+offset_top = 30
+offset_right = 180
+offset_bottom = 60
+text = "Insane"
+
+[node name="SideOptions" type="Control" parent="."]
+visible = false
+
+[node name="SideLabel" type="Label" parent="SideOptions"]
+offset_left = -200
+offset_top = 80
+offset_right = 200
+offset_bottom = 100
+text = "Choose Side"
+horizontal_alignment = 1
+
+[node name="UwongButton" type="Button" parent="SideOptions"]
+offset_left = -180
+offset_top = 110
+offset_right = -20
+offset_bottom = 140
+text = "Uwong"
+
+[node name="MacanButton" type="Button" parent="SideOptions"]
+offset_left = 20
+offset_top = 110
+offset_right = 180
+offset_bottom = 140
+text = "Macan"
+
+[node name="StartButton" type="Button" parent="."]
+offset_left = -100
+offset_top = 170
+offset_right = 100
+offset_bottom = 200
+text = "Start Game"
+
+[node name="BackButton" type="Button" parent="."]
+offset_left = -100
+offset_top = 210
+offset_right = 100
+offset_bottom = 240
+text = "Back to Main Menu"
