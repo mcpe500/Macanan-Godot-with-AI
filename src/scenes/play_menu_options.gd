@@ -53,13 +53,14 @@ func set_side(side: String) -> void:
 	
 func update_ui() -> void:
 	# Show/hide AI options based on mode
+	print("Current mode: ", current_config.mode)
 	$AIOptions.visible = current_config.mode == "ai"
 	$SideOptions.visible = current_config.mode == "ai"
-
+	
 	# Reset button colors
 	$PvPButton.modulate = Color.WHITE
 	$PvAIButton.modulate = Color.WHITE
-
+	
 	# Highlight the selected mode button
 	if current_config.mode == "pvp":
 		$PvPButton.modulate = Color.GREEN

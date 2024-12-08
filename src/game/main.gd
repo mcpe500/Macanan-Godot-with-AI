@@ -5,7 +5,7 @@ func _ready() -> void:
 	show_main_menu()
 
 func show_main_menu() -> void:
-	var main_menu_scene = load("res://scenes/MainMenu.tscn")
+	var main_menu_scene = load("res://src/scenes/MainMenu.tscn")
 	if main_menu_scene:
 		var main_menu = main_menu_scene.instantiate()
 		add_child(main_menu)

@@ -1,7 +1,7 @@
 [gd_scene load_steps=3 format=3 uid="uid://cfsd0xmik5874"]
 
 [ext_resource type="PackedScene" uid="uid://bxu52bvkbtpcq" path="res://scenes/movement_node.tscn" id="2_4fpt8"]
-[ext_resource type="Script" path="res://scenes/fps_counter.gd" id="2_rwua1"]
+[ext_resource type="Script" path="res://src/scenes/fps_counter.gd" id="2_rwua1"]
 
 [node name="Papan" type="Node2D"]
 

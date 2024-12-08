@@ -1,6 +1,6 @@
 extends Node
 
-const BoardConstants = preload("res://board_constants.gd")
+const BoardConstants = preload("res://src/board/board_constants.gd")
 
 static func get_middle_positions() -> Array:
 	var positions = []
