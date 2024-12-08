@@ -7,25 +7,39 @@ script = ExtResource("1_options")
 
 [node name="Title" type="Label" parent="."]
 offset_left = -200
-offset_top = -250
+offset_top = -300
 offset_right = 200
-offset_bottom = -200
+offset_bottom = -250
 text = "Game Options"
 horizontal_alignment = 1
 
 [node name="PvPButton" type="Button" parent="."]
 offset_left = -180
-offset_top = -150
+offset_top = -200
 offset_right = -20
-offset_bottom = -110
+offset_bottom = -160
 text = "Player vs Player"
 
 [node name="PvAIButton" type="Button" parent="."]
 offset_left = 20
+offset_top = -200
+offset_right = 180
+offset_bottom = -160
+text = "Player vs AI"
+
+[node name="AIPButton" type="Button" parent="."]
+offset_left = -180
+offset_top = -150
+offset_right = -20
+offset_bottom = -110
+text = "AI vs Player"
+
+[node name="AIAIButton" type="Button" parent="."]
+offset_left = 20
 offset_top = -150
 offset_right = 180
 offset_bottom = -110
-text = "Player vs AI"
+text = "AI vs AI"
 
 [node name="GameTypeLabel" type="Label" parent="."]
 offset_left = -200

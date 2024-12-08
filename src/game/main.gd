@@ -1,32 +1,38 @@
-# main.gd
 extends Node2D
 
+# Load the main menu and papan scenes
+var main_menu_scene = preload("res://scenes/MainMenu.tscn")
+var papan_scene = preload("res://scenes/papan.tscn")
+
 func _ready() -> void:
+	# Show the main menu initially
 	show_main_menu()
 
 func show_main_menu() -> void:
-	var main_menu_scene = load("res://src/scenes/MainMenu.tscn")
-	if main_menu_scene:
-		var main_menu = main_menu_scene.instantiate()
-		add_child(main_menu)
-		# Center the menu
-		main_menu.position = Vector2(get_viewport_rect().size / 2)
-	else:
-		push_error("Failed to load MainMenu.tscn")
+	# Load and add the main menu scene as a child
+	var main_menu_instance = main_menu_scene.instantiate()
+	add_child(main_menu_instance)
 
 func show_play_options() -> void:
+	# Remove the main menu scene
 	for child in get_children():
-		if child is Camera2D:
-			continue
 		child.queue_free()
-	var play_options = load("res://src/scenes/PlayMenuOptions.tscn").instantiate()
-	add_child(play_options)
-	play_options.position = Vector2(get_viewport_rect().size / 2)
 
-func start_game(game_config: Dictionary) -> void:
+	# Load and add the play options scene as a child
+	var play_options_instance = preload("res://scenes/PlayMenuOptions.tscn").instantiate()
+	add_child(play_options_instance)
+
+	# Connect the game_started signal to the start_game function
+	play_options_instance.connect("game_started", self, "start_game")
+
+func start_game(_game_config) -> void:
+	# Remove the play options scene
 	for child in get_children():
-		if child is Camera2D:
-			continue
 		child.queue_free()
-	var game_scene = load("res://src/scenes/papan.tscn").instantiate()
-	add_child(game_scene)
+
+	# Load and add the papan scene as a child
+	var papan_instance = papan_scene.instantiate()
+	add_child(papan_instance)
+
+	# Optionally, you can pass the game configuration to the papan scene
+	papan_instance.game_config = _game_config
