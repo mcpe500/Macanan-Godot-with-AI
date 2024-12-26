@@ -163,8 +163,21 @@ const MacananGame = () => {
       <div className="text-xl font-bold mb-4">{message}</div>
       <div className="flex justify-center items-center gap-8">
         {/* Left Wing (Positions 25–30) */}
-        <div className="grid grid-cols-2 gap-4">
-            {[25, 26, 27, 28, 29, 30].map((index) => (
+        <div className="grid grid-cols-1 gap-20">
+            {[25, 27, 29].map((index) => (
+              <button
+                key={index}
+                className={`w-12 h-12 rounded-full ${
+                  board[index] === 'uwong' ? 'bg-green-500' :
+                  board[index] === 'macan' ? 'bg-red-500' :
+                  'bg-gray-200'
+                }`}
+                onClick={() => handleClick(index)}
+              />
+            ))}
+        </div>
+        <div className="grid grid-cols-1 gap-4">
+            {[26, 28, 30].map((index) => (
               <button
                 key={index}
                 className={`w-12 h-12 rounded-full ${
@@ -195,8 +208,21 @@ const MacananGame = () => {
         </div>
 
         {/* Right Wing (Positions 31–36) */}
-        <div className="grid grid-cols-2 gap-4">
-          {[31, 32, 33, 34, 35, 36].map((index) => (
+        <div className="grid grid-cols-1 gap-4">
+          {[31, 33, 35].map((index) => (
+            <button
+              key={index}
+              className={`w-12 h-12 rounded-full ${
+                board[index] === 'uwong' ? 'bg-green-500' :
+                board[index] === 'macan' ? 'bg-red-500' :
+                'bg-gray-200'
+              }`}
+              onClick={() => handleClick(index)}
+            />
+          ))}
+        </div>
+        <div className="grid grid-cols-1 gap-20">
+          {[32, 34, 36].map((index) => (
             <button
               key={index}
               className={`w-12 h-12 rounded-full ${
