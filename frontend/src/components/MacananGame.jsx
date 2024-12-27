@@ -50,47 +50,73 @@ const MacananGame = () => {
     36: [34, 35]
   };
 
-  useEffect(() => {
+ // Updated useEffect to handle window resize and page refresh
+ useEffect(() => {
+  const calculateNodePositions = () => {
     if (boardRef.current) {
       const positions = {};
       const nodes = boardRef.current.getElementsByTagName('button');
       
-      Array.from(nodes).forEach((node) => {
-        const rect = node.getBoundingClientRect();
-        const boardRect = boardRef.current.getBoundingClientRect();
-        positions[node.dataset.position] = {
-          x: rect.left - boardRect.left + rect.width / 2,
-          y: rect.top - boardRect.top + rect.height / 2
-        };
+      // Wait for next frame to ensure DOM is fully rendered
+      requestAnimationFrame(() => {
+        Array.from(nodes).forEach((node) => {
+          const rect = node.getBoundingClientRect();
+          const boardRect = boardRef.current.getBoundingClientRect();
+          positions[node.dataset.position] = {
+            x: rect.left - boardRect.left + rect.width / 2,
+            y: rect.top - boardRect.top + rect.height / 2
+          };
+        });
+        
+        setNodePositions(positions);
       });
-      
-      setNodePositions(positions);
     }
-  }, []);
-
-  const renderConnections = () => {
-    const lines = [];
-    
-    Object.entries(connections).forEach(([from, tos]) => {
-      tos.forEach((to) => {
-        if (nodePositions[from] && nodePositions[to]) {
-          lines.push(
-            <line
-              key={`${from}-${to}`}
-              x1={nodePositions[from].x}
-              y1={nodePositions[from].y}
-              x2={nodePositions[to].x}
-              y2={nodePositions[to].y}
-              stroke="#CBD5E0"
-              strokeWidth="2"
-            />
-          );
-        }
-      });
-    });
-    
-    return lines;
   };
+
+  // Initial calculation
+  calculateNodePositions();
+
+  // Add resize event listener
+  window.addEventListener('resize', calculateNodePositions);
+
+  // Add visibility change listener for when page becomes visible again
+  document.addEventListener('visibilitychange', calculateNodePositions);
+
+  // Recalculate positions after a short delay to ensure all elements are properly rendered
+  const timeout = setTimeout(calculateNodePositions, 100);
+
+  // Cleanup function
+  return () => {
+    window.removeEventListener('resize', calculateNodePositions);
+    document.removeEventListener('visibilitychange', calculateNodePositions);
+    clearTimeout(timeout);
+  };
+}, [board]); // Added board as dependency to recalculate when game state changes
+
+const renderConnections = () => {
+  const lines = [];
+  
+  Object.entries(connections).forEach(([from, tos]) => {
+    tos.forEach((to) => {
+      // Only render if both positions exist and are different
+      if (nodePositions[from] && nodePositions[to] && from !== to) {
+        lines.push(
+          <line
+            key={`${from}-${to}`}
+            x1={nodePositions[from].x}
+            y1={nodePositions[from].y}
+            x2={nodePositions[to].x}
+            y2={nodePositions[to].y}
+            stroke="#CBD5E0"
+            strokeWidth="2"
+          />
+        );
+      }
+    });
+  });
+  
+  return lines;
+};
 
   const place3x3Formation = (centerPosition) => {
     const newBoard = [...board];
@@ -147,145 +173,112 @@ const MacananGame = () => {
   };
 
   const handleClick = (position) => {
+    console.log(position);
+    // kondisi peletakan uwong awal
     if (gameState === 'initial') {
       place3x3Formation(position);
-    } else if (gameState === 'placing') {
-      if (currentPlayer === 'macan' && board[position] === null) {
-        const newBoard = [...board];
-        newBoard[position] = 'macan';
-        setBoard(newBoard);
-        setCurrentPlayer('uwong');
-        setGameState('moving');
-        setMessage('Uwong: Place remaining pawns or move existing ones');
-      } else if (currentPlayer === 'uwong' && board[position] === null && uwongPawnsInHand > 0) {
-        const newBoard = [...board];
-        newBoard[position] = 'uwong';
-        setBoard(newBoard);
-        setUwongPawnsInHand(prev => prev - 1);
-        setCurrentPlayer('macan');
-        setMessage('Macan: Your turn');
+    } 
+    // kondisi pemasangan pion macan atau uwong
+    else if (gameState === 'placing') {
+      // kondisi pemasangan pion macan
+      if (currentPlayer === 'macan') {
+        if(board[position] === null){
+          const newBoard = [...board];
+          newBoard[position] = 'macan';
+          setBoard(newBoard);
+          setCurrentPlayer('uwong');
+          if (uwongPawnsInHand > 0) {
+            setGameState('placing');
+            setMessage('Uwong: Place remaining pawns');
+          }
+          else{
+            setGameState('moving');
+            setMessage('Uwong: Move existing ones');
+          }
+        }else{
+          setMessage("Macan: Choose an empty place")
+        }
+      } 
+      // kondisi pemasangan pion uwong
+      else if (currentPlayer === 'uwong') {
+        if(board[position] === null){
+          const newBoard = [...board];
+          newBoard[position] = 'uwong';
+          setBoard(newBoard);
+          setUwongPawnsInHand(prev => prev - 1);
+          setCurrentPlayer('macan');
+          setGameState('moving')
+          setMessage('Macan: Move or eat Uwong piece(s)');
+        }
+        else{
+          setMessage("Uwong: Choose an empty place")
+        }
       }
-    } else if (gameState === 'moving') {
-      if (selectedPiece === null) {
-        if (board[position] === currentPlayer) {
+    } 
+    // kondisi penggerakan pion macan atau uwong
+    else if (gameState === 'moving') {
+
+      // ketika board sekarang ada pionnya
+      if(board[position] !== null){
+        // kalau misalkan ternyata pionnya adalah milik pemain sekarang
+        if(board[position] === currentPlayer){
           setSelectedPiece(position);
-          setMessage(`Selected piece at position ${position}`);
+          if(currentPlayer === 'macan'){
+            setMessage(`Macan: Selected piece at position ${position}`);
+          }
+          else if(currentPlayer === 'uwong'){
+            setMessage(`Uwong: Selected piece at position ${position}`);
+          }
         }
-      } else {
-        if (currentPlayer === 'macan') {
-          if (isValidMove(selectedPiece, position) || canMacanJump(selectedPiece, position)) {
-            const newBoard = [...board];
-            newBoard[selectedPiece] = null;
-            newBoard[position] = 'macan';
-            
-            if (canMacanJump(selectedPiece, position)) {
-              const jumpedPos = findJumpPath(selectedPiece, position);
-              newBoard[jumpedPos] = null;
+      }
+      // ketika board sekarang tidak ada pionnya
+      else{
+        // kondisi saat pion sudah dipilih
+        if(selectedPiece !== null){
+          // masuk kondisi jika pemain sekarang adalah macan
+          if(currentPlayer === 'macan'){
+            // pengecekan apakah pergerakannya valid
+            if ((isValidMove(selectedPiece, position) || canMacanJump(selectedPiece, position))) {
+              const newBoard = [...board];
+              newBoard[selectedPiece] = null;
+              newBoard[position] = 'macan';
+              
+              if (canMacanJump(selectedPiece, position)) {
+                const jumpedPos = findJumpPath(selectedPiece, position);
+                newBoard[jumpedPos] = null;
+              }
+              
+              setBoard(newBoard);
+              setCurrentPlayer('uwong');
+              if (uwongPawnsInHand > 0) {
+                setGameState('placing');
+                setMessage('Uwong: Place remaining pawns');
+              }
+              else{
+                setGameState('moving');
+                setMessage('Uwong: Move existing ones');
+              }
+              setSelectedPiece(null);
             }
-            
-            setBoard(newBoard);
-            setCurrentPlayer('uwong');
-            setMessage('Uwong: Your turn');
           }
-        } else if (currentPlayer === 'uwong') {
-          if (isValidMove(selectedPiece, position) && board[position] === null) {
-            const newBoard = [...board];
-            newBoard[selectedPiece] = null;
-            newBoard[position] = 'uwong';
-            setBoard(newBoard);
-            setCurrentPlayer('macan');
-            setMessage('Macan: Your turn');
+          // masuk kondisi jika pemain sekarang adalah uwong
+          else if (currentPlayer === 'uwong') {
+            // pengecekan apakah pergerakannya valid
+            if (isValidMove(selectedPiece, position)) {
+              const newBoard = [...board];
+              newBoard[selectedPiece] = null;
+              newBoard[position] = 'uwong';
+              setBoard(newBoard);
+              setCurrentPlayer('macan');
+              setGameState('moving');
+              setMessage('Macan: Move or eat Uwong piece(s)');
+              setSelectedPiece(null);
+            }
           }
         }
-        setSelectedPiece(null);
       }
     }
   };
-
-  // return (
-  //   <div className="flex flex-col items-center gap-4 p-4">
-  //     <div className="text-xl font-bold mb-4">{message}</div>
-  //     <div className="flex justify-center items-center gap-8">
-  //       {/* Left Wing (Positions 25–30) */}
-  //       <div className="grid grid-cols-1 gap-20">
-  //           {[25, 27, 29].map((index) => (
-  //             <button
-  //               key={index}
-  //               className={`w-12 h-12 rounded-full ${
-  //                 board[index] === 'uwong' ? 'bg-green-500' :
-  //                 board[index] === 'macan' ? 'bg-red-500' :
-  //                 'bg-gray-200'
-  //               }`}
-  //               onClick={() => handleClick(index)}
-  //             />
-  //           ))}
-  //       </div>
-  //       <div className="grid grid-cols-1 gap-4">
-  //           {[26, 28, 30].map((index) => (
-  //             <button
-  //               key={index}
-  //               className={`w-12 h-12 rounded-full ${
-  //                 board[index] === 'uwong' ? 'bg-green-500' :
-  //                 board[index] === 'macan' ? 'bg-red-500' :
-  //                 'bg-gray-200'
-  //               }`}
-  //               onClick={() => handleClick(index)}
-  //             />
-  //           ))}
-  //       </div>
-
-  //       {/* Main 5x5 Grid (Positions 0–24) */}
-  //       <div className="grid grid-cols-5 gap-4">
-  //         {board.slice(0, 25).map((piece, index) => (
-  //           <button
-  //             key={index}
-  //             className={`w-12 h-12 rounded-full ${
-  //               selectedPiece === index ? 'ring-2 ring-blue-500' : ''
-  //             } ${
-  //               piece === 'uwong' ? 'bg-green-500' :
-  //               piece === 'macan' ? 'bg-red-500' :
-  //               'bg-gray-200'
-  //             }`}
-  //             onClick={() => handleClick(index)}
-  //           />
-  //         ))}
-  //       </div>
-
-  //       {/* Right Wing (Positions 31–36) */}
-  //       <div className="grid grid-cols-1 gap-4">
-  //         {[31, 33, 35].map((index) => (
-  //           <button
-  //             key={index}
-  //             className={`w-12 h-12 rounded-full ${
-  //               board[index] === 'uwong' ? 'bg-green-500' :
-  //               board[index] === 'macan' ? 'bg-red-500' :
-  //               'bg-gray-200'
-  //             }`}
-  //             onClick={() => handleClick(index)}
-  //           />
-  //         ))}
-  //       </div>
-  //       <div className="grid grid-cols-1 gap-20">
-  //         {[32, 34, 36].map((index) => (
-  //           <button
-  //             key={index}
-  //             className={`w-12 h-12 rounded-full ${
-  //               board[index] === 'uwong' ? 'bg-green-500' :
-  //               board[index] === 'macan' ? 'bg-red-500' :
-  //               'bg-gray-200'
-  //             }`}
-  //             onClick={() => handleClick(index)}
-  //           />
-  //         ))}
-  //       </div>
-  //     </div>
-  //     <div className="mt-4">
-  //       {uwongPawnsInHand > 0 && (
-  //         <div className="text-sm">Remaining Uwong pawns: {uwongPawnsInHand}</div>
-  //       )}
-  //     </div>
-  //   </div>
-  // );
 
   return (
     <div className="relative w-full max-w-4xl mx-auto" ref={boardRef}>
@@ -370,6 +363,9 @@ const MacananGame = () => {
               />
             ))}
           </div>
+        </div>
+        <div className="mt-4">
+            <div className="text-sm">Remaining Uwong pawns: {uwongPawnsInHand}</div>
         </div>
       </div>
     </div>
