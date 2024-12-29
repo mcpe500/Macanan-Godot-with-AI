@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Grid Visualization</title>
+  <style>
+    body {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      margin: 0;
+    }
+
+    .grid-container {
+      position: relative;
+      width: 650px;
+      height: 400px;
+    }
+
+    .node {
+      position: absolute;
+      width: 12px;
+      height: 12px;
+      background-color: lightgreen;
+      border-radius: 50%;
+    }
+
+    .line {
+      position: absolute;
+      width: 2px;
+      height: 2px;
+      background-color: #ccc;
+    }
+  </style>
+</head>
+<body>
+  <div class="grid-container">
+    <!-- TITIK -->
+    <!-- ROW 1 -->
+    <div class="node" style="left: 0px; top: 0px;"></div>
+    <div class="node" style="left: 160px; top: 0px;"></div>
+    <div class="node" style="left: 240px; top: 0px;"></div>
+    <div class="node" style="left: 320px; top: 0px;"></div>
+    <div class="node" style="left: 400px; top: 0px;"></div>
+    <div class="node" style="left: 480px; top: 0px;"></div>
+    <div class="node" style="left: 640px; top: 0px;"></div>
+
+    <!-- ROW 2 -->
+    <div class="node" style="left: 80px; top: 80px;"></div>
+    <div class="node" style="left: 160px; top: 80px;"></div>
+    <div class="node" style="left: 240px; top: 80px;"></div>
+    <div class="node" style="left: 320px; top: 80px;"></div>
+    <div class="node" style="left: 400px; top: 80px;"></div>
+    <div class="node" style="left: 480px; top: 80px;"></div>
+    <div class="node" style="left: 560px; top: 80px;"></div>
+    <div class="node" style="left: 560px; top: 80px;"></div>
+    
+    <!-- ROW 3 -->
+    <div class="node" style="left: 0px; top: 160px;"></div>
+    <div class="node" style="left: 80px; top: 160px;"></div>
+    <div class="node" style="left: 160px; top: 160px;"></div>
+    <div class="node" style="left: 240px; top: 160px;"></div>
+    <div class="node" style="left: 320px; top: 160px;"></div>
+    <div class="node" style="left: 400px; top: 160px;"></div>
+    <div class="node" style="left: 480px; top: 160px;"></div>
+    <div class="node" style="left: 560px; top: 160px;"></div>
+    <div class="node" style="left: 640px; top: 160px;"></div>
+    
+    <!-- ROW 4 -->
+    <div class="node" style="left: 80px; top: 240px;"></div>
+    <div class="node" style="left: 160px; top: 240px;"></div>
+    <div class="node" style="left: 240px; top: 240px;"></div>
+    <div class="node" style="left: 320px; top: 240px;"></div>
+    <div class="node" style="left: 400px; top: 240px;"></div>
+    <div class="node" style="left: 480px; top: 240px;"></div>
+    <div class="node" style="left: 560px; top: 240px;"></div>
+
+    <!-- ROW 5 -->
+    <div class="node" style="left: 0px; top: 320px;"></div>
+    <div class="node" style="left: 160px; top: 320px;"></div>
+    <div class="node" style="left: 240px; top: 320px;"></div>
+    <div class="node" style="left: 320px; top: 320px;"></div>
+    <div class="node" style="left: 400px; top: 320px;"></div>
+    <div class="node" style="left: 480px; top: 320px;"></div>
+    <div class="node" style="left: 640px; top: 320px;"></div>
+
+    <!-- GARIS HORIZONTAL -->
+     <!-- LINE 1 -->
+    <div class="line" style="left: 165px; top: 5px; width: 80px;"></div>
+    <div class="line" style="left: 245px; top: 5px; width: 80px;"></div>
+    <div class="line" style="left: 325px; top: 5px; width: 80px;"></div>
+    <div class="line" style="left: 405px; top: 5px; width: 80px;"></div>
+
+    <!-- LINE 2 -->
+    <div class="line" style="left: 165px; top: 85px; width: 80px;"></div>
+    <div class="line" style="left: 245px; top: 85px; width: 80px;"></div>
+    <div class="line" style="left: 325px; top: 85px; width: 80px;"></div>
+    <div class="line" style="left: 405px; top: 85px; width: 80px;"></div>
+
+    <!-- LINE 3 -->
+    <div class="line" style="left: 5px; top: 165px; width: 80px;"></div>
+    <div class="line" style="left: 85px; top: 165px; width: 80px;"></div>
+    <div class="line" style="left: 165px; top: 165px; width: 80px;"></div>
+    <div class="line" style="left: 245px; top: 165px; width: 80px;"></div>
+    <div class="line" style="left: 325px; top: 165px; width: 80px;"></div>
+    <div class="line" style="left: 405px; top: 165px; width: 80px;"></div>
+    <div class="line" style="left: 485px; top: 165px; width: 80px;"></div>
+    <div class="line" style="left: 565px; top: 165px; width: 80px;"></div>
+    
+    <!-- LINE 4 -->
+    <div class="line" style="left: 165px; top: 245px; width: 80px;"></div>
+    <div class="line" style="left: 245px; top: 245px; width: 80px;"></div>
+    <div class="line" style="left: 325px; top: 245px; width: 80px;"></div>
+    <div class="line" style="left: 405px; top: 245px; width: 80px;"></div>
+    
+    <!-- LINE 5 -->
+    <div class="line" style="left: 165px; top: 325px; width: 80px;"></div>
+    <div class="line" style="left: 245px; top: 325px; width: 80px;"></div>
+    <div class="line" style="left: 325px; top: 325px; width: 80px;"></div>
+    <div class="line" style="left: 405px; top: 325px; width: 80px;"></div>
+    
+    <!-- GARIS VERTICAL -->
+    <!-- LINE 1 -->
+    <div class="line" style="left: 5px; top: 5px; height: 80px;"></div>
+    <div class="line" style="left: 5px; top: 85px; height: 80px;"></div>
+    <div class="line" style="left: 5px; top: 165px; height: 80px;"></div>
+    <div class="line" style="left: 5px; top: 245px; height: 80px;"></div>
+    
+    <!-- LINE 2 -->
+    <div class="line" style="left: 85px; top: 85px; height: 80px;"></div>
+    <div class="line" style="left: 85px; top: 165px; height: 80px;"></div>
+    
+    <!-- LINE 3 -->
+    <div class="line" style="left: 165px; top: 5px; height: 80px;"></div>
+    <div class="line" style="left: 165px; top: 85px; height: 80px;"></div>
+    <div class="line" style="left: 165px; top: 165px; height: 80px;"></div>
+    <div class="line" style="left: 165px; top: 245px; height: 80px;"></div>
+    
+    <!-- LINE 4 -->
+    <div class="line" style="left: 245px; top: 5px; height: 80px;"></div>
+    <div class="line" style="left: 245px; top: 85px; height: 80px;"></div>
+    <div class="line" style="left: 245px; top: 165px; height: 80px;"></div>
+    <div class="line" style="left: 245px; top: 245px; height: 80px;"></div>
+    
+    <!-- LINE 5 -->
+    <div class="line" style="left: 325px; top: 5px; height: 80px;"></div>
+    <div class="line" style="left: 325px; top: 85px; height: 80px;"></div>
+    <div class="line" style="left: 325px; top: 165px; height: 80px;"></div>
+    <div class="line" style="left: 325px; top: 245px; height: 80px;"></div>
+    
+    <!-- LINE 6 -->
+    <div class="line" style="left: 405px; top: 5px; height: 80px;"></div>
+    <div class="line" style="left: 405px; top: 85px; height: 80px;"></div>
+    <div class="line" style="left: 405px; top: 165px; height: 80px;"></div>
+    <div class="line" style="left: 405px; top: 245px; height: 80px;"></div>
+    
+    <!-- LINE 7 -->
+    <div class="line" style="left: 485px; top: 5px; height: 80px;"></div>
+    <div class="line" style="left: 485px; top: 85px; height: 80px;"></div>
+    <div class="line" style="left: 485px; top: 165px; height: 80px;"></div>
+    <div class="line" style="left: 485px; top: 245px; height: 80px;"></div>
+    
+    <!-- LINE 8 -->
+    <div class="line" style="left: 565px; top: 85px; height: 80px;"></div>
+    <div class="line" style="left: 565px; top: 165px; height: 80px;"></div>
+
+    <!-- LINE 7 -->
+    <div class="line" style="left: 645px; top: 5px; height: 80px;"></div>
+    <div class="line" style="left: 645px; top: 85px; height: 80px;"></div>
+    <div class="line" style="left: 645px; top: 165px; height: 80px;"></div>
+    <div class="line" style="left: 645px; top: 245px; height: 80px;"></div>
+
+    <!-- GARIS DIAGONAL KIRI ATAS KE KANAN BAWAH -->
+     <!-- LINE 1 -->
+    <div class="line" style="left: 45px; top: -12px; height: 115px; transform: rotate(-45deg);"></div>
+    <div class="line" style="left: 205px; top: -12px; height: 115px; transform: rotate(-45deg);"></div>
+    <div class="line" style="left: 365px; top: -12px; height: 115px; transform: rotate(-45deg);"></div>
+    
+    <!-- LINE 2 -->
+    <div class="line" style="left: 125px; top: 68px; height: 115px; transform: rotate(-45deg);"></div>
+    <div class="line" style="left: 285px; top: 68px; height: 115px; transform: rotate(-45deg);"></div>
+    <div class="line" style="left: 445px; top: 68px; height: 115px; transform: rotate(-45deg);"></div>
+    
+    <!-- LINE 3 -->
+    <div class="line" style="left: 205px; top: 148px; height: 115px; transform: rotate(-45deg);"></div>
+    <div class="line" style="left: 365px; top: 148px; height: 115px; transform: rotate(-45deg);"></div>
+    <div class="line" style="left: 525px; top: 148px; height: 115px; transform: rotate(-45deg);"></div>
+    
+    <!-- LINE 4 -->
+    <div class="line" style="left: 285px; top: 228px; height: 115px; transform: rotate(-45deg);"></div>
+    <div class="line" style="left: 445px; top: 228px; height: 115px; transform: rotate(-45deg);"></div>
+    <div class="line" style="left: 605px; top: 228px; height: 115px; transform: rotate(-45deg);"></div>
+
+    <!-- GARIS DIAGONAL KANAN ATAS KE KIRI BAWAH -->
+     <!-- LINE 1 -->
+     <div class="line" style="left: 285px; top: -12px; height: 115px; transform: rotate(45deg);"></div>
+     <div class="line" style="left: 445px; top: -12px; height: 115px; transform: rotate(45deg);"></div>
+     <div class="line" style="left: 605px; top: -12px; height: 115px; transform: rotate(45deg);"></div>
+    
+    <!-- LINE 2 -->
+    <div class="line" style="left: 205px; top: 68px; height: 115px; transform: rotate(45deg);"></div>
+    <div class="line" style="left: 365px; top: 68px; height: 115px; transform: rotate(45deg);"></div>
+    <div class="line" style="left: 525px; top: 68px; height: 115px; transform: rotate(45deg);"></div>
+    
+    <!-- LINE 3 -->
+    <div class="line" style="left: 125px; top: 148px; height: 115px; transform: rotate(45deg);"></div>
+    <div class="line" style="left: 285px; top: 148px; height: 115px; transform: rotate(45deg);"></div>
+    <div class="line" style="left: 445px; top: 148px; height: 115px; transform: rotate(45deg);"></div>
+    
+    <!-- LINE 4 -->
+    <div class="line" style="left: 45px; top: 228px; height: 115px; transform: rotate(45deg);"></div>
+    <div class="line" style="left: 205px; top: 228px; height: 115px; transform: rotate(45deg);"></div>
+    <div class="line" style="left: 365px; top: 228px; height: 115px; transform: rotate(45deg);"></div>
+</html>
