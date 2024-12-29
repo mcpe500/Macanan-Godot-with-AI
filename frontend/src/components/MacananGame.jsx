@@ -159,12 +159,58 @@ const MacananGame = () => {
   };
 
   return (
-    <div className="flex flex-col items-center gap-4 p-4">
-      <div className="text-xl font-bold mb-4">{message}</div>
-      <div className="flex justify-center items-center gap-8">
-        {/* Left Wing (Positions 25–30) */}
-        <div className="grid grid-cols-1 gap-20">
-            {[25, 27, 29].map((index) => (
+    <div className="min-h-screen bg-gray-100 flex justify-center items-center">
+      <div className="flex flex-col items-center gap-4 p-4">
+        <div className="text-xl font-bold mb-4">{message}</div>
+        <div className="flex justify-center items-center gap-8">
+          {/* Left Wing (Positions 25–30) */}
+          <div className="grid grid-cols-1 gap-20">
+              {[25, 27, 29].map((index) => (
+                <button
+                  key={index}
+                  className={`w-12 h-12 rounded-full ${
+                    board[index] === 'uwong' ? 'bg-green-500' :
+                    board[index] === 'macan' ? 'bg-red-500' :
+                    'bg-gray-200'
+                  }`}
+                  onClick={() => handleClick(index)}
+                />
+              ))}
+          </div>
+          <div className="grid grid-cols-1 gap-4">
+              {[26, 28, 30].map((index) => (
+                <button
+                  key={index}
+                  className={`w-12 h-12 rounded-full ${
+                    board[index] === 'uwong' ? 'bg-green-500' :
+                    board[index] === 'macan' ? 'bg-red-500' :
+                    'bg-gray-200'
+                  }`}
+                  onClick={() => handleClick(index)}
+                />
+              ))}
+          </div>
+
+          {/* Main 5x5 Grid (Positions 0–24) */}
+          <div className="grid grid-cols-5 gap-4">
+            {board.slice(0, 25).map((piece, index) => (
+              <button
+                key={index}
+                className={`w-12 h-12 rounded-full ${
+                  selectedPiece === index ? 'ring-2 ring-blue-500' : ''
+                } ${
+                  piece === 'uwong' ? 'bg-green-500' :
+                  piece === 'macan' ? 'bg-red-500' :
+                  'bg-gray-200'
+                }`}
+                onClick={() => handleClick(index)}
+              />
+            ))}
+          </div>
+
+          {/* Right Wing (Positions 31–36) */}
+          <div className="grid grid-cols-1 gap-4">
+            {[31, 33, 35].map((index) => (
               <button
                 key={index}
                 className={`w-12 h-12 rounded-full ${
@@ -175,9 +221,9 @@ const MacananGame = () => {
                 onClick={() => handleClick(index)}
               />
             ))}
-        </div>
-        <div className="grid grid-cols-1 gap-4">
-            {[26, 28, 30].map((index) => (
+          </div>
+          <div className="grid grid-cols-1 gap-20">
+            {[32, 34, 36].map((index) => (
               <button
                 key={index}
                 className={`w-12 h-12 rounded-full ${
@@ -188,57 +234,13 @@ const MacananGame = () => {
                 onClick={() => handleClick(index)}
               />
             ))}
+          </div>
         </div>
-
-        {/* Main 5x5 Grid (Positions 0–24) */}
-        <div className="grid grid-cols-5 gap-4">
-          {board.slice(0, 25).map((piece, index) => (
-            <button
-              key={index}
-              className={`w-12 h-12 rounded-full ${
-                selectedPiece === index ? 'ring-2 ring-blue-500' : ''
-              } ${
-                piece === 'uwong' ? 'bg-green-500' :
-                piece === 'macan' ? 'bg-red-500' :
-                'bg-gray-200'
-              }`}
-              onClick={() => handleClick(index)}
-            />
-          ))}
+        <div className="mt-4">
+          {uwongPawnsInHand > 0 && (
+            <div className="text-sm">Remaining Uwong pawns: {uwongPawnsInHand}</div>
+          )}
         </div>
-
-        {/* Right Wing (Positions 31–36) */}
-        <div className="grid grid-cols-1 gap-4">
-          {[31, 33, 35].map((index) => (
-            <button
-              key={index}
-              className={`w-12 h-12 rounded-full ${
-                board[index] === 'uwong' ? 'bg-green-500' :
-                board[index] === 'macan' ? 'bg-red-500' :
-                'bg-gray-200'
-              }`}
-              onClick={() => handleClick(index)}
-            />
-          ))}
-        </div>
-        <div className="grid grid-cols-1 gap-20">
-          {[32, 34, 36].map((index) => (
-            <button
-              key={index}
-              className={`w-12 h-12 rounded-full ${
-                board[index] === 'uwong' ? 'bg-green-500' :
-                board[index] === 'macan' ? 'bg-red-500' :
-                'bg-gray-200'
-              }`}
-              onClick={() => handleClick(index)}
-            />
-          ))}
-        </div>
-      </div>
-      <div className="mt-4">
-        {uwongPawnsInHand > 0 && (
-          <div className="text-sm">Remaining Uwong pawns: {uwongPawnsInHand}</div>
-        )}
       </div>
     </div>
   );
