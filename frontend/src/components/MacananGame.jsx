@@ -9,8 +9,8 @@ const MacananGame = () => {
   const [message, setMessage] = useState('Uwong: Click anywhere to place initial 3x3 formation');
   const [win, setWin] = useState(false);
   const [winner, setWinner] = useState(null);
-  const [canMacanMove, setCanMacanMove] = useState(true);
   const [uwongTotal, setUwongTotal] = useState(21);
+  const [macanPos, setMacanPos] = useState(null);
   const [nodePositions, setNodePositions] = useState({});
   const boardRef = useRef(null);
 
@@ -234,7 +234,7 @@ const MacananGame = () => {
     25: {
       10: [26],
       22: [26, 10, 16],
-      29: [28]
+      29: [27]
     },
     26: {
       16: [10],
@@ -336,14 +336,56 @@ const MacananGame = () => {
 
 // check macan player condition for win
 useEffect(() => {
-  if(uwongTotal < 14){
+  const canMacanMove = (from) => {
+    const walk = connections[from];
+    const jump = macanJump[from];
+    
+    for (const w of walk) {
+      if(board[w] !== "uwong"){
+        return true
+      }
+    }
+
+    for (const key in jump) {
+      if (Object.prototype.hasOwnProperty.call(jump, key)) {
+        let value = jump[key];
+        console.log(key, value);
+
+        let adaMusuh = true;
+
+        for (const wong of value) {
+          if(board[wong] != "uwong"){
+            adaMusuh = false;
+          }
+        }
+
+        if(adaMusuh){
+          if(board[key] != "uwong"){
+            return true;
+          }
+        }
+      }
+    }
+
+    return false;
+  }
+
+  if(currentPlayer == "uwong" && uwongTotal < 14){
     setWin(true);
     setWinner("macan");
     setMessage("Macan Win!");
   }
 
-}, [uwongTotal])
+  if(macanPos != null){
+    if(!canMacanMove(macanPos)){
+      setWin(true);
+      setWinner("uwong");
+      setMessage("Uwong Win!");
+    }
+  }
 
+// eslint-disable-next-line react-hooks/exhaustive-deps
+}, [currentPlayer, uwongTotal])
 
 const renderConnections = () => {
   const lines = [];
@@ -439,6 +481,7 @@ const renderConnections = () => {
           if(board[position] === null){
             const newBoard = [...board];
             newBoard[position] = 'macan';
+            setMacanPos(position)
             setBoard(newBoard);
             setCurrentPlayer('uwong');
             if (uwongPawnsInHand > 0) {
@@ -507,6 +550,7 @@ const renderConnections = () => {
                 }
                 
                 setBoard(newBoard);
+                setMacanPos(position)
                 setCurrentPlayer('uwong');
                 if (uwongPawnsInHand > 0) {
                   setGameState('placing');
