@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { useNavigate } from 'react-router';
 
 const MacananGame = () => {
   const [board, setBoard] = useState(Array(36).fill(null));
@@ -13,6 +14,25 @@ const MacananGame = () => {
   const [macanPos, setMacanPos] = useState(null);
   const [nodePositions, setNodePositions] = useState({});
   const boardRef = useRef(null);
+  const navigate = useNavigate();
+
+  const goBack = () => {
+    navigate('/');
+  };
+
+  const restartGame = () => {
+    setBoard(Array(36).fill(null));
+    setCurrentPlayer('uwong');
+    setUwongPawnsInHand(21);
+    setGameState('initial');
+    setSelectedPiece(null);
+    setMessage('Uwong: Click anywhere to place initial 3x3 formation');
+    setWin(false);
+    setWinner(null);
+    setUwongTotal(21);
+    setMacanPos(null);
+    setNodePositions({});
+  };
 
   const connections = {
     0: [1, 5, 6],
@@ -681,6 +701,22 @@ const renderConnections = () => {
           <div className="mt-2">
               <div className="text-sm">Total Uwong pawns: {uwongTotal}</div>
           </div>
+          {win && 
+          <div className="flex gap-4">
+            <button 
+              onClick={goBack}
+              className="bg-blue-600 hover:bg-blue-700 text-white text-lg px-8 py-3 rounded-lg shadow-md transition duration-200"
+            >
+              Go Back
+            </button>
+            <button 
+              onClick={restartGame}
+              className="bg-green-600 hover:bg-green-700 text-white text-lg px-8 py-3 rounded-lg shadow-md transition duration-200"
+            >
+              Restart
+            </button>
+          </div>
+        }
         </div>
       </div>
     </div>
