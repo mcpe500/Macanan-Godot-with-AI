@@ -1,7 +1,8 @@
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router';
+import MacananAI from './MacananAI';
 
-const MacananGame = () => {
+const MacananUwongAI = () => {
   const [board, setBoard] = useState(Array(37).fill(null));
   const [currentPlayer, setCurrentPlayer] = useState('uwong');
   const [uwongPawnsInHand, setUwongPawnsInHand] = useState(21);
@@ -13,6 +14,7 @@ const MacananGame = () => {
   const [uwongTotal, setUwongTotal] = useState(21);
   const [macanPos, setMacanPos] = useState(null);
   const [nodePositions, setNodePositions] = useState({});
+  const [isAIThinking, setIsAIThinking] = useState(false);
   const boardRef = useRef(null);
   const navigate = useNavigate();
 
@@ -311,6 +313,47 @@ const MacananGame = () => {
     }
   }
 
+  // Add useEffect for AI moves
+  useEffect(() => {
+    if (currentPlayer === 'uwong' && !win && !isAIThinking) {
+      setIsAIThinking(true);
+      
+      // Small delay to make AI moves feel more natural
+      setTimeout(() => {
+        if (gameState === 'initial') {
+          // AI places initial formation in a good position (center)
+          place3x3Formation(12); // Center position
+        } else if (gameState === 'placing') {
+          // AI places remaining pawns
+          const bestMove = MacananAI.getBestMove(board, uwongTotal, connections, macanPos, macanJump);
+          const validEmptySpots = Array(37).fill().map((_, i) => i).filter(i => board[i] === null);
+          const randomSpot = validEmptySpots[Math.floor(Math.random() * validEmptySpots.length)];
+          
+          const newBoard = [...board];
+          newBoard[randomSpot] = 'uwong';
+          setBoard(newBoard);
+          setUwongPawnsInHand(prev => prev - 1);
+          setCurrentPlayer('macan');
+          setGameState('moving');
+          setMessage('Macan: Move or eat Uwong piece(s)');
+        } else if (gameState === 'moving') {
+          // AI moves existing pawns
+          const bestMove = MacananAI.getBestMove(board, uwongTotal, connections, macanPos, macanJump);
+          if (bestMove) {
+            const newBoard = [...board];
+            newBoard[bestMove.from] = null;
+            newBoard[bestMove.to] = 'uwong';
+            setBoard(newBoard);
+            setCurrentPlayer('macan');
+            setGameState('moving');
+            setMessage('Macan: Move or eat Uwong piece(s)');
+          }
+        }
+        setIsAIThinking(false);
+      }, 500);
+    }
+  }, [currentPlayer, gameState, board, win, isAIThinking]);
+
  // Updated useEffect to handle window resize and page refresh
  useEffect(() => {
   const calculateNodePositions = () => {
@@ -487,126 +530,55 @@ const renderConnections = () => {
     return path;
   };
 
+  // Modified handle click to only process Macan moves
   const handleClick = (position) => {
-    console.log(position);
-    if(!win){
-      // kondisi peletakan uwong awal
-      if (gameState === 'initial') {
-        place3x3Formation(position);
-      } 
-      // kondisi pemasangan pion macan atau uwong
-      else if (gameState === 'placing') {
-        // kondisi pemasangan pion macan
-        if (currentPlayer === 'macan') {
-          if(board[position] === null){
-            const newBoard = [...board];
-            newBoard[position] = 'macan';
-            setMacanPos(position)
-            setBoard(newBoard);
-            setCurrentPlayer('uwong');
-            if (uwongPawnsInHand > 0) {
-              setGameState('placing');
-              setMessage('Uwong: Place remaining pawns');
-            }
-            else{
-              setGameState('moving');
-              setMessage('Uwong: Move existing ones');
-            }
-          }else{
-            setMessage("Macan: Choose an empty place")
+    if (!win && currentPlayer === 'macan') {
+      if (gameState === 'placing') {
+        if (board[position] === null) {
+          const newBoard = [...board];
+          newBoard[position] = 'macan';
+          setMacanPos(position);
+          setBoard(newBoard);
+          setCurrentPlayer('uwong');
+          if (uwongPawnsInHand > 0) {
+            setGameState('placing');
+            setMessage('Uwong: Place remaining pawns');
+          } else {
+            setGameState('moving');
+            setMessage('Uwong: Move existing ones');
           }
-        } 
-        // kondisi pemasangan pion uwong
-        else if (currentPlayer === 'uwong') {
-          if(board[position] === null){
-            const newBoard = [...board];
-            newBoard[position] = 'uwong';
-            setBoard(newBoard);
-            setUwongPawnsInHand(prev => prev - 1);
-            setCurrentPlayer('macan');
-            setGameState('moving')
-            setMessage('Macan: Move or eat Uwong piece(s)');
-          }
-          else{
-            setMessage("Uwong: Choose an empty place")
-          }
+        } else {
+          setMessage("Macan: Choose an empty place");
         }
-      } 
-      // kondisi penggerakan pion macan atau uwong
-      else if (gameState === 'moving') {
-  
-        // ketika board sekarang ada pionnya
-        if(board[position] !== null){
-          // kalau misalkan ternyata pionnya adalah milik pemain sekarang
-          if(board[position] === currentPlayer){
+      } else if (gameState === 'moving') {
+        if (board[position] !== null) {
+          if (board[position] === currentPlayer) {
             setSelectedPiece(position);
-            if(currentPlayer === 'macan'){
-              setMessage(`Macan: Selected piece at position ${position}`);
-            }
-            else if(currentPlayer === 'uwong'){
-              setMessage(`Uwong: Selected piece at position ${position}`);
-            }
+            setMessage(`Macan: Selected piece at position ${position}`);
           }
-        }
-        // ketika board sekarang tidak ada pionnya
-        else{
-          // kondisi saat pion sudah dipilih
-          if(selectedPiece !== null){
-            // masuk kondisi jika pemain sekarang adalah macan
-            if(currentPlayer === 'macan'){
-              // pengecekan apakah pergerakannya valid
-              if ((isValidMove(selectedPiece, position) || canMacanJump(selectedPiece, position))) {
-                const newBoard = [...board];
-                newBoard[selectedPiece] = null;
-                newBoard[position] = 'macan';
-                
-                if (canMacanJump(selectedPiece, position)) {
-                  const jumpedPos = findJumpPath(selectedPiece, position);
-  
-                  for (const p of jumpedPos) {
-                    newBoard[p] = null;
-                    setUwongTotal(prev => prev - 1)
-                  }
-                }
-                
-                setBoard(newBoard);
-                setMacanPos(position)
-                setCurrentPlayer('uwong');
-                if (uwongPawnsInHand > 0) {
-                  setGameState('placing');
-                  setMessage('Uwong: Place remaining pawns');
-                }
-                else{
-                  setGameState('moving');
-                  setMessage('Uwong: Move existing ones');
-                }
-                setSelectedPiece(null);
+        } else if (selectedPiece !== null) {
+          if ((isValidMove(selectedPiece, position) || canMacanJump(selectedPiece, position))) {
+            const newBoard = [...board];
+            newBoard[selectedPiece] = null;
+            newBoard[position] = 'macan';
+            
+            if (canMacanJump(selectedPiece, position)) {
+              const jumpedPos = findJumpPath(selectedPiece, position);
+              for (const p of jumpedPos) {
+                newBoard[p] = null;
+                setUwongTotal(prev => prev - 1);
               }
             }
-            // masuk kondisi jika pemain sekarang adalah uwong
-            else if (currentPlayer === 'uwong') {
-              // pengecekan apakah pergerakannya valid
-              if (isValidMove(selectedPiece, position)) {
-                const newBoard = [...board];
-                newBoard[selectedPiece] = null;
-                newBoard[position] = 'uwong';
-                setBoard(newBoard);
-                setCurrentPlayer('macan');
-                setGameState('moving');
-                setMessage('Macan: Move or eat Uwong piece(s)');
-                setSelectedPiece(null);
-              }
-            }
+            
+            setBoard(newBoard);
+            setMacanPos(position);
+            setCurrentPlayer('uwong');
+            setGameState('moving');
+            setMessage('Uwong: Move existing ones');
+            setSelectedPiece(null);
           }
         }
       }
-
-      // pengecekan apakah macan atau uwong sudah menang atau belum
-        // if(uwongTotal < 14){
-        //   setWin(true);
-        //   setWinner("macan");
-        //   setMessage("Macan Win!");
-        // }
     }
   };
 
@@ -617,7 +589,9 @@ const renderConnections = () => {
           {renderConnections()}
         </svg>
         <div className="flex flex-col items-center gap-4">
-          <div className="text-xl font-bold text-center">{message}</div>
+          <div className="text-xl font-bold text-center">
+            {isAIThinking ? "AI is thinking..." : message}
+          </div>
           <div className="flex justify-center items-center gap-8">
             {/* Left Wing */}
             <div className="grid grid-cols-1 gap-20">
@@ -723,4 +697,4 @@ const renderConnections = () => {
   );
 };
 
-export default MacananGame;
+export default MacananUwongAI;
