@@ -1,45 +1,157 @@
 // AI Implementation for Uwong player using Minimax with Alpha-Beta pruning
 const MacananAI = {
     // Maximum depth for minimax search
-    MAX_DEPTH: 3,
+    MAX_DEPTH: 4,
   
-    // Evaluate the current board state from Uwong's perspective
+    // Enhanced board evaluation with multiple strategic factors
     evaluateBoard: (board, uwongTotal, connections, macanPos) => {
-      if (uwongTotal < 14) return -1000; // Losing state for Uwong
+      if (uwongTotal < 14) return -10000; // Increased penalty for losing state
       
-      // Count how many valid moves Macan has
       const macanMoves = MacananAI.getValidMacanMoves(board, macanPos, connections);
-      if (macanMoves.length === 0) return 1000; // Winning state for Uwong
-  
+      if (macanMoves.length === 0) return 10000; // Increased reward for winning state
+      
       let score = 0;
       
-      // Value based on number of Uwong pieces
-      score += uwongTotal * 10;
+      // Base score from piece count
+      score += uwongTotal * 15;
       
-      // Penalty for Macan's mobility
-      score -= macanMoves.length * 5;
+      // Evaluate formation strength
+      score += MacananAI.evaluateUwongFormation(board, connections) * 3;
       
-      // Bonus for Uwong pieces that are protecting each other
-      score += MacananAI.evaluateUwongFormation(board, connections);
+      // Evaluate control of critical positions
+      score += MacananAI.evaluatePositionalControl(board) * 2;
+      
+      // Evaluate protection against Macan jumps
+      score += MacananAI.evaluateJumpProtection(board, macanPos) * 4;
+      
+      // Penalty for exposed pieces
+      score -= MacananAI.evaluateExposedPieces(board, connections, macanPos) * 3;
+      
+      // Mobility evaluation
+      score += MacananAI.evaluateMobility(board, connections) * 2;
+      
+      // Penalty for Macan's mobility (weighted by threat level)
+      score -= macanMoves.length * 8;
       
       return score;
     },
-  
-    // Evaluate how well Uwong pieces protect each other
+    
+    // Enhanced formation evaluation
     evaluateUwongFormation: (board, connections) => {
-      let score = 0;
-      
-      for (let i = 0; i < board.length; i++) {
-        if (board[i] === 'uwong') {
-          // Count adjacent Uwong pieces
-          const adjacentUwongs = connections[i].filter(pos => board[pos] === 'uwong').length;
-          score += adjacentUwongs * 2;
+        let score = 0;
+        
+        for (let i = 0; i < board.length; i++) {
+            if (board[i] === 'uwong') {
+                const adjacentUwongs = connections[i].filter(pos => board[pos] === 'uwong');
+                
+                // Reward for adjacent pieces (defensive formation)
+                score += adjacentUwongs.length * 3;
+                
+                // Extra reward for forming triangular formations (stronger defense)
+                for (const adj1 of adjacentUwongs) {
+                    for (const adj2 of adjacentUwongs) {
+                        if (adj1 !== adj2 && connections[adj1].includes(adj2)) {
+                            score += 5; // Bonus for triangle formation
+                        }
+                    }
+                }
+            }
         }
-      }
-      
-      return score;
+        
+        return score;
     },
-  
+
+    // New: Evaluate control of strategically important positions
+    evaluatePositionalControl: (board) => {
+        let score = 0;
+        const criticalPositions = [
+            12, // Center
+            6, 7, 8, // Middle row
+            16, 17, 18, // Critical connections
+            11, 13, // Side connections
+        ];
+        
+        for (const pos of criticalPositions) {
+            if (board[pos] === 'uwong') {
+                score += 10; // Bonus for controlling critical positions
+            }
+        }
+        
+        return score;
+    },
+
+    // New: Evaluate protection against Macan jumps
+    evaluateJumpProtection: (board, macanPos) => {
+        let score = 0;
+        const uwongPositions = board.map((cell, index) => cell === 'uwong' ? index : -1).filter(pos => pos !== -1);
+        
+        for (const pos of uwongPositions) {
+            let isProtected = false;
+            // Check if piece is protected from jumps
+            const adjacentPieces = board.map((cell, index) => 
+                cell === 'uwong' && Math.abs(index - pos) === 1 ? index : -1
+            ).filter(p => p !== -1);
+            
+            if (adjacentPieces.length >= 2) {
+                isProtected = true;
+                score += 8; // Bonus for being protected from jumps
+            }
+            
+            if (!isProtected) {
+                score -= 5; // Penalty for being vulnerable to jumps
+            }
+        }
+        
+        return score;
+    },
+
+    // New: Evaluate exposed pieces that could be captured
+    evaluateExposedPieces: (board, connections, macanPos) => {
+        let exposedCount = 0;
+        
+        for (let i = 0; i < board.length; i++) {
+            if (board[i] === 'uwong') {
+                // Check if piece is isolated and could be jumped over
+                const adjacentUwongs = connections[i].filter(pos => board[pos] === 'uwong').length;
+                if (adjacentUwongs === 0) {
+                    exposedCount += 2; // Heavily penalize isolated pieces
+                } else if (adjacentUwongs === 1) {
+                    exposedCount += 1; // Smaller penalty for pieces with only one connection
+                }
+                
+                // Check if piece is in direct danger from Macan
+                if (connections[macanPos]?.includes(i)) {
+                    exposedCount += 3; // Extra penalty for pieces next to Macan
+                }
+            }
+        }
+        
+        return exposedCount;
+    },
+
+    // New: Evaluate mobility and control of the board
+    evaluateMobility: (board, connections) => {
+        let mobilityScore = 0;
+        
+        for (let i = 0; i < board.length; i++) {
+            if (board[i] === 'uwong') {
+                const moveOptions = connections[i].filter(pos => board[pos] === null).length;
+                mobilityScore += moveOptions * 2; // Reward for having more move options
+                
+                // Bonus for pieces that can move to multiple safe spots
+                const safeMovesCount = connections[i].filter(pos => {
+                    if (board[pos] !== null) return false;
+                    const adjacentUwongs = connections[pos].filter(p => board[p] === 'uwong').length;
+                    return adjacentUwongs >= 2; // Consider a move safe if supported by other pieces
+                }).length;
+                
+                mobilityScore += safeMovesCount * 3;
+            }
+        }
+        
+        return mobilityScore;
+    },
+    
     // Get all valid moves for Uwong pieces
     getValidUwongMoves: (board, connections) => {
       const moves = [];

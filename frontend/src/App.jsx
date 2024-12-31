@@ -1,5 +1,5 @@
 import { Routes, Route } from 'react-router-dom';
-// import MacananGame from './components/MacananGame';
+import MacananGame from './components/MacananGame';
 import Home from './components/Home';
 import MacananUwongAI from './components/MacananUwongAI';
 

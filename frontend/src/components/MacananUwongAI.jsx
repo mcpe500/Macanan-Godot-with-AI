@@ -313,7 +313,47 @@ const MacananUwongAI = () => {
     }
   }
 
-  // Add useEffect for AI moves
+  // // Add useEffect for AI moves
+  // useEffect(() => {
+  //   if (currentPlayer === 'uwong' && !win && !isAIThinking) {
+  //     setIsAIThinking(true);
+      
+  //     // Small delay to make AI moves feel more natural
+  //     setTimeout(() => {
+  //       if (gameState === 'initial') {
+  //         // AI places initial formation in a good position (center)
+  //         place3x3Formation(12); // Center position
+  //       } else if (gameState === 'placing') {
+  //         // AI places remaining pawns
+  //         const bestMove = MacananAI.getBestMove(board, uwongTotal, connections, macanPos, macanJump);
+  //         const validEmptySpots = Array(37).fill().map((_, i) => i).filter(i => board[i] === null);
+  //         const randomSpot = validEmptySpots[Math.floor(Math.random() * validEmptySpots.length)];
+          
+  //         const newBoard = [...board];
+  //         newBoard[randomSpot] = 'uwong';
+  //         setBoard(newBoard);
+  //         setUwongPawnsInHand(prev => prev - 1);
+  //         setCurrentPlayer('macan');
+  //         setGameState('moving');
+  //         setMessage('Macan: Move or eat Uwong piece(s)');
+  //       } else if (gameState === 'moving') {
+  //         // AI moves existing pawns
+  //         const bestMove = MacananAI.getBestMove(board, uwongTotal, connections, macanPos, macanJump);
+  //         if (bestMove) {
+  //           const newBoard = [...board];
+  //           newBoard[bestMove.from] = null;
+  //           newBoard[bestMove.to] = 'uwong';
+  //           setBoard(newBoard);
+  //           setCurrentPlayer('macan');
+  //           setGameState('moving');
+  //           setMessage('Macan: Move or eat Uwong piece(s)');
+  //         }
+  //       }
+  //       setIsAIThinking(false);
+  //     }, 500);
+  //   }
+  // }, [currentPlayer, gameState, win]);
+
   useEffect(() => {
     if (currentPlayer === 'uwong' && !win && !isAIThinking) {
       setIsAIThinking(true);
@@ -323,21 +363,37 @@ const MacananUwongAI = () => {
         if (gameState === 'initial') {
           // AI places initial formation in a good position (center)
           place3x3Formation(12); // Center position
-        } else if (gameState === 'placing') {
-          // AI places remaining pawns
-          const bestMove = MacananAI.getBestMove(board, uwongTotal, connections, macanPos, macanJump);
-          const validEmptySpots = Array(37).fill().map((_, i) => i).filter(i => board[i] === null);
-          const randomSpot = validEmptySpots[Math.floor(Math.random() * validEmptySpots.length)];
+        } else if (gameState === 'placing' && uwongPawnsInHand > 0) {
+          // AI must place all remaining pawns before moving
+          const validEmptySpots = Array(37)
+            .fill()
+            .map((_, i) => i)
+            .filter(i => board[i] === null);
+            
+          // Pick a strategic spot using the evaluation function
+          let bestScore = -Infinity;
+          let bestSpot = validEmptySpots[0];
+          
+          for (const spot of validEmptySpots) {
+            const testBoard = [...board];
+            testBoard[spot] = 'uwong';
+            const score = MacananAI.evaluateBoard(testBoard, uwongTotal + 1, connections, macanPos);
+            
+            if (score > bestScore) {
+              bestScore = score;
+              bestSpot = spot;
+            }
+          }
           
           const newBoard = [...board];
-          newBoard[randomSpot] = 'uwong';
+          newBoard[bestSpot] = 'uwong';
           setBoard(newBoard);
           setUwongPawnsInHand(prev => prev - 1);
           setCurrentPlayer('macan');
           setGameState('moving');
           setMessage('Macan: Move or eat Uwong piece(s)');
-        } else if (gameState === 'moving') {
-          // AI moves existing pawns
+        } else if (gameState === 'moving' && uwongPawnsInHand === 0) {
+          // Only move pieces after all pawns are placed
           const bestMove = MacananAI.getBestMove(board, uwongTotal, connections, macanPos, macanJump);
           if (bestMove) {
             const newBoard = [...board];
@@ -345,14 +401,13 @@ const MacananUwongAI = () => {
             newBoard[bestMove.to] = 'uwong';
             setBoard(newBoard);
             setCurrentPlayer('macan');
-            setGameState('moving');
             setMessage('Macan: Move or eat Uwong piece(s)');
           }
         }
         setIsAIThinking(false);
       }, 500);
     }
-  }, [currentPlayer, gameState, board, win, isAIThinking]);
+  }, [currentPlayer, gameState, win]);
 
  // Updated useEffect to handle window resize and page refresh
  useEffect(() => {
@@ -433,7 +488,7 @@ useEffect(() => {
     return false;
   }
 
-  if(currentPlayer == "uwong" && uwongTotal < 14){
+  if(uwongTotal < 14){
     setWin(true);
     setWinner("macan");
     setMessage("Macan Win!");
@@ -573,8 +628,13 @@ const renderConnections = () => {
             setBoard(newBoard);
             setMacanPos(position);
             setCurrentPlayer('uwong');
-            setGameState('moving');
-            setMessage('Uwong: Move existing ones');
+            if (uwongPawnsInHand > 0) {
+              setGameState('placing');
+              setMessage('Uwong: Place remaining pawns');
+            } else {
+              setGameState('moving');
+              setMessage('Uwong: Move existing ones');
+            }
             setSelectedPiece(null);
           }
         }
