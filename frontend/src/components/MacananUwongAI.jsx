@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router';
-import MacananAI from './MacananAI';
+import MacananUAI from './MacananUAI';
 
 const MacananUwongAI = () => {
   const [board, setBoard] = useState(Array(37).fill(null));
@@ -325,7 +325,7 @@ const MacananUwongAI = () => {
   //         place3x3Formation(12); // Center position
   //       } else if (gameState === 'placing') {
   //         // AI places remaining pawns
-  //         const bestMove = MacananAI.getBestMove(board, uwongTotal, connections, macanPos, macanJump);
+  //         const bestMove = MacananUAI.getBestMove(board, uwongTotal, connections, macanPos, macanJump);
   //         const validEmptySpots = Array(37).fill().map((_, i) => i).filter(i => board[i] === null);
   //         const randomSpot = validEmptySpots[Math.floor(Math.random() * validEmptySpots.length)];
           
@@ -338,7 +338,7 @@ const MacananUwongAI = () => {
   //         setMessage('Macan: Move or eat Uwong piece(s)');
   //       } else if (gameState === 'moving') {
   //         // AI moves existing pawns
-  //         const bestMove = MacananAI.getBestMove(board, uwongTotal, connections, macanPos, macanJump);
+  //         const bestMove = MacananUAI.getBestMove(board, uwongTotal, connections, macanPos, macanJump);
   //         if (bestMove) {
   //           const newBoard = [...board];
   //           newBoard[bestMove.from] = null;
@@ -377,7 +377,7 @@ const MacananUwongAI = () => {
           for (const spot of validEmptySpots) {
             const testBoard = [...board];
             testBoard[spot] = 'uwong';
-            const score = MacananAI.evaluateBoard(testBoard, uwongTotal + 1, connections, macanPos);
+            const score = MacananUAI.evaluateBoard(testBoard, uwongTotal + 1, connections, macanPos);
             
             if (score > bestScore) {
               bestScore = score;
@@ -394,7 +394,7 @@ const MacananUwongAI = () => {
           setMessage('Macan: Move or eat Uwong piece(s)');
         } else if (gameState === 'moving' && uwongPawnsInHand === 0) {
           // Only move pieces after all pawns are placed
-          const bestMove = MacananAI.getBestMove(board, uwongTotal, connections, macanPos, macanJump);
+          const bestMove = MacananUAI.getBestMove(board, uwongTotal, connections, macanPos, macanJump);
           if (bestMove) {
             const newBoard = [...board];
             newBoard[bestMove.from] = null;

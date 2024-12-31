@@ -1,5 +1,5 @@
 // AI Implementation for Uwong player using Minimax with Alpha-Beta pruning
-const MacananAI = {
+const MacananUAI = {
     // Maximum depth for minimax search
     MAX_DEPTH: 4,
   
@@ -7,7 +7,7 @@ const MacananAI = {
     evaluateBoard: (board, uwongTotal, connections, macanPos) => {
       if (uwongTotal < 14) return -10000; // Increased penalty for losing state
       
-      const macanMoves = MacananAI.getValidMacanMoves(board, macanPos, connections);
+      const macanMoves = MacananUAI.getValidMacanMoves(board, macanPos, connections);
       if (macanMoves.length === 0) return 10000; // Increased reward for winning state
       
       let score = 0;
@@ -16,19 +16,19 @@ const MacananAI = {
       score += uwongTotal * 15;
       
       // Evaluate formation strength
-      score += MacananAI.evaluateUwongFormation(board, connections) * 3;
+      score += MacananUAI.evaluateUwongFormation(board, connections) * 3;
       
       // Evaluate control of critical positions
-      score += MacananAI.evaluatePositionalControl(board) * 2;
+      score += MacananUAI.evaluatePositionalControl(board) * 2;
       
       // Evaluate protection against Macan jumps
-      score += MacananAI.evaluateJumpProtection(board, macanPos) * 4;
+      score += MacananUAI.evaluateJumpProtection(board, macanPos) * 4;
       
       // Penalty for exposed pieces
-      score -= MacananAI.evaluateExposedPieces(board, connections, macanPos) * 3;
+      score -= MacananUAI.evaluateExposedPieces(board, connections, macanPos) * 3;
       
       // Mobility evaluation
-      score += MacananAI.evaluateMobility(board, connections) * 2;
+      score += MacananUAI.evaluateMobility(board, connections) * 2;
       
       // Penalty for Macan's mobility (weighted by threat level)
       score -= macanMoves.length * 8;
@@ -212,9 +212,9 @@ const MacananAI = {
     // Minimax algorithm with alpha-beta pruning
     minimax: (board, depth, alpha, beta, isMaximizing, uwongTotal, connections, macanPos, macanJump) => {
       // Terminal conditions
-      if (depth === 0 || uwongTotal < 14 || MacananAI.getValidMacanMoves(board, macanPos, connections, macanJump).length === 0) {
+      if (depth === 0 || uwongTotal < 14 || MacananUAI.getValidMacanMoves(board, macanPos, connections, macanJump).length === 0) {
         return {
-          score: MacananAI.evaluateBoard(board, uwongTotal, connections, macanPos)
+          score: MacananUAI.evaluateBoard(board, uwongTotal, connections, macanPos)
         };
       }
   
@@ -222,11 +222,11 @@ const MacananAI = {
         // Uwong's turn (maximizing)
         let bestScore = -Infinity;
         let bestMove = null;
-        const moves = MacananAI.getValidUwongMoves(board, connections);
+        const moves = MacananUAI.getValidUwongMoves(board, connections);
   
         for (const move of moves) {
-          const newBoard = MacananAI.makeMove(board, move, 'uwong');
-          const result = MacananAI.minimax(newBoard, depth - 1, alpha, beta, false, uwongTotal, connections, macanPos, macanJump);
+          const newBoard = MacananUAI.makeMove(board, move, 'uwong');
+          const result = MacananUAI.minimax(newBoard, depth - 1, alpha, beta, false, uwongTotal, connections, macanPos, macanJump);
           
           if (result.score > bestScore) {
             bestScore = result.score;
@@ -242,12 +242,12 @@ const MacananAI = {
         // Macan's turn (minimizing)
         let bestScore = Infinity;
         let bestMove = null;
-        const moves = MacananAI.getValidMacanMoves(board, macanPos, connections, macanJump);
+        const moves = MacananUAI.getValidMacanMoves(board, macanPos, connections, macanJump);
   
         for (const move of moves) {
-          const newBoard = MacananAI.makeMove(board, move, 'macan');
+          const newBoard = MacananUAI.makeMove(board, move, 'macan');
           const newUwongTotal = uwongTotal - (move.captures ? move.captures.length : 0);
-          const result = MacananAI.minimax(newBoard, depth - 1, alpha, beta, true, newUwongTotal, connections, move.to, macanJump);
+          const result = MacananUAI.minimax(newBoard, depth - 1, alpha, beta, true, newUwongTotal, connections, move.to, macanJump);
           
           if (result.score < bestScore) {
             bestScore = result.score;
@@ -264,9 +264,9 @@ const MacananAI = {
   
     // Get the best move for Uwong
     getBestMove: (board, uwongTotal, connections, macanPos, macanJump) => {
-      const result = MacananAI.minimax(
+      const result = MacananUAI.minimax(
         board,
-        MacananAI.MAX_DEPTH,
+        MacananUAI.MAX_DEPTH,
         -Infinity,
         Infinity,
         true,
@@ -280,4 +280,4 @@ const MacananAI = {
     }
   };
   
-  export default MacananAI;
+  export default MacananUAI;
