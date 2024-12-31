@@ -390,7 +390,7 @@ useEffect(() => {
     return false;
   }
 
-  if(currentPlayer == "uwong" && uwongTotal < 14){
+  if(uwongTotal < 14){
     setWin(true);
     setWinner("macan");
     setMessage("Macan Win!");
