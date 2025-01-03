@@ -374,7 +374,6 @@ useEffect(() => {
     setWin(true);
     setWinner("macan");
     setMessage("Macan Win!");
-    alert.message = "Macan"
   }
 
   if(macanPos != null){
