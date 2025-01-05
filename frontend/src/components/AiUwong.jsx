@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 
-const MacananGame = () => {
+const AiUwong = () => {
   const [board, setBoard] = useState(Array(37).fill(null));
   const [currentPlayer, setCurrentPlayer] = useState('uwong');
   const [uwongPawnsInHand, setUwongPawnsInHand] = useState(21);
@@ -13,6 +13,7 @@ const MacananGame = () => {
   const [macanPos, setMacanPos] = useState(null);
   const [nodePositions, setNodePositions] = useState({});
   const boardRef = useRef(null);
+  
 
   const connections = {
     0: [1, 5, 6],
@@ -374,6 +375,7 @@ useEffect(() => {
     setWin(true);
     setWinner("macan");
     setMessage("Macan Win!");
+    alert.message = "Macan"
   }
 
   if(macanPos != null){
@@ -439,6 +441,39 @@ const renderConnections = () => {
     setMessage('Macan: Place your piece');
   };
 
+  const isValidMoveUwong = (from, to) => {
+    return connections[from]?.includes(to);
+  };
+
+  const makeAiMove = () => {
+    if (currentPlayer === 'uwong') {
+      // Placement phase
+      if (gameState === 'placing') {
+        let availablePositions = board.map((value, index) => value === null ? index : null).filter(val => val !== null);
+        const randomPosition = availablePositions[Math.floor(Math.random() * availablePositions.length)];
+        handleClick(randomPosition); // Use handleClick to handle AI's placement
+      } 
+      // Moving phase
+      else if(gameState === 'moving'){
+        let availableMoves = [];
+        for (let i = 0; i < board.length; i++) {
+          if (board[i] === 'uwong') {
+            connections[i].forEach(j => {
+              if (board[j] === null) {
+                availableMoves.push({ from: i, to: j });
+              }
+            });
+          }
+        }
+
+        if (availableMoves.length > 0) {
+          const randomMove = availableMoves[Math.floor(Math.random() * availableMoves.length)];
+          handleClick(randomMove.to, randomMove.from); // Provide both 'to' and 'from' for handleClick
+          }
+      }
+    }
+  };
+
   const isValidMove = (from, to) => {
     return connections[from]?.includes(to);
   };
@@ -467,7 +502,7 @@ const renderConnections = () => {
     return path;
   };
 
-  const handleClick = (position) => {
+  const handleClick = (position, from = null) => {
     console.log(position);
     if(!win){
       // kondisi peletakan uwong awal
@@ -495,6 +530,7 @@ const renderConnections = () => {
           }else{
             setMessage("Macan: Choose an empty place")
           }
+          makeAiMove();
         } 
         // kondisi pemasangan pion uwong
         else if (currentPlayer === 'uwong') {
@@ -687,4 +723,4 @@ const renderConnections = () => {
   );
 };
 
-export default MacananGame;
+export default AiUwong;
