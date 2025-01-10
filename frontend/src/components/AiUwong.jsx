@@ -1,7 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
-import { useNavigate } from 'react-router';
 
-const MacananGame = () => {
+const AiUwong = () => {
   const [board, setBoard] = useState(Array(37).fill(null));
   const [currentPlayer, setCurrentPlayer] = useState('uwong');
   const [uwongPawnsInHand, setUwongPawnsInHand] = useState(21);
@@ -14,25 +13,7 @@ const MacananGame = () => {
   const [macanPos, setMacanPos] = useState(null);
   const [nodePositions, setNodePositions] = useState({});
   const boardRef = useRef(null);
-  const navigate = useNavigate();
-
-  const goBack = () => {
-    navigate('/');
-  };
-
-  const restartGame = () => {
-    setBoard(Array(37).fill(null));
-    setCurrentPlayer('uwong');
-    setUwongPawnsInHand(21);
-    setGameState('initial');
-    setSelectedPiece(null);
-    setMessage('Uwong: Click anywhere to place initial 3x3 formation');
-    setWin(false);
-    setWinner(null);
-    setUwongTotal(21);
-    setMacanPos(null);
-    setNodePositions({});
-  };
+  
 
   const connections = {
     0: [1, 5, 6],
@@ -390,7 +371,7 @@ useEffect(() => {
     return false;
   }
 
-  if(uwongTotal < 14){
+  if(currentPlayer == "uwong" && uwongTotal < 14){
     setWin(true);
     setWinner("macan");
     setMessage("Macan Win!");
@@ -460,6 +441,39 @@ const renderConnections = () => {
     setMessage('Macan: Place your piece');
   };
 
+  const isValidMoveUwong = (from, to) => {
+    return connections[from]?.includes(to);
+  };
+
+  const makeAiMove = () => {
+    if (currentPlayer === 'uwong') {
+      // Placement phase
+      if (gameState === 'placing') {
+        let availablePositions = board.map((value, index) => value === null ? index : null).filter(val => val !== null);
+        const randomPosition = availablePositions[Math.floor(Math.random() * availablePositions.length)];
+        handleClick(randomPosition); // Use handleClick to handle AI's placement
+      } 
+      // Moving phase
+      else if(gameState === 'moving'){
+        let availableMoves = [];
+        for (let i = 0; i < board.length; i++) {
+          if (board[i] === 'uwong') {
+            connections[i].forEach(j => {
+              if (board[j] === null) {
+                availableMoves.push({ from: i, to: j });
+              }
+            });
+          }
+        }
+
+        if (availableMoves.length > 0) {
+          const randomMove = availableMoves[Math.floor(Math.random() * availableMoves.length)];
+          handleClick(randomMove.to, randomMove.from); // Provide both 'to' and 'from' for handleClick
+          }
+      }
+    }
+  };
+
   const isValidMove = (from, to) => {
     return connections[from]?.includes(to);
   };
@@ -488,7 +502,7 @@ const renderConnections = () => {
     return path;
   };
 
-  const handleClick = (position) => {
+  const handleClick = (position, from = null) => {
     console.log(position);
     if(!win){
       // kondisi peletakan uwong awal
@@ -516,6 +530,7 @@ const renderConnections = () => {
           }else{
             setMessage("Macan: Choose an empty place")
           }
+          makeAiMove();
         } 
         // kondisi pemasangan pion uwong
         else if (currentPlayer === 'uwong') {
@@ -702,26 +717,10 @@ const renderConnections = () => {
           <div className="mt-2">
               <div className="text-sm">Total Uwong pawns: {uwongTotal}</div>
           </div>
-          {win && 
-          <div className="flex gap-4">
-            <button 
-              onClick={goBack}
-              className="bg-blue-600 hover:bg-blue-700 text-white text-lg px-8 py-3 rounded-lg shadow-md transition duration-200"
-            >
-              Go Back
-            </button>
-            <button 
-              onClick={restartGame}
-              className="bg-green-600 hover:bg-green-700 text-white text-lg px-8 py-3 rounded-lg shadow-md transition duration-200"
-            >
-              Restart
-            </button>
-          </div>
-        }
         </div>
       </div>
     </div>
   );
 };
 
-export default MacananGame;
+export default AiUwong;

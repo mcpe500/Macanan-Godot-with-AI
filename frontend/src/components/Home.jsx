@@ -5,7 +5,7 @@ const Home = () => {
   const navigate = useNavigate();
 
   const startGame = () => {
-    navigate('/game');
+    navigate('/option');
   };
 
   return (
