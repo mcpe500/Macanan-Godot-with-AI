@@ -132,6 +132,7 @@ const AIvsAI = () => {
         maxScore = Math.max(maxScore, score);
         alpha = Math.max(alpha, score);
         if (beta <= alpha) break;
+        console.log(`Minimax (Maximizing): Depth ${depth}, Player ${player}, Move:`, move, "Score:", score, "Alpha:", alpha, "Beta:", beta);
       }
       return maxScore;
     } else {
@@ -145,6 +146,7 @@ const AIvsAI = () => {
         minScore = Math.min(minScore, score);
         beta = Math.min(beta, score);
         if (beta <= alpha) break;
+        console.log(`Minimax (Minimizing): Depth ${depth}, Player ${player}, Move:`, move, "Score:", score, "Alpha:", alpha, "Beta:", beta);
       }
       return minScore;
     }
@@ -198,11 +200,12 @@ const AIvsAI = () => {
         }
       });
     }
-
+    console.log("Available Moves for", player, ":", moves);
     return moves;
   };
 
   const makeMove = (tempBoard, move, player) => {
+    console.log("Making move:", move, "for player:", player);
     if (player === 'uwong') {
       if (move.type === 'place3x3') {
         const row = Math.floor(move.position / 5);
@@ -236,6 +239,7 @@ const AIvsAI = () => {
 
   const findBestMove = (tempBoard, player) => {
     const moves = getAvailableMoves(tempBoard, player);
+    
     let bestScore = player === 'uwong' ? -Infinity : Infinity;
     let bestMove = null;
 
@@ -251,8 +255,9 @@ const AIvsAI = () => {
         bestScore = score;
         bestMove = move;
       }
+      console.log("Evaluating move:", move, "for player:", player, "Score:", score, "Best Score:", bestScore);
     }
-
+    console.log("Best move for", player, ":", bestMove);
     return bestMove;
   };
 
