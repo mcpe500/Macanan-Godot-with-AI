@@ -10,8 +10,16 @@ const MacananGame = () => {
     handleClick,
     renderConnections
   } = useMacananGame();
-
-  return (
+  console.log({
+    board,
+    message,
+    uwongPawnsInHand,
+    uwongTotal,
+    boardRef,
+    handleClick,
+    renderConnections
+  })
+  return ( 
     <div className="min-h-screen bg-gray-100 flex justify-center items-center">
       <div className="relative w-full max-w-4xl mx-auto" ref={boardRef}>
         <svg className="absolute w-full h-full pointer-events-none">

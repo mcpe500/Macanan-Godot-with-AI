@@ -16,6 +16,7 @@ export const MacananGameProvider = ({ children }) => {
   const [macanPos, setMacanPos] = useState(null);
   const [nodePositions, setNodePositions] = useState({});
   const boardRef = useRef(null);
+  const [firstMove, setFirstMove] = useState({uwong: true, macan: false});
 
   const connections = {
     0: [1, 5, 6],
@@ -319,6 +320,7 @@ export const MacananGameProvider = ({ children }) => {
     setGameState('placing');
     setUwongPawnsInHand(12);
     setMessage('Macan: Place your piece');
+    setFirstMove({...firstMove, uwong: false});
   };
 
   const isValidMove = (from, to) => {
@@ -366,6 +368,7 @@ export const MacananGameProvider = ({ children }) => {
               setGameState('moving');
               setMessage('Uwong: Move existing ones');
             }
+            setFirstMove({...firstMove, macan: false});
           } else {
             setMessage("Macan: Choose an empty place");
           }
@@ -522,7 +525,7 @@ export const MacananGameProvider = ({ children }) => {
     currentPlayer,
     uwongPawnsInHand,
     gameState,
-    selectedPiece,
+    selectedPiece, 
     setSelectedPiece,
     message,
     win,
@@ -534,6 +537,7 @@ export const MacananGameProvider = ({ children }) => {
     connections,
     macanJump,
     handleClick,
+    firstMove,
     renderConnections: () => {
       const lines = [];
       

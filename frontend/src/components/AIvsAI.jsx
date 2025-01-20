@@ -1,15 +1,78 @@
+import { useEffect, useState } from 'react';
+import { getBestMove } from '../utils/generic';
 import { useMacananGame } from './MacananGameContext';
 
 const AIvsAI = () => {
   const {
     board,
-    message,
+    currentPlayer,
     uwongPawnsInHand,
+    gameState,
+    selectedPiece,
+    setSelectedPiece,
+    message,
+    win,
+    winner,
     uwongTotal,
+    macanPos,
+    nodePositions,
     boardRef,
+    connections,
+    macanJump,
     handleClick,
-    renderConnections
+    renderConnections,
+    firstMove,
+    // setFirstMove
   } = useMacananGame();
+
+  const [isRunning, setIsRunning] = useState(true);
+
+  const move = () => {
+    if (!win && (currentPlayer === 'macan' || currentPlayer === 'uwong') && isRunning) {
+      let aiMove;
+      if (firstMove.uwong && currentPlayer === 'uwong') {
+        aiMove = [null, 12];
+      } else if (firstMove.macan && currentPlayer === 'macan') {
+        aiMove = [null, 12];
+      } else {
+        aiMove = getBestMove(board, currentPlayer, connections, macanPos);
+      }
+      if (aiMove) {
+        handleClick(aiMove[1], aiMove[0]);
+      }
+    }
+    console.log('AIvsAI useEffect');
+  };
+
+  useEffect(() => {
+    let timer;
+    if (isRunning) {
+      timer = setTimeout(() => {
+        move();
+      }, 500);
+    }
+
+
+    return () => clearTimeout(timer);
+  }, [isRunning, currentPlayer, win, firstMove]);
+
+  console.log({
+    board,
+    currentPlayer,
+    uwongPawnsInHand,
+    gameState,
+    selectedPiece,
+    message,
+    win,
+    winner,
+    uwongTotal,
+    macanPos,
+    nodePositions,
+    boardRef,
+    connections,
+    macanJump,
+    handleClick,
+  })
 
   return (
     <div className="min-h-screen bg-gray-100 flex justify-center items-center">
@@ -26,11 +89,10 @@ const AIvsAI = () => {
                 <button
                   key={index}
                   data-position={index}
-                  className={`w-12 h-12 rounded-full bg-gray-200 relative z-10 ${
-                    board[index] === 'uwong' ? 'bg-green-500' :
+                  className={`w-12 h-12 rounded-full bg-gray-200 relative z-10 ${board[index] === 'uwong' ? 'bg-green-500' :
                     board[index] === 'macan' ? 'bg-red-500' :
-                    'bg-gray-200'
-                  }`}
+                      'bg-gray-200'
+                    }`}
                   onClick={() => handleClick(index)}
                 >{index}</button>
               ))}
@@ -40,11 +102,10 @@ const AIvsAI = () => {
                 <button
                   key={index}
                   data-position={index}
-                  className={`w-12 h-12 rounded-full bg-gray-200 relative z-10 ${
-                    board[index] === 'uwong' ? 'bg-green-500' :
+                  className={`w-12 h-12 rounded-full bg-gray-200 relative z-10 ${board[index] === 'uwong' ? 'bg-green-500' :
                     board[index] === 'macan' ? 'bg-red-500' :
-                    'bg-gray-200'
-                  }`}
+                      'bg-gray-200'
+                    }`}
                   onClick={() => handleClick(index)}
                 >{index}</button>
               ))}
@@ -56,11 +117,10 @@ const AIvsAI = () => {
                 <button
                   key={index}
                   data-position={index}
-                  className={`w-12 h-12 rounded-full bg-gray-200 relative z-10 ${
-                    board[index] === 'uwong' ? 'bg-green-500' :
+                  className={`w-12 h-12 rounded-full bg-gray-200 relative z-10 ${board[index] === 'uwong' ? 'bg-green-500' :
                     board[index] === 'macan' ? 'bg-red-500' :
-                    'bg-gray-200'
-                  }`}
+                      'bg-gray-200'
+                    }`}
                   onClick={() => handleClick(index)}
                 >{index}</button>
               ))}
@@ -72,11 +132,10 @@ const AIvsAI = () => {
                 <button
                   key={index}
                   data-position={index}
-                  className={`w-12 h-12 rounded-full bg-gray-200 relative z-10 ${
-                    board[index] === 'uwong' ? 'bg-green-500' :
+                  className={`w-12 h-12 rounded-full bg-gray-200 relative z-10 ${board[index] === 'uwong' ? 'bg-green-500' :
                     board[index] === 'macan' ? 'bg-red-500' :
-                    'bg-gray-200'
-                  }`}
+                      'bg-gray-200'
+                    }`}
                   onClick={() => handleClick(index)}
                 >{index}</button>
               ))}
@@ -86,11 +145,10 @@ const AIvsAI = () => {
                 <button
                   key={index}
                   data-position={index}
-                  className={`w-12 h-12 rounded-full bg-gray-200 relative z-10 ${
-                    board[index] === 'uwong' ? 'bg-green-500' :
+                  className={`w-12 h-12 rounded-full bg-gray-200 relative z-10 ${board[index] === 'uwong' ? 'bg-green-500' :
                     board[index] === 'macan' ? 'bg-red-500' :
-                    'bg-gray-200'
-                  }`}
+                      'bg-gray-200'
+                    }`}
                   onClick={() => handleClick(index)}
                 >{index}</button>
               ))}
@@ -102,6 +160,9 @@ const AIvsAI = () => {
           <div className="mt-2">
             <div className="text-sm">Total Uwong pawns: {uwongTotal}</div>
           </div>
+          <button onClick={() => setIsRunning(!isRunning)}>
+            {isRunning ? 'Stop' : 'Start'}
+          </button>
         </div>
       </div>
     </div>
