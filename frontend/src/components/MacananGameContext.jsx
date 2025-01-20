@@ -16,7 +16,7 @@ export const MacananGameProvider = ({ children }) => {
   const [macanPos, setMacanPos] = useState(null);
   const [nodePositions, setNodePositions] = useState({});
   const boardRef = useRef(null);
-  const [firstMove, setFirstMove] = useState({uwong: true, macan: false});
+  const [firstMove, setFirstMove] = useState({ uwong: true, macan: false });
 
   const connections = {
     0: [1, 5, 6],
@@ -166,7 +166,7 @@ export const MacananGameProvider = ({ children }) => {
       24: [19],
       22: [18],
       12: [13],
-      10: [13, 12 , 11],
+      10: [13, 12, 11],
       27: [13, 12, 11, 10, 28],
       2: [8],
       4: [9],
@@ -299,16 +299,16 @@ export const MacananGameProvider = ({ children }) => {
     const newBoard = [...board];
     const row = Math.floor(centerPosition / 5);
     const col = centerPosition % 5;
-    
+
     if (row < 1 || row > 3 || col < 1 || col > 3) {
       setMessage('Invalid position. Choose center position for 3x3 formation');
       return;
     }
 
     const positions = [
-      [(row-1)*5 + (col-1), (row-1)*5 + col, (row-1)*5 + (col+1)],
-      [row*5 + (col-1), row*5 + col, row*5 + (col+1)],
-      [(row+1)*5 + (col-1), (row+1)*5 + col, (row+1)*5 + (col+1)]
+      [(row - 1) * 5 + (col - 1), (row - 1) * 5 + col, (row - 1) * 5 + (col + 1)],
+      [row * 5 + (col - 1), row * 5 + col, row * 5 + (col + 1)],
+      [(row + 1) * 5 + (col - 1), (row + 1) * 5 + col, (row + 1) * 5 + (col + 1)]
     ];
 
     positions.flat().forEach(pos => {
@@ -320,7 +320,7 @@ export const MacananGameProvider = ({ children }) => {
     setGameState('placing');
     setUwongPawnsInHand(12);
     setMessage('Macan: Place your piece');
-    setFirstMove({...firstMove, uwong: false});
+    setFirstMove({ ...firstMove, uwong: false });
   };
 
   const isValidMove = (from, to) => {
@@ -329,13 +329,13 @@ export const MacananGameProvider = ({ children }) => {
 
   const canMacanJump = (from, to) => {
     if (board[to] !== null) return false;
-    
+
     const path = findJumpPath(from, to);
-    if(path == null) return false;
+    if (path == null) return false;
 
     let eat = true;
     for (const p of path) {
-      if (board[p] !== "uwong"){
+      if (board[p] !== "uwong") {
         eat = false;
       }
     }
@@ -350,12 +350,12 @@ export const MacananGameProvider = ({ children }) => {
   };
 
   const handleClick = (position) => {
-    if(!win){
+    if (!win) {
       if (gameState === 'initial') {
         place3x3Formation(position);
       } else if (gameState === 'placing') {
         if (currentPlayer === 'macan') {
-          if(board[position] === null){
+          if (board[position] === null) {
             const newBoard = [...board];
             newBoard[position] = 'macan';
             setMacanPos(position);
@@ -368,12 +368,12 @@ export const MacananGameProvider = ({ children }) => {
               setGameState('moving');
               setMessage('Uwong: Move existing ones');
             }
-            setFirstMove({...firstMove, macan: false});
+            setFirstMove({ ...firstMove, macan: false });
           } else {
             setMessage("Macan: Choose an empty place");
           }
         } else if (currentPlayer === 'uwong') {
-          if(board[position] === null){
+          if (board[position] === null) {
             const newBoard = [...board];
             newBoard[position] = 'uwong';
             setBoard(newBoard);
@@ -386,19 +386,19 @@ export const MacananGameProvider = ({ children }) => {
           }
         }
       } else if (gameState === 'moving') {
-        if(board[position] !== null){
-          if(board[position] === currentPlayer){
+        if (board[position] !== null) {
+          if (board[position] === currentPlayer) {
             setSelectedPiece(position);
             setMessage(`${currentPlayer}: Selected piece at position ${position}`);
           }
         } else {
-          if(selectedPiece !== null){
-            if(currentPlayer === 'macan'){
+          if (selectedPiece !== null) {
+            if (currentPlayer === 'macan') {
               if ((isValidMove(selectedPiece, position) || canMacanJump(selectedPiece, position))) {
                 const newBoard = [...board];
                 newBoard[selectedPiece] = null;
                 newBoard[position] = 'macan';
-                
+
                 if (canMacanJump(selectedPiece, position)) {
                   const jumpedPos = findJumpPath(selectedPiece, position);
                   for (const p of jumpedPos) {
@@ -406,7 +406,7 @@ export const MacananGameProvider = ({ children }) => {
                     setUwongTotal(prev => prev - 1);
                   }
                 }
-                
+
                 setBoard(newBoard);
                 setMacanPos(position);
                 setCurrentPlayer('uwong');
@@ -436,15 +436,116 @@ export const MacananGameProvider = ({ children }) => {
       }
     }
   };
+  const handleAIClick = (movePosition, currentPosition) => {
+    if (!win) {
+      if (gameState === 'initial') {
+        place3x3Formation(movePosition);
+      } else if (gameState === 'placing') {
+        if (currentPlayer === 'macan') {
+          if (board[movePosition] === null) {
+            const newBoard = [...board];
+            newBoard[movePosition] = 'macan';
+            setMacanPos(movePosition);
+            setBoard(newBoard);
+            setCurrentPlayer('uwong');
+            if (uwongPawnsInHand > 0) {
+              setGameState('placing');
+              setMessage('Uwong: Place remaining pawns');
+            } else {
+              setGameState('moving');
+              setMessage('Uwong: Move existing ones');
+            }
+            setFirstMove({ ...firstMove, macan: false });
+          }
+        } else if (currentPlayer === 'uwong') {
+          if (board[movePosition] === null) {
+            const newBoard = [...board];
+            newBoard[movePosition] = 'uwong';
+            setBoard(newBoard);
+            setUwongPawnsInHand(prev => prev - 1);
+            setCurrentPlayer('macan');
+            setGameState('moving');
+            setMessage('Macan: Move or eat Uwong piece(s)');
+          }
+        }
+      } else if (gameState === 'moving') {
+        if (currentPosition === null) {
+          if (currentPlayer === 'macan') {
+            if (board[movePosition] === null) {
+              const newBoard = [...board];
+              newBoard[movePosition] = 'macan';
+              setMacanPos(movePosition);
+              setBoard(newBoard);
+              setCurrentPlayer('uwong');
+              if (uwongPawnsInHand > 0) {
+                setGameState('placing');
+                setMessage('Uwong: Place remaining pawns');
+              } else {
+                setGameState('moving');
+                setMessage('Uwong: Move existing ones');
+              }
+            }
+          } else if (currentPlayer === 'uwong') {
+            if (board[movePosition] === null) {
+              const newBoard = [...board];
+              newBoard[movePosition] = 'uwong';
+              setBoard(newBoard);
+              setCurrentPlayer('macan');
+              setGameState('moving');
+              setMessage('Macan: Move or eat Uwong piece(s)');
+            }
+          }
+        } else {
+          if (currentPlayer === 'macan') {
+            if ((isValidMove(currentPosition, movePosition) || canMacanJump(currentPosition, movePosition))) {
+              const newBoard = [...board];
+              newBoard[currentPosition] = null;
+              newBoard[movePosition] = 'macan';
 
+              if (canMacanJump(currentPosition, movePosition)) {
+                const jumpedPos = findJumpPath(currentPosition, movePosition);
+                for (const p of jumpedPos) {
+                  newBoard[p] = null;
+                  setUwongTotal(prev => prev - 1);
+                }
+              }
+
+              setBoard(newBoard);
+              setMacanPos(movePosition);
+              setCurrentPlayer('uwong');
+              if (uwongPawnsInHand > 0) {
+                setGameState('placing');
+                setMessage('Uwong: Place remaining pawns');
+              } else {
+                setGameState('moving');
+                setMessage('Uwong: Move existing ones');
+              }
+              setSelectedPiece(null);
+            }
+          } else if (currentPlayer === 'uwong') {
+            if (isValidMove(currentPosition, movePosition)) {
+              const newBoard = [...board];
+              newBoard[currentPosition] = null;
+              newBoard[movePosition] = 'uwong';
+              setBoard(newBoard);
+              setCurrentPlayer('macan');
+              setGameState('moving');
+              setMessage('Macan: Move or eat Uwong piece(s)');
+              setSelectedPiece(null);
+            }
+          }
+        }
+      }
+    }
+  };
   // Win condition check effect
   useEffect(() => {
     const canMacanMove = (from) => {
       const walk = connections[from];
       const jump = macanJump[from];
-      
+
       for (const w of walk) {
-        if(board[w] !== "uwong"){
+        if (board[w] !== "uwong") {
           return true;
         }
       }
@@ -455,13 +556,13 @@ export const MacananGameProvider = ({ children }) => {
           let adaMusuh = true;
 
           for (const wong of value) {
-            if(board[wong] != "uwong"){
+            if (board[wong] != "uwong") {
               adaMusuh = false;
             }
           }
 
-          if(adaMusuh){
-            if(board[key] != "uwong"){
+          if (adaMusuh) {
+            if (board[key] != "uwong") {
               return true;
             }
           }
@@ -471,14 +572,14 @@ export const MacananGameProvider = ({ children }) => {
       return false;
     };
 
-    if(currentPlayer == "uwong" && uwongTotal < 14){
+    if (currentPlayer == "uwong" && uwongTotal < 14) {
       setWin(true);
       setWinner("macan");
       setMessage("Macan Win!");
     }
 
-    if(macanPos != null){
-      if(!canMacanMove(macanPos)){
+    if (macanPos != null) {
+      if (!canMacanMove(macanPos)) {
         setWin(true);
         setWinner("uwong");
         setMessage("Uwong Win!");
@@ -492,7 +593,7 @@ export const MacananGameProvider = ({ children }) => {
       if (boardRef.current) {
         const positions = {};
         const nodes = boardRef.current.getElementsByTagName('button');
-        
+
         requestAnimationFrame(() => {
           Array.from(nodes).forEach((node) => {
             const rect = node.getBoundingClientRect();
@@ -502,7 +603,7 @@ export const MacananGameProvider = ({ children }) => {
               y: rect.top - boardRect.top + rect.height / 2
             };
           });
-          
+
           setNodePositions(positions);
         });
       }
@@ -525,7 +626,7 @@ export const MacananGameProvider = ({ children }) => {
     currentPlayer,
     uwongPawnsInHand,
     gameState,
-    selectedPiece, 
+    selectedPiece,
     setSelectedPiece,
     message,
     win,
@@ -537,10 +638,11 @@ export const MacananGameProvider = ({ children }) => {
     connections,
     macanJump,
     handleClick,
+    handleAIClick,
     firstMove,
     renderConnections: () => {
       const lines = [];
-      
+
       Object.entries(connections).forEach(([from, tos]) => {
         tos.forEach((to) => {
           // Only render if both positions exist and are different
@@ -559,7 +661,7 @@ export const MacananGameProvider = ({ children }) => {
           }
         });
       });
-      
+
       return lines;
     }
   };
