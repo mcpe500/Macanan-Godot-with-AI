@@ -1,253 +1,48 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useEffect } from 'react';
+import { useMacananGame } from './MacananGameContext';
 
 const AIvsAI = () => {
-  const [board, setBoard] = useState(Array(37).fill(null));
-  const [currentPlayer, setCurrentPlayer] = useState('uwong');
-  const [uwongPawnsInHand, setUwongPawnsInHand] = useState(21);
-  const [gameState, setGameState] = useState('initial');
-  const [message, setMessage] = useState('AI Uwong: Placing initial 3x3 formation');
-  const [win, setWin] = useState(false);
-  const [winner, setWinner] = useState(null);
-  const [uwongTotal, setUwongTotal] = useState(21);
-  const [macanPos, setMacanPos] = useState(null);
-  const [nodePositions, setNodePositions] = useState({});
-  const [isSimulating, setIsSimulating] = useState(false);
-  const [moveDelay] = useState(1000); // 1 second delay between moves
-  const boardRef = useRef(null);
+  const {
+    board,
+    currentPlayer,
+    uwongPawnsInHand,
+    gameState,
+    message,
+    win,
+    uwongTotal,
+    macanPos,
+    boardRef,
+    connections,
+    macanJump,
+    handleClick,
+    renderConnections,
+    setSelectedPiece
+  } = useMacananGame();
 
-  const connections = {
-    0: [1, 5, 6],
-    1: [0, 2, 6],
-    2: [1, 3, 6, 7, 8],
-    3: [2, 4, 8],
-    4: [3, 8, 9],
-    5: [0, 6, 10],
-    6: [0, 1, 2, 5, 7, 10, 11, 12],
-    7: [2, 6, 8, 12],
-    8: [2, 3, 4, 7, 9, 12, 13, 14],
-    9: [4, 8, 14],
-    10: [5, 6, 11, 15, 16, 26, 28, 30],
-    11: [6, 10, 12, 16],
-    12: [6, 7, 8, 11, 13, 16, 17, 18],
-    13: [8, 12, 14, 18],
-    14: [8, 9, 13, 18, 19, 31, 33, 35],
-    15: [10, 16, 20],
-    16: [10, 11, 12, 15, 17, 20, 21, 22],
-    17: [12, 16, 18, 22],
-    18: [12, 13, 14, 17, 19, 22, 23, 24],
-    19: [14, 18, 24],
-    20: [15, 16, 21],
-    21: [16, 20, 22],
-    22: [16, 17, 18, 21, 23],
-    23: [18, 22, 24],
-    24: [18, 19, 23],
-    25: [26, 27],
-    26: [25, 28, 10],
-    27: [25, 28, 29],
-    28: [26, 27, 10, 30],
-    29: [27, 30],
-    30: [28, 29, 10],
-    31: [14, 32, 33],
-    32: [31, 34],
-    33: [14, 31, 34, 35],
-    34: [32, 33, 36],
-    35: [14, 33, 36],
-    36: [34, 35]
-  };
+  console.log('Component rendered. Current state:', {
+    board,
+    currentPlayer,
+    uwongPawnsInHand,
+    gameState,
+    message,
+    win,
+    uwongTotal,
+    macanPos
+  });
 
-  const macanJump = {
-    0: { 2: [1], 10: [5] },
-    1: { 3: [2], 11: [6] },
-    2: { 0: [1], 4: [3], 12: [7] },
-    3: { 1: [2], 13: [8] },
-    4: { 2: [3], 14: [9] },
-    5: { 15: [10], 7: [6] },
-    6: { 16: [11], 8: [7] },
-    7: { 17: [12], 5: [6] },
-    8: { 18: [13], 6: [7] },
-    9: { 19: [14], 7: [8] },
-    10: { 20: [15], 0: [5] },
-    11: { 21: [16], 1: [6] },
-    12: { 22: [17], 2: [7] },
-    13: { 23: [18], 3: [8] },
-    14: { 24: [19], 4: [9] },
-    15: { 25: [20], 5: [10] },
-    16: { 26: [21], 6: [11] },
-    17: { 27: [22], 7: [12] },
-    18: { 28: [23], 8: [13] },
-    19: { 29: [24], 9: [14] },
-    20: { 30: [25], 10: [15] },
-    21: { 31: [26], 11: [16] },
-    22: { 32: [27], 12: [17] },
-    23: { 33: [28], 13: [18] },
-    24: { 34: [29], 14: [19] }
-  };
-
-  const evaluateBoard = (tempBoard, player) => {
-    let score = 0;
-    
-    // Count pieces
-    const uwongCount = tempBoard.filter(cell => cell === 'uwong').length;
-    const macanCount = tempBoard.filter(cell => cell === 'macan').length;
-    
-    if (player === 'uwong') {
-      // Uwong strategy: maintain pieces and surround Macan
-      score += uwongCount * 10;
-      // Bonus for pieces near Macan
-      const macanIndex = tempBoard.findIndex(cell => cell === 'macan');
-      if (macanIndex !== -1) {
-        connections[macanIndex].forEach(pos => {
-          if (tempBoard[pos] === 'uwong') score += 5;
-        });
-      }
-    } else {
-      // Macan strategy: capture Uwong pieces
-      score -= uwongCount * 10;
-      // Bonus for having more capture opportunities
-      Object.keys(macanJump).forEach(from => {
-        if (tempBoard[from] === 'macan') {
-          Object.keys(macanJump[from]).forEach(to => {
-            if (!tempBoard[to]) score += 3;
-          });
-        }
-      });
-    }
-    
-    return score;
-  };
-
-  const minimax = (depth, isMaximizing, tempBoard, player, alpha = -Infinity, beta = Infinity) => {
-    if (depth === 0) {
-      return evaluateBoard(tempBoard, player);
-    }
-
-    if (isMaximizing) {
-      let maxScore = -Infinity;
-      const moves = getAvailableMoves(tempBoard, player);
-      
-      for (const move of moves) {
-        const newBoard = [...tempBoard];
-        makeMove(newBoard, move, player);
-        const score = minimax(depth - 1, false, newBoard, player, alpha, beta);
-        maxScore = Math.max(maxScore, score);
-        alpha = Math.max(alpha, score);
-        if (beta <= alpha) break;
-        console.log(`Minimax (Maximizing): Depth ${depth}, Player ${player}, Move:`, move, "Score:", score, "Alpha:", alpha, "Beta:", beta);
-      }
-      return maxScore;
-    } else {
-      let minScore = Infinity;
-      const moves = getAvailableMoves(tempBoard, player === 'uwong' ? 'macan' : 'uwong');
-      
-      for (const move of moves) {
-        const newBoard = [...tempBoard];
-        makeMove(newBoard, move, player === 'uwong' ? 'macan' : 'uwong');
-        const score = minimax(depth - 1, true, newBoard, player, alpha, beta);
-        minScore = Math.min(minScore, score);
-        beta = Math.min(beta, score);
-        if (beta <= alpha) break;
-        console.log(`Minimax (Minimizing): Depth ${depth}, Player ${player}, Move:`, move, "Score:", score, "Alpha:", alpha, "Beta:", beta);
-      }
-      return minScore;
-    }
-  };
-
-  const getAvailableMoves = (tempBoard, player) => {
-    const moves = [];
-
-    if (player === 'uwong') {
-      if (gameState === 'initial') {
-        // Get valid 3x3 formation positions
-        for (let i = 0; i < 37; i++) {
-          if (!tempBoard[i]) {
-            const row = Math.floor(i / 5);
-            const col = i % 5;
-            if (row >= 1 && row <= 3 && col >= 1 && col <= 3) {
-              moves.push({ type: 'place3x3', position: i });
-            }
-          }
-        }
-      } else if (gameState === 'placing') {
-        // Get empty positions for placing remaining pawns
-        tempBoard.forEach((cell, i) => {
-          if (!cell) moves.push({ type: 'place', position: i });
-        });
-      } else {
-        // Get valid moves for existing Uwong pieces
-        tempBoard.forEach((cell, i) => {
-          if (cell === 'uwong') {
-            connections[i].forEach(to => {
-              if (!tempBoard[to]) moves.push({ type: 'move', from: i, to });
-            });
-          }
-        });
-      }
-    } else {
-      // Macan moves
-      tempBoard.forEach((cell, i) => {
-        if (cell === 'macan') {
-          // Regular moves
-          connections[i].forEach(to => {
-            if (!tempBoard[to]) moves.push({ type: 'move', from: i, to });
-          });
-          
-          // Jump moves
-          Object.keys(macanJump[i] || {}).forEach(to => {
-            if (!tempBoard[to] && canMacanJump(i, parseInt(to), tempBoard)) {
-              moves.push({ type: 'jump', from: i, to: parseInt(to) });
-            }
-          });
-        }
-      });
-    }
-    console.log("Available Moves for", player, ":", moves);
-    return moves;
-  };
-
-  const makeMove = (tempBoard, move, player) => {
-    console.log("Making move:", move, "for player:", player);
-    if (player === 'uwong') {
-      if (move.type === 'place3x3') {
-        const row = Math.floor(move.position / 5);
-        const col = move.position % 5;
-        const positions = [
-          [(row-1)*5 + (col-1), (row-1)*5 + col, (row-1)*5 + (col+1)],
-          [row*5 + (col-1), row*5 + col, row*5 + (col+1)],
-          [(row+1)*5 + (col-1), (row+1)*5 + col, (row+1)*5 + (col+1)]
-        ];
-        positions.flat().forEach(pos => {
-          tempBoard[pos] = 'uwong';
-        });
-      } else if (move.type === 'place') {
-        tempBoard[move.position] = 'uwong';
-      } else {
-        tempBoard[move.from] = null;
-        tempBoard[move.to] = 'uwong';
-      }
-    } else {
-      tempBoard[move.from] = null;
-      tempBoard[move.to] = 'macan';
-      
-      if (move.type === 'jump') {
-        const path = findJumpPath(move.from, move.to);
-        path?.forEach(pos => {
-          tempBoard[pos] = null;
-        });
-      }
-    }
-  };
-
-  const findBestMove = (tempBoard, player) => {
-    const moves = getAvailableMoves(tempBoard, player);
-    
-    let bestScore = player === 'uwong' ? -Infinity : Infinity;
+  const getAIMove = (player) => {
+    console.log(`Calculating AI move for player: ${player}`);
     let bestMove = null;
+    let bestScore = player === 'uwong' ? -Infinity : Infinity;
+
+    const moves = getAvailableMoves(player);
+    console.log(`Available moves for ${player}:`, moves);
 
     for (const move of moves) {
-      const newBoard = [...tempBoard];
-      makeMove(newBoard, move, player);
-      const score = minimax(3, player === 'uwong', newBoard, player);
-      
+      const newBoard = simulateMove(board, move, player);
+      const score = minimax(newBoard, 3, player === 'uwong', player);
+      console.log(`Move:`, move, `Score:`, score);
+
       if (player === 'uwong' && score > bestScore) {
         bestScore = score;
         bestMove = move;
@@ -255,160 +50,235 @@ const AIvsAI = () => {
         bestScore = score;
         bestMove = move;
       }
-      console.log("Evaluating move:", move, "for player:", player, "Score:", score, "Best Score:", bestScore);
     }
-    console.log("Best move for", player, ":", bestMove);
+
+    console.log(`Best move for ${player}:`, bestMove);
     return bestMove;
   };
 
-  const canMacanJump = (from, to, tempBoard) => {
-    if (tempBoard[to] !== null) return false;
-    const path = findJumpPath(from, to);
-    if (!path) return false;
-    return path.every(p => tempBoard[p] === "uwong");
-  };
-
-  const findJumpPath = (from, to) => {
-    return macanJump[from]?.[to];
-  };
-
-  useEffect(() => {
-    if (!win && !isSimulating) {
-      setIsSimulating(true);
-      setTimeout(() => {
-        const move = findBestMove(board, currentPlayer);
-        if (move) {
-          const newBoard = [...board];
-          makeMove(newBoard, move, currentPlayer);
-          setBoard(newBoard);
-          
-          if (currentPlayer === 'uwong') {
-            if (gameState === 'initial') {
-              setGameState('placing');
-              setUwongPawnsInHand(12);
-              setCurrentPlayer('macan');
-              setMessage('AI Macan: Making a move');
-            } else {
-              setCurrentPlayer('macan');
-              setMessage('AI Macan: Making a move');
-            }
-          } else {
-            setCurrentPlayer('uwong');
-            if (uwongPawnsInHand > 0) {
-              setGameState('placing');
-              setMessage('AI Uwong: Placing remaining pawns');
-            } else {
-              setGameState('moving');
-              setMessage('AI Uwong: Moving existing pieces');
-            }
-          }
-        }
-        setIsSimulating(false);
-      }, moveDelay);
-    }
-  }, [board, currentPlayer, gameState, win, isSimulating]);
-
-  useEffect(() => {
-    const canMacanMove = (from) => {
-      const walk = connections[from];
-      const jump = macanJump[from];
-      
-      for (const w of walk) {
-        if(board[w] !== "uwong"){
-          return true
-        }
-      }
-
-      for (const key in jump) {
-        if (Object.prototype.hasOwnProperty.call(jump, key)) {
-          let value = jump[key];
-          let adaMusuh = true;
-
-          for (const wong of value) {
-            if(board[wong] != "uwong"){
-              adaMusuh = false;
-            }
-          }
-
-          if(adaMusuh){
-            if(board[key] != "uwong"){
-              return true;
-            }
-          }
-        }
-      }
-      return false;
+  const minimax = (tempBoard, depth, isMaximizing, player) => {
+    console.log(`Minimax called. Depth: ${depth}, isMaximizing: ${isMaximizing}, player: ${player}`);
+    if (depth === 0 || checkWinCondition(tempBoard)) {
+      const score = evaluateBoard(tempBoard, player);
+      console.log(`Terminal state reached. Score: ${score}`);
+      return score;
     }
 
-    if (currentPlayer === 'uwong' && uwongTotal < 14) {
-      setWin(true);
-      setWinner('macan');
-      setMessage('Macan Wins!');
+    if (isMaximizing) {
+      let maxScore = -Infinity;
+      const moves = getAvailableMoves(player);
+      console.log(`Maximizing moves for ${player}:`, moves);
+
+      for (const move of moves) {
+        const newBoard = simulateMove(tempBoard, move, player);
+        const score = minimax(newBoard, depth - 1, false, player);
+        console.log(`Move:`, move, `Score:`, score);
+        maxScore = Math.max(maxScore, score);
+      }
+
+      console.log(`Max score for ${player}:`, maxScore);
+      return maxScore;
+    } else {
+      let minScore = Infinity;
+      const moves = getAvailableMoves(switchPlayer(player));
+      console.log(`Minimizing moves for ${switchPlayer(player)}:`, moves);
+
+      for (const move of moves) {
+        const newBoard = simulateMove(tempBoard, move, switchPlayer(player));
+        const score = minimax(newBoard, depth - 1, true, player);
+        console.log(`Move:`, move, `Score:`, score);
+        minScore = Math.min(minScore, score);
+      }
+
+      console.log(`Min score for ${switchPlayer(player)}:`, minScore);
+      return minScore;
+    }
+  };
+
+  const checkWinCondition = (tempBoard) => {
+    const uwongCount = tempBoard.filter(piece => piece === 'uwong').length;
+    console.log(`Checking win condition. Uwong count: ${uwongCount}`);
+
+    if (uwongCount < 14) {
+      console.log('Win condition met: Uwong count < 14');
+      return true;
     }
 
     if (macanPos !== null) {
-      if (!canMacanMove(macanPos)) {
-        setWin(true);
-        setWinner('uwong');
-        setMessage('Uwong Wins!');
+      // Check regular moves
+      const hasValidMove = connections[macanPos].some(to => tempBoard[to] === null);
+      if (hasValidMove) {
+        console.log('Macan has valid moves. No win condition.');
+        return false;
+      }
+
+      // Check jump moves
+      const jumps = macanJump[macanPos];
+      if (jumps) {
+        for (const [to, path] of Object.entries(jumps)) {
+          if (tempBoard[to] === null && path.every(pos => tempBoard[pos] === 'uwong')) {
+            console.log('Macan has valid jump moves. No win condition.');
+            return false;
+          }
+        }
+      }
+
+      console.log('Macan has no valid moves. Win condition met.');
+      return true; // Macan has no valid moves
+    }
+
+    console.log('No win condition met.');
+    return false;
+  };
+
+  const evaluateBoard = (tempBoard, player) => {
+    const uwongCount = tempBoard.filter(piece => piece === 'uwong').length;
+    const score = uwongCount < 14 ? -1000 : 1000;
+    console.log(`Evaluating board for ${player}. Uwong count: ${uwongCount}, Score: ${score}`);
+
+    if (player === 'uwong') {
+      return score + uwongCount;
+    } else {
+      return -score - uwongCount;
+    }
+  };
+
+  const getAvailableMoves = (player) => {
+    console.log(`Getting available moves for ${player}. Game state: ${gameState}`);
+    const moves = [];
+
+    if (gameState === 'initial' && player === 'uwong') {
+      for (let row = 1; row <= 3; row++) {
+        for (let col = 1; col <= 3; col++) {
+          const pos = row * 5 + col;
+          if (board[pos] === null) {
+            moves.push({ type: 'initial', position: pos });
+          }
+        }
+      }
+    } else if (gameState === 'placing') {
+      if (player === 'uwong' && uwongPawnsInHand > 0) {
+        for (let i = 0; i < board.length; i++) {
+          if (board[i] === null) {
+            moves.push({ type: 'place', position: i });
+          }
+        }
+      } else if (player === 'macan') {
+        for (let i = 0; i < board.length; i++) {
+          if (board[i] === null) {
+            moves.push({ type: 'place', position: i });
+          }
+        }
+      }
+    } else if (gameState === 'moving') {
+      if (player === 'uwong') {
+        for (let i = 0; i < board.length; i++) {
+          if (board[i] === 'uwong') {
+            const validMoves = connections[i] || [];
+            for (const to of validMoves) {
+              if (board[to] === null) {
+                moves.push({ type: 'move', from: i, to });
+              }
+            }
+          }
+        }
+      } else if (player === 'macan') {
+        if (board[macanPos] === 'macan') {
+          // Regular moves
+          const validMoves = connections[macanPos] || [];
+          for (const to of validMoves) {
+            if (board[to] === null) {
+              moves.push({ type: 'move', from: macanPos, to });
+            }
+          }
+
+          // Jump moves
+          const jumps = macanJump[macanPos] || {};
+          for (const [to, path] of Object.entries(jumps)) {
+            const toNum = parseInt(to);
+            if (board[toNum] === null && path.every(pos => board[pos] === 'uwong')) {
+              moves.push({ type: 'jump', from: macanPos, to: toNum });
+            }
+          }
+        }
       }
     }
-  }, [currentPlayer, uwongTotal, macanPos, board]);
 
-  const calculateNodePositions = () => {
-    if (boardRef.current) {
-      const buttons = boardRef.current.querySelectorAll('button');
-      buttons.forEach(button => {
-        const position = button.getAttribute('data-position');
-        const rect = button.getBoundingClientRect();
-        setNodePositions(prev => ({
-          ...prev,
-          [position]: {
-            x: rect.left + rect.width / 2,
-            y: rect.top + rect.height / 2
-          }
-        }));
+    console.log(`Available moves for ${player}:`, moves);
+    return moves;
+  };
+
+  const switchPlayer = (player) => {
+    const newPlayer = player === 'uwong' ? 'macan' : 'uwong';
+    console.log(`Switching player from ${player} to ${newPlayer}`);
+    return newPlayer;
+  };
+
+  const simulateMove = (tempBoard, move, player) => {
+    console.log(`Simulating move for ${player}. Move:`, move);
+    const newBoard = [...tempBoard];
+
+    if (move.type === 'initial') {
+      const row = Math.floor(move.position / 5);
+      const col = move.position % 5;
+      const positions = [
+        [(row-1)*5 + (col-1), (row-1)*5 + col, (row-1)*5 + (col+1)],
+        [row*5 + (col-1), row*5 + col, row*5 + (col+1)],
+        [(row+1)*5 + (col-1), (row+1)*5 + col, (row+1)*5 + (col+1)]
+      ];
+      positions.flat().forEach(pos => {
+        if (pos >= 0 && pos < tempBoard.length) {
+          newBoard[pos] = 'uwong';
+        }
       });
+    } else if (move.type === 'place') {
+      newBoard[move.position] = player;
+    } else if (move.type === 'move') {
+      newBoard[move.from] = null;
+      newBoard[move.to] = player;
+    } else if (move.type === 'jump') {
+      newBoard[move.from] = null;
+      newBoard[move.to] = player;
+      const jumpedPos = macanJump[move.from][move.to];
+      for (const p of jumpedPos) {
+        newBoard[p] = null;
+      }
     }
+
+    console.log(`Board after move:`, newBoard);
+    return newBoard;
   };
 
   useEffect(() => {
-    calculateNodePositions();
-    window.addEventListener('resize', calculateNodePositions);
-    document.addEventListener('visibilitychange', calculateNodePositions);
+    let timeoutId;
 
-    const timeout = setTimeout(calculateNodePositions, 100);
+    const makeAIMove = async () => {
+      if (!win) {
+        console.log(`Making AI move for ${currentPlayer}`);
+        const move = getAIMove(currentPlayer);
+        if (move) {
+          console.log(`Executing move:`, move);
+          if (move.type === 'initial' || move.type === 'place') {
+            handleClick(move.position);
+          } else if (move.type === 'move' || move.type === 'jump') {
+            setSelectedPiece(move.from);
+            await new Promise(resolve => setTimeout(resolve, 500));
+            handleClick(move.to);
+          }
+        }
+        timeoutId = setTimeout(makeAIMove, 1000);
+      }
+    };
+
+    makeAIMove();
 
     return () => {
-      window.removeEventListener('resize', calculateNodePositions);
-      document.removeEventListener('visibilitychange', calculateNodePositions);
-      clearTimeout(timeout);
+      if (timeoutId) {
+        console.log('Clearing timeout for AI move');
+        clearTimeout(timeoutId);
+      }
     };
-  }, [board]);
-
-  const renderConnections = () => {
-    const lines = [];
-    
-    Object.entries(connections).forEach(([from, tos]) => {
-      tos.forEach((to) => {
-        if (nodePositions[from] && nodePositions[to] && from !== to) {
-          lines.push(
-            <line
-              key={`${from}-${to}`}
-              x1={nodePositions[from].x}
-              y1={nodePositions[from].y}
-              x2={nodePositions[to].x}
-              y2={nodePositions[to].y}
-              stroke="#CBD5E0"
-              strokeWidth="2"
-            />
-          );
-        }
-      });
-    });
-    
-    return lines;
-  };
+  }, [currentPlayer, win]);
 
   return (
     <div className="min-h-screen bg-gray-100 flex justify-center items-center">
@@ -496,7 +366,6 @@ const AIvsAI = () => {
           <div className="mt-2">
             <div className="text-sm">Total Uwong pawns: {uwongTotal}</div>
           </div>
-          {winner && <div className="text-2xl font-bold text-center mt-4">{winner} wins!</div>}
         </div>
       </div>
     </div>
