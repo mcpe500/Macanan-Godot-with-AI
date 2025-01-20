@@ -12,7 +12,7 @@ const MacananUwongAI = () => {
   const [win, setWin] = useState(false);
   const [winner, setWinner] = useState(null);
   const [uwongTotal, setUwongTotal] = useState(21);
-  const [macanPos, setMacanPos] = useState(null);
+  const [macanPos, setMacanPos] = useState(null); // Initialize to null
   const [nodePositions, setNodePositions] = useState({});
   const [isAIThinking, setIsAIThinking] = useState(false);
   const boardRef = useRef(null);
@@ -32,7 +32,7 @@ const MacananUwongAI = () => {
     setWin(false);
     setWinner(null);
     setUwongTotal(21);
-    setMacanPos(null);
+    setMacanPos(null); // Reset macanPos to null
     setNodePositions({});
   };
 
@@ -357,34 +357,33 @@ const MacananUwongAI = () => {
   useEffect(() => {
     if (currentPlayer === 'uwong' && !win && !isAIThinking) {
       setIsAIThinking(true);
-      
-      // Small delay to make AI moves feel more natural
+  
       setTimeout(() => {
         if (gameState === 'initial') {
           // AI places initial formation in a good position (center)
           place3x3Formation(12); // Center position
         } else if (gameState === 'placing' && uwongPawnsInHand > 0) {
-          // AI must place all remaining pawns before moving
+          // AI places remaining pawns
           const validEmptySpots = Array(37)
             .fill()
             .map((_, i) => i)
             .filter(i => board[i] === null);
-            
+  
           // Pick a strategic spot using the evaluation function
           let bestScore = -Infinity;
           let bestSpot = validEmptySpots[0];
-          
+  
           for (const spot of validEmptySpots) {
             const testBoard = [...board];
             testBoard[spot] = 'uwong';
-            const score = MacananUAI.evaluateBoard(testBoard, uwongTotal + 1, connections, macanPos);
-            
+            const score = MacananUAI.evaluateBoard(testBoard, uwongTotal + 1, connections, macanPos, macanJump);
+  
             if (score > bestScore) {
               bestScore = score;
               bestSpot = spot;
             }
           }
-          
+  
           const newBoard = [...board];
           newBoard[bestSpot] = 'uwong';
           setBoard(newBoard);
@@ -452,58 +451,53 @@ const MacananUwongAI = () => {
   };
 }, [board]); // Added board as dependency to recalculate when game state changes
 
-// check macan player condition for win
-useEffect(() => {
-  const canMacanMove = (from) => {
-    const walk = connections[from];
-    const jump = macanJump[from];
-    
-    for (const w of walk) {
-      if(board[w] !== "uwong"){
-        return true
-      }
-    }
-
-    for (const key in jump) {
-      if (Object.prototype.hasOwnProperty.call(jump, key)) {
-        let value = jump[key];
-        console.log(key, value);
-
-        let adaMusuh = true;
-
-        for (const wong of value) {
-          if(board[wong] != "uwong"){
-            adaMusuh = false;
-          }
-        }
-
-        if(adaMusuh){
-          if(board[key] != "uwong"){
+    // Check macan player condition for win
+    useEffect(() => {
+      const canMacanMove = (from) => {
+        if (from === null || !macanJump[from]) return false; // Validate from position
+      
+        const walk = connections[from];
+        const jump = macanJump[from];
+      
+        for (const w of walk) {
+          if (board[w] !== "uwong") {
             return true;
           }
         }
+      
+        for (const key in jump) {
+          if (Object.prototype.hasOwnProperty.call(jump, key)) {
+            const value = jump[key];
+            let adaMusuh = true;
+      
+            for (const wong of value) {
+              if (board[wong] !== "uwong") {
+                adaMusuh = false;
+              }
+            }
+      
+            if (adaMusuh && board[key] !== "uwong") {
+              return true;
+            }
+          }
+        }
+      
+        return false;
+      };
+  
+      if (uwongTotal < 14) {
+        setWin(true);
+        setWinner("macan");
+        setMessage("Macan Win!");
       }
-    }
-
-    return false;
-  }
-
-  if(uwongTotal < 14){
-    setWin(true);
-    setWinner("macan");
-    setMessage("Macan Win!");
-  }
-
-  if(macanPos != null){
-    if(!canMacanMove(macanPos)){
-      setWin(true);
-      setWinner("uwong");
-      setMessage("Uwong Win!");
-    }
-  }
-
-// eslint-disable-next-line react-hooks/exhaustive-deps
-}, [currentPlayer, uwongTotal])
+  
+      if (macanPos !== null && !canMacanMove(macanPos)) {
+        setWin(true);
+        setWinner("uwong");
+        setMessage("Uwong Win!");
+      }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [currentPlayer, uwongTotal, macanPos, board, connections]);
 
 const renderConnections = () => {
   const lines = [];
@@ -561,17 +555,23 @@ const renderConnections = () => {
     return connections[from]?.includes(to);
   };
 
+  // Validate macanPos before accessing macanJump
   const canMacanJump = (from, to) => {
     if (board[to] !== null) return false;
-    
-    const path = findJumpPath(from, to);
 
-    if(path == null) return false;
+    // Validate from and to positions
+    if (from === null || to === null || !macanJump[from] || !macanJump[from][to]) {
+      return false;
+    }
+
+    const path = macanJump[from][to];
+
+    if (path == null) return false;
 
     let eat = true;
     for (const p of path) {
-      if (board[p] !== "uwong"){
-        eat = false
+      if (board[p] !== "uwong") {
+        eat = false;
       }
     }
 
@@ -585,14 +585,14 @@ const renderConnections = () => {
     return path;
   };
 
-  // Modified handle click to only process Macan moves
+  // Modified handleClick to validate macanPos
   const handleClick = (position) => {
     if (!win && currentPlayer === 'macan') {
       if (gameState === 'placing') {
         if (board[position] === null) {
           const newBoard = [...board];
           newBoard[position] = 'macan';
-          setMacanPos(position);
+          setMacanPos(position); // Set macanPos to the new position
           setBoard(newBoard);
           setCurrentPlayer('uwong');
           if (uwongPawnsInHand > 0) {
@@ -616,17 +616,17 @@ const renderConnections = () => {
             const newBoard = [...board];
             newBoard[selectedPiece] = null;
             newBoard[position] = 'macan';
-            
+
             if (canMacanJump(selectedPiece, position)) {
-              const jumpedPos = findJumpPath(selectedPiece, position);
+              const jumpedPos = macanJump[selectedPiece][position];
               for (const p of jumpedPos) {
                 newBoard[p] = null;
                 setUwongTotal(prev => prev - 1);
               }
             }
-            
+
             setBoard(newBoard);
-            setMacanPos(position);
+            setMacanPos(position); // Update macanPos to the new position
             setCurrentPlayer('uwong');
             if (uwongPawnsInHand > 0) {
               setGameState('placing');
@@ -641,6 +641,8 @@ const renderConnections = () => {
       }
     }
   };
+
+
 
   return (
     <div className="min-h-screen bg-gray-100 flex justify-center items-center">
@@ -665,7 +667,7 @@ const renderConnections = () => {
                     'bg-gray-200'
                   }`}
                   onClick={() => handleClick(index)}
-                />
+                >{index}</button>
               ))}
             </div>
             <div className="grid grid-cols-1 gap-4">
@@ -679,7 +681,7 @@ const renderConnections = () => {
                     'bg-gray-200'
                   }`}
                   onClick={() => handleClick(index)}
-                />
+                >{index}</button>
               ))}
             </div>
 
@@ -695,7 +697,7 @@ const renderConnections = () => {
                     'bg-gray-200'
                   }`}
                   onClick={() => handleClick(index)}
-                />
+                >{index}</button>
               ))}
             </div>
 
@@ -711,7 +713,7 @@ const renderConnections = () => {
                     'bg-gray-200'
                   }`}
                   onClick={() => handleClick(index)}
-                />
+                >{index}</button>
               ))}
             </div>
             <div className="grid grid-cols-1 gap-20">
@@ -725,7 +727,7 @@ const renderConnections = () => {
                     'bg-gray-200'
                   }`}
                   onClick={() => handleClick(index)}
-                />
+                >{index}</button>
               ))}
             </div>
           </div>

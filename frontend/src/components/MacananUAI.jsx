@@ -1,283 +1,382 @@
-// AI Implementation for Uwong player using Minimax with Alpha-Beta pruning
 const MacananUAI = {
-    // Maximum depth for minimax search
-    MAX_DEPTH: 4,
-  
-    // Enhanced board evaluation with multiple strategic factors
-    evaluateBoard: (board, uwongTotal, connections, macanPos) => {
-      if (uwongTotal < 14) return -10000; // Increased penalty for losing state
-      
-      const macanMoves = MacananUAI.getValidMacanMoves(board, macanPos, connections);
-      if (macanMoves.length === 0) return 10000; // Increased reward for winning state
-      
-      let score = 0;
-      
-      // Base score from piece count
-      score += uwongTotal * 15;
-      
-      // Evaluate formation strength
-      score += MacananUAI.evaluateUwongFormation(board, connections) * 3;
-      
-      // Evaluate control of critical positions
-      score += MacananUAI.evaluatePositionalControl(board) * 2;
-      
-      // Evaluate protection against Macan jumps
-      score += MacananUAI.evaluateJumpProtection(board, macanPos) * 4;
-      
-      // Penalty for exposed pieces
-      score -= MacananUAI.evaluateExposedPieces(board, connections, macanPos) * 3;
-      
-      // Mobility evaluation
-      score += MacananUAI.evaluateMobility(board, connections) * 2;
-      
-      // Penalty for Macan's mobility (weighted by threat level)
-      score -= macanMoves.length * 8;
-      
-      return score;
-    },
-    
-    // Enhanced formation evaluation
-    evaluateUwongFormation: (board, connections) => {
-        let score = 0;
-        
-        for (let i = 0; i < board.length; i++) {
-            if (board[i] === 'uwong') {
-                const adjacentUwongs = connections[i].filter(pos => board[pos] === 'uwong');
-                
-                // Reward for adjacent pieces (defensive formation)
-                score += adjacentUwongs.length * 3;
-                
-                // Extra reward for forming triangular formations (stronger defense)
-                for (const adj1 of adjacentUwongs) {
-                    for (const adj2 of adjacentUwongs) {
-                        if (adj1 !== adj2 && connections[adj1].includes(adj2)) {
-                            score += 5; // Bonus for triangle formation
-                        }
-                    }
-                }
-            }
-        }
-        
-        return score;
-    },
+  MIN_UWONG_PIECES: 14,
+  MAX_DEPTH: 4,
 
-    // New: Evaluate control of strategically important positions
-    evaluatePositionalControl: (board) => {
-        let score = 0;
-        const criticalPositions = [
-            12, // Center
-            6, 7, 8, // Middle row
-            16, 17, 18, // Critical connections
-            11, 13, // Side connections
-        ];
-        
-        for (const pos of criticalPositions) {
-            if (board[pos] === 'uwong') {
-                score += 10; // Bonus for controlling critical positions
-            }
-        }
-        
-        return score;
-    },
+  getValidMacanMoves: (board, macanPos, connections, macanJump = null) => {
+    if (macanPos === null) return [];
+    const moves = [];
 
-    // New: Evaluate protection against Macan jumps
-    evaluateJumpProtection: (board, macanPos) => {
-        let score = 0;
-        const uwongPositions = board.map((cell, index) => cell === 'uwong' ? index : -1).filter(pos => pos !== -1);
-        
-        for (const pos of uwongPositions) {
-            let isProtected = false;
-            // Check if piece is protected from jumps
-            const adjacentPieces = board.map((cell, index) => 
-                cell === 'uwong' && Math.abs(index - pos) === 1 ? index : -1
-            ).filter(p => p !== -1);
-            
-            if (adjacentPieces.length >= 2) {
-                isProtected = true;
-                score += 8; // Bonus for being protected from jumps
-            }
-            
-            if (!isProtected) {
-                score -= 5; // Penalty for being vulnerable to jumps
-            }
-        }
-        
-        return score;
-    },
-
-    // New: Evaluate exposed pieces that could be captured
-    evaluateExposedPieces: (board, connections, macanPos) => {
-        let exposedCount = 0;
-        
-        for (let i = 0; i < board.length; i++) {
-            if (board[i] === 'uwong') {
-                // Check if piece is isolated and could be jumped over
-                const adjacentUwongs = connections[i].filter(pos => board[pos] === 'uwong').length;
-                if (adjacentUwongs === 0) {
-                    exposedCount += 2; // Heavily penalize isolated pieces
-                } else if (adjacentUwongs === 1) {
-                    exposedCount += 1; // Smaller penalty for pieces with only one connection
-                }
-                
-                // Check if piece is in direct danger from Macan
-                if (connections[macanPos]?.includes(i)) {
-                    exposedCount += 3; // Extra penalty for pieces next to Macan
-                }
-            }
-        }
-        
-        return exposedCount;
-    },
-
-    // New: Evaluate mobility and control of the board
-    evaluateMobility: (board, connections) => {
-        let mobilityScore = 0;
-        
-        for (let i = 0; i < board.length; i++) {
-            if (board[i] === 'uwong') {
-                const moveOptions = connections[i].filter(pos => board[pos] === null).length;
-                mobilityScore += moveOptions * 2; // Reward for having more move options
-                
-                // Bonus for pieces that can move to multiple safe spots
-                const safeMovesCount = connections[i].filter(pos => {
-                    if (board[pos] !== null) return false;
-                    const adjacentUwongs = connections[pos].filter(p => board[p] === 'uwong').length;
-                    return adjacentUwongs >= 2; // Consider a move safe if supported by other pieces
-                }).length;
-                
-                mobilityScore += safeMovesCount * 3;
-            }
-        }
-        
-        return mobilityScore;
-    },
-    
-    // Get all valid moves for Uwong pieces
-    getValidUwongMoves: (board, connections) => {
-      const moves = [];
-      
-      // Find all Uwong pieces and their possible moves
-      for (let i = 0; i < board.length; i++) {
-        if (board[i] === 'uwong') {
-          connections[i].forEach(to => {
-            if (board[to] === null) {
-              moves.push({ from: i, to });
-            }
-          });
-        }
-      }
-      
-      return moves;
-    },
-  
-    // Get all valid moves for Macan
-    getValidMacanMoves: (board, macanPos, connections, macanJump = null) => {
-      const moves = [];
-      
-      // Regular moves
+    if (connections[macanPos]) {
       connections[macanPos].forEach(to => {
         if (board[to] === null) {
           moves.push({ from: macanPos, to, captures: [] });
         }
       });
+    }
+
+    if (macanJump && macanJump[macanPos]) {
+      for (const [to, path] of Object.entries(macanJump[macanPos])) {
+        if (board[to] === null && path.every(pos => board[pos] === 'uwong')) {
+          moves.push({ from: macanPos, to: parseInt(to), captures: path });
+        }
+      }
+    }
+
+    return moves;
+  },
+
+  evaluateBoard: (board, uwongTotal, connections, macanPos, macanJump) => {
+    let score = 0;
+    let penalty = 0;
+
+    // Immediate win/loss conditions
+    if (uwongTotal < MacananUAI.MIN_UWONG_PIECES) return -10000;
+    const macanMoves = MacananUAI.getValidMacanMoves(board, macanPos, connections, macanJump);
+    if (macanMoves.length === 0) return 10000;
+
+    // Base score from piece count
+    score += uwongTotal * 25;
+
+    // Evaluate blocking Macan's jumps
+    score += MacananUAI.evaluateJumpBlocking(board, macanPos, macanJump) * 30;
+
+    // Evaluate Uwong formations that limit Macan's mobility
+    score += MacananUAI.evaluateUwongFormations(board, connections) * 20;
+
+    // Penalties for exposed Uwong pieces
+    penalty += MacananUAI.evaluateExposedPieces(board, connections, macanPos) * 15;
+
+    // Penalties for unblocked Macan paths
+    penalty += MacananUAI.evaluateUnblockedPaths(board, macanPos, connections, macanJump) * 25;
+
+    return score - penalty;
+  },
+
+  evaluateJumpBlocking: (board, macanPos, macanJump) => {
+    let score = 0;
+    if (!macanPos || !macanJump[macanPos]) return score;
+
+    // Check all potential jumps for Macan
+    for (const [to, path] of Object.entries(macanJump[macanPos])) {
+      if (board[to] === null) {
+        // Reward blocking jumps
+        const blockingPieces = path.filter(pos => board[pos] === 'uwong').length;
+        score += blockingPieces * 10;
+      }
+    }
+
+    return score;
+  },
+
+  evaluateUwongFormations: (board, connections) => {
+    let score = 0;
+
+    // Reward Uwong pieces that are adjacent to each other
+    for (let i = 0; i < board.length; i++) {
+      if (board[i] === 'uwong' && connections[i]) {
+        const adjacentUwongs = connections[i].filter(pos => board[pos] === 'uwong').length;
+        score += adjacentUwongs * 5;
+      }
+    }
+
+    return score;
+  },
+
+  evaluateUnblockedPaths: (board, macanPos, connections, macanJump) => {
+    let penalty = 0;
+
+    // Penalize unblocked paths for Macan
+    if (macanPos && connections[macanPos]) {
+      connections[macanPos].forEach(to => {
+        if (board[to] === null) {
+          penalty += 5; // Unblocked move
+        }
+      });
+    }
+
+    if (macanPos && macanJump[macanPos]) {
+      for (const [to, path] of Object.entries(macanJump[macanPos])) {
+        if (board[to] === null && path.every(pos => board[pos] === 'uwong')) {
+          penalty += 10; // Unblocked jump
+        }
+      }
+    }
+
+    return penalty;
+  },
+
+  evaluatePathBlocking: (board, macanPos, connections, macanJump) => {
+    let score = 0;
+    if (!macanPos) return score;
+    
+    const possiblePaths = MacananUAI.getAllMacanPaths(macanPos, connections);
+
+    for (const path of possiblePaths) {
+      const blockingPieces = path.filter(pos => board[pos] === 'uwong');
       
-      // Jump moves
-      if (macanJump) {
-        for (const [to, path] of Object.entries(macanJump[macanPos] || {})) {
-          if (board[to] === null && path.every(pos => board[pos] === 'uwong')) {
-            moves.push({ from: macanPos, to: parseInt(to), captures: path });
+      if (blockingPieces.length >= 2 && blockingPieces.length % 2 === 0) {
+        score += 20 * (blockingPieces.length / 2);
+      }
+
+      if (blockingPieces.length === path.length) {
+        score += 30;
+      }
+    }
+
+    return score;
+  },
+
+  getAllMacanPaths: (macanPos, connections) => {
+    if (!macanPos || !connections[macanPos]) return [];
+    
+    const paths = [];
+    const visited = new Set();
+    const maxDepth = 4;
+
+    const findPaths = (current, path, depth) => {
+      if (depth >= maxDepth) return;
+      
+      visited.add(current);
+      const neighbors = connections[current] || [];
+
+      for (const next of neighbors) {
+        if (!visited.has(next)) {
+          const newPath = [...path, next];
+          paths.push(newPath);
+          findPaths(next, newPath, depth + 1);
+        }
+      }
+      visited.delete(current);
+    };
+
+    findPaths(macanPos, [macanPos], 0);
+    return paths;
+  },
+
+  evaluatePairedFormations: (board, connections) => {
+    let score = 0;
+    const visited = new Set();
+
+    for (let i = 0; i < board.length; i++) {
+      if (board[i] === 'uwong' && !visited.has(i)) {
+        visited.add(i);
+        const adjacentUwongs = connections[i]?.filter(pos => board[pos] === 'uwong') || [];
+        
+        for (const adj of adjacentUwongs) {
+          if (!visited.has(adj)) {
+            visited.add(adj);
+            score += 10;
+            
+            const sharedNeighbors = connections[i]?.filter(pos => 
+              connections[adj]?.includes(pos)
+            ) || [];
+            
+            if (sharedNeighbors.length > 0) {
+              score += 15;
+            }
           }
         }
       }
+    }
+
+    return score;
+  },
+
+  evaluateJumpProtection: (board, macanPos, macanJump) => {
+    let score = 0;
+    if (!macanPos || !macanJump[macanPos]) return score;
+
+    const jumpPaths = macanJump[macanPos];
+    for (const [to, path] of Object.entries(jumpPaths)) {
+      const pathPieces = path.filter(pos => board[pos] === 'uwong');
       
-      return moves;
-    },
-  
-    // Make a move on a copy of the board
-    makeMove: (board, move, piece) => {
-      const newBoard = [...board];
-      newBoard[move.from] = null;
-      newBoard[move.to] = piece;
+      if (pathPieces.length % 2 === 0) {
+        score += 25;
+      }
       
-      // Handle captures for Macan jumps
-      if (move.captures) {
-        move.captures.forEach(pos => {
-          newBoard[pos] = null;
+      if (pathPieces.length === path.length) {
+        score += 35;
+      }
+    }
+
+    return score;
+  },
+
+  evaluateUnblockedJumpPaths: (board, macanPos, macanJump) => {
+    let penalty = 0;
+    if (!macanPos || !macanJump[macanPos]) return penalty;
+
+    const jumpPaths = macanJump[macanPos];
+    for (const [to, path] of Object.entries(jumpPaths)) {
+      if (board[to] === null) {
+        const unprotectedPieces = path.filter(pos => {
+          if (board[pos] !== 'uwong') return false;
+          const adjacentProtectors = MacananUAI.getAdjacentProtectors(board, pos);
+          return adjacentProtectors < 2;
+        }).length;
+
+        penalty += unprotectedPieces * 30;
+      }
+    }
+
+    return penalty;
+  },
+
+  getAdjacentProtectors: (board, position) => {
+    const adjacent = [-1, 1, -5, 5];
+    return adjacent.filter(offset => {
+      const pos = position + offset;
+      return pos >= 0 && pos < board.length && board[pos] === 'uwong';
+    }).length;
+  },
+
+  evaluatePositionalControl: (board) => {
+    let score = 0;
+    const criticalPositions = [12, 6, 7, 8, 16, 17, 18, 11, 13, 23];
+
+    for (const pos of criticalPositions) {
+      if (board[pos] === 'uwong') {
+        score += 15;
+      }
+    }
+
+    return score;
+  },
+
+  evaluateMobility: (board, connections) => {
+    let score = 0;
+    
+    for (let i = 0; i < board.length; i++) {
+      if (board[i] === 'uwong' && connections[i]) {
+        const moveOptions = connections[i].filter(pos => board[pos] === null).length;
+        score += moveOptions * 2;
+
+        const safeMovesCount = connections[i].filter(pos => {
+          if (board[pos] !== null) return false;
+          const adjacentUwongs = connections[pos]?.filter(p => board[p] === 'uwong').length || 0;
+          return adjacentUwongs >= 2;
+        }).length;
+
+        score += safeMovesCount * 3;
+      }
+    }
+
+    return score;
+  },
+
+  evaluateExposedPieces: (board, connections, macanPos) => {
+    let penalty = 0;
+
+    // Penalize Uwong pieces that are exposed to capture
+    for (let i = 0; i < board.length; i++) {
+      if (board[i] === 'uwong' && connections[i]) {
+        const adjacentUwongs = connections[i].filter(pos => board[pos] === 'uwong').length;
+        if (adjacentUwongs === 0) {
+          penalty += 10; // Highly exposed
+        } else if (adjacentUwongs === 1) {
+          penalty += 5; // Partially exposed
+        }
+      }
+    }
+
+    return penalty;
+  },
+
+  getValidUwongMoves: (board, connections) => {
+    const moves = [];
+    
+    for (let i = 0; i < board.length; i++) {
+      if (board[i] === 'uwong' && connections[i]) {
+        connections[i].forEach(to => {
+          if (board[to] === null) {
+            moves.push({ from: i, to });
+          }
         });
       }
-      
-      return newBoard;
-    },
-  
-    // Minimax algorithm with alpha-beta pruning
-    minimax: (board, depth, alpha, beta, isMaximizing, uwongTotal, connections, macanPos, macanJump) => {
-      // Terminal conditions
-      if (depth === 0 || uwongTotal < 14 || MacananUAI.getValidMacanMoves(board, macanPos, connections, macanJump).length === 0) {
-        return {
-          score: MacananUAI.evaluateBoard(board, uwongTotal, connections, macanPos)
-        };
-      }
-  
-      if (isMaximizing) {
-        // Uwong's turn (maximizing)
-        let bestScore = -Infinity;
-        let bestMove = null;
-        const moves = MacananUAI.getValidUwongMoves(board, connections);
-  
-        for (const move of moves) {
-          const newBoard = MacananUAI.makeMove(board, move, 'uwong');
-          const result = MacananUAI.minimax(newBoard, depth - 1, alpha, beta, false, uwongTotal, connections, macanPos, macanJump);
-          
-          if (result.score > bestScore) {
-            bestScore = result.score;
-            bestMove = move;
-          }
-          
-          alpha = Math.max(alpha, bestScore);
-          if (beta <= alpha) break;
-        }
-  
-        return { score: bestScore, move: bestMove };
-      } else {
-        // Macan's turn (minimizing)
-        let bestScore = Infinity;
-        let bestMove = null;
-        const moves = MacananUAI.getValidMacanMoves(board, macanPos, connections, macanJump);
-  
-        for (const move of moves) {
-          const newBoard = MacananUAI.makeMove(board, move, 'macan');
-          const newUwongTotal = uwongTotal - (move.captures ? move.captures.length : 0);
-          const result = MacananUAI.minimax(newBoard, depth - 1, alpha, beta, true, newUwongTotal, connections, move.to, macanJump);
-          
-          if (result.score < bestScore) {
-            bestScore = result.score;
-            bestMove = move;
-          }
-          
-          beta = Math.min(beta, bestScore);
-          if (beta <= alpha) break;
-        }
-  
-        return { score: bestScore, move: bestMove };
-      }
-    },
-  
-    // Get the best move for Uwong
-    getBestMove: (board, uwongTotal, connections, macanPos, macanJump) => {
-      const result = MacananUAI.minimax(
-        board,
-        MacananUAI.MAX_DEPTH,
-        -Infinity,
-        Infinity,
-        true,
-        uwongTotal,
-        connections,
-        macanPos,
-        macanJump
-      );
-      
-      return result.move;
     }
-  };
-  
-  export default MacananUAI;
+
+    return moves;
+  },
+
+  makeMove: (board, move, piece) => {
+    const newBoard = [...board];
+    newBoard[move.from] = null;
+    newBoard[move.to] = piece;
+
+    if (move.captures) {
+      move.captures.forEach(pos => {
+        newBoard[pos] = null;
+      });
+    }
+
+    return newBoard;
+  },
+
+  minimax: (board, depth, alpha, beta, isMaximizing, uwongTotal, connections, macanPos, macanJump) => {
+    if (depth === 0 || uwongTotal < MacananUAI.MIN_UWONG_PIECES || 
+        MacananUAI.getValidMacanMoves(board, macanPos, connections, macanJump).length === 0) {
+      return {
+        score: MacananUAI.evaluateBoard(board, uwongTotal, connections, macanPos, macanJump)
+      };
+    }
+
+    if (isMaximizing) {
+      let bestScore = -Infinity;
+      let bestMove = null;
+      const moves = MacananUAI.getValidUwongMoves(board, connections);
+
+      for (const move of moves) {
+        const newBoard = MacananUAI.makeMove(board, move, 'uwong');
+        const result = MacananUAI.minimax(newBoard, depth - 1, alpha, beta, false, uwongTotal, connections, macanPos, macanJump);
+
+        if (result.score > bestScore) {
+          bestScore = result.score;
+          bestMove = move;
+        }
+
+        alpha = Math.max(alpha, bestScore);
+        if (beta <= alpha) break;
+      }
+
+      return { score: bestScore, move: bestMove };
+    } else {
+      let bestScore = Infinity;
+      let bestMove = null;
+      const moves = MacananUAI.getValidMacanMoves(board, macanPos, connections, macanJump);
+
+      for (const move of moves) {
+        const newBoard = MacananUAI.makeMove(board, move, 'macan');
+        const newUwongTotal = uwongTotal - (move.captures ? move.captures.length : 0);
+        const result = MacananUAI.minimax(newBoard, depth - 1, alpha, beta, true, newUwongTotal, connections, move.to, macanJump);
+
+        if (result.score < bestScore) {
+          bestScore = result.score;
+          bestMove = move;
+        }
+
+        beta = Math.min(beta, bestScore);
+        if (beta <= alpha) break;
+      }
+
+      return { score: bestScore, move: bestMove };
+    }
+  },
+
+  getBestMove: (board, uwongTotal, connections, macanPos, macanJump) => {
+    const result = MacananUAI.minimax(
+      board,
+      MacananUAI.MAX_DEPTH,
+      -Infinity,
+      Infinity,
+      true,
+      uwongTotal,
+      connections,
+      macanPos,
+      macanJump
+    );
+
+    return result.move;
+  }
+};
+
+export default MacananUAI;
