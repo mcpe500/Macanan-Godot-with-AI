@@ -1,37 +1,49 @@
-import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
-import { MacananGameProvider } from './components/MacananGameContext';
+import * as React from 'react';
 import { NavigationContainer } from '@react-navigation/native';
-import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import Home from './components/Home';
+import { createStackNavigator } from '@react-navigation/stack';
 import Option from './components/Option';
 import MacananGame from './components/MacananGame';
+import Home from './components/Home';
 import MacananUwongAI from './components/MacananUwongAI';
-import AIvsAI from './components/AIvsAI';
+import useRegisterNavigator from './components/useRegisterNavigator';
 
-const Stack = createNativeStackNavigator();
+// Define TypeScript types for navigation
+export type RootStackParamList = {
+  Home: undefined;
+  Option: undefined;
+  Game: undefined;
+  AIUwong: undefined;
+};
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#F5FCFF',
-  },
-});
+const Stack = createStackNavigator<RootStackParamList>();
 
 const App = () => {
+  // const { register } = useRegisterNavigator(); // You don't need to use register here
+
   return (
     <NavigationContainer>
-      <MacananGameProvider>
-        <View style={styles.container}>
-          <Stack.Navigator initialRouteName="Home">
-            <Stack.Screen name="Home" component={Home} />
-            <Stack.Screen name="Option" component={Option} />
-            <Stack.Screen name="MacananGame" component={MacananGame} />
-            <Stack.Screen name="MacananUwongAI" component={MacananUwongAI} />
-            <Stack.Screen name="AIvsAI" component={AIvsAI} />
-          </Stack.Navigator>
-        </View>
-      </MacananGameProvider>
+      <Stack.Navigator initialRouteName="Home">
+        <Stack.Screen
+          name="Home"
+          component={Home}
+          options={{ title: 'Home Screen' }}
+        />
+        <Stack.Screen
+          name="Option"
+          component={Option}
+          options={{ title: 'Options' }}
+        />
+        <Stack.Screen
+          name="Game"
+          component={MacananGame}
+          options={{ title: 'Macanan Game' }}
+        />
+        <Stack.Screen
+          name="AIUwong"
+          component={MacananUwongAI}
+          options={{ title: 'AI vs Human' }}
+        />
+      </Stack.Navigator>
     </NavigationContainer>
   );
 };

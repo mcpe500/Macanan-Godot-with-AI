@@ -1,24 +1,73 @@
-// MacananGameContext.js
-import { createContext, useContext, useState, useEffect, useRef } from 'react';
+import React, {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  useRef,
+  useCallback,
+  ReactNode,
+} from 'react';
+import { View, LayoutChangeEvent, Platform, StyleSheet } from 'react-native';
+import { Line, Svg } from 'react-native-svg';
+import type { StackNavigationProp } from '@react-navigation/stack';
+import useRegisterNavigator from './useRegisterNavigator';
 
-const MacananGameContext = createContext();
+// Type definitions
+type Player = 'uwong' | 'macan';
+type GameState = 'initial' | 'placing' | 'moving';
+type Position = number | null;
+type NodePositions = Record<number, { x: number; y: number }>;
+type FirstMove = { uwong: boolean; macan: boolean };
 
-export const MacananGameProvider = ({ children }) => {
-  const [board, setBoard] = useState(Array(37).fill(null));
-  const [currentPlayer, setCurrentPlayer] = useState('uwong');
+interface GameContextValue {
+  board: (Player | null)[];
+  currentPlayer: Player;
+  uwongPawnsInHand: number;
+  gameState: GameState;
+  selectedPiece: Position;
+  message: string;
+  win: boolean;
+  winner: Player | null;
+  uwongTotal: number;
+  macanPos: Position;
+  nodePositions: NodePositions;
+  connections: Record<number, number[]>;
+  macanJump: Record<number, Record<number, number[]>>;
+  handleClick: (position: number) => void;
+  handleAIClick: (movePosition: number, currentPosition?: Position) => void;
+  firstMove: FirstMove;
+  renderConnections: () => ReactNode;
+  setSelectedPiece: React.Dispatch<React.SetStateAction<Position>>;
+  boardRef: React.RefObject<View>;
+  restartGame: () => void;
+}
+
+interface GameProviderProps {
+  children: ReactNode;
+  navigation: StackNavigationProp<any>;
+}
+
+const MacananGameContext = createContext<GameContextValue | undefined>(undefined);
+
+export const MacananGameProvider: React.FC<GameProviderProps> = ({ children, navigation }) => {
+  // State initialization
+  const [board, setBoard] = useState<(Player | null)[]>(Array(37).fill(null));
+  const [currentPlayer, setCurrentPlayer] = useState<Player>('uwong');
   const [uwongPawnsInHand, setUwongPawnsInHand] = useState(21);
-  const [gameState, setGameState] = useState('initial');
-  const [selectedPiece, setSelectedPiece] = useState(null);
+  const [gameState, setGameState] = useState<GameState>('initial');
+  const [selectedPiece, setSelectedPiece] = useState<Position>(null);
   const [message, setMessage] = useState('Uwong: Click anywhere to place initial 3x3 formation');
   const [win, setWin] = useState(false);
-  const [winner, setWinner] = useState(null);
+  const [winner, setWinner] = useState<Player | null>(null);
   const [uwongTotal, setUwongTotal] = useState(21);
-  const [macanPos, setMacanPos] = useState(null);
-  const [nodePositions, setNodePositions] = useState({});
-  const boardRef = useRef(null);
-  const [firstMove, setFirstMove] = useState({ uwong: true, macan: false });
+  const [macanPos, setMacanPos] = useState<Position>(null);
+  const [nodePositions, setNodePositions] = useState<NodePositions>({});
+  const boardRef = useRef<View>(null);
+  const nodeRefs = useRef<Record<number, View | null>>({});
+  const [firstMove, setFirstMove] = useState<FirstMove>({ uwong: true, macan: false });
 
-  const connections = {
+  // Static game configurations
+  const connections: Record<number, number[]> = {
     0: [1, 5, 6],
     1: [0, 2, 6],
     2: [1, 3, 6, 7, 8],
@@ -57,8 +106,7 @@ export const MacananGameProvider = ({ children }) => {
     35: [14, 33, 36],
     36: [34, 35]
   };
-
-  const macanJump = {
+  const macanJump: Record<number, Record<number, number[]>> = {
     0: {
       2: [1],
       4: [1, 2, 3],
@@ -295,7 +343,8 @@ export const MacananGameProvider = ({ children }) => {
     }
   };
 
-  const place3x3Formation = (centerPosition) => {
+  // Game logic functions
+  const place3x3Formation = useCallback((centerPosition: number) => {
     const newBoard = [...board];
     const row = Math.floor(centerPosition / 5);
     const col = centerPosition % 5;
@@ -321,13 +370,18 @@ export const MacananGameProvider = ({ children }) => {
     setUwongPawnsInHand(12);
     setMessage('Macan: Place your piece');
     setFirstMove({ ...firstMove, uwong: false });
-  };
+  }, [board, firstMove, setBoard, setCurrentPlayer, setGameState, setUwongPawnsInHand, setMessage, setFirstMove]);
 
-  const isValidMove = (from, to) => {
+  const isValidMove = useCallback((from: number, to: number) => {
     return connections[from]?.includes(to);
-  };
+  }, [connections]);
 
-  const canMacanJump = (from, to) => {
+  const findJumpPath = useCallback((from: number, to: number) => {
+    const listJump = macanJump[from];
+    return listJump?.[to];
+  }, [macanJump]);
+
+  const canMacanJump = useCallback((from: number, to: number) => {
     if (board[to] !== null) return false;
 
     const path = findJumpPath(from, to);
@@ -341,15 +395,11 @@ export const MacananGameProvider = ({ children }) => {
     }
 
     return eat;
-  };
+  }, [board, findJumpPath]);
 
-  const findJumpPath = (from, to) => {
-    const listJump = macanJump[from];
-    const path = listJump[to];
-    return path;
-  };
 
-  const handleClick = (position) => {
+  // Touch handling
+  const handleClick = useCallback((position: number) => {
     if (!win) {
       if (gameState === 'initial') {
         place3x3Formation(position);
@@ -401,9 +451,11 @@ export const MacananGameProvider = ({ children }) => {
 
                 if (canMacanJump(selectedPiece, position)) {
                   const jumpedPos = findJumpPath(selectedPiece, position);
-                  for (const p of jumpedPos) {
-                    newBoard[p] = null;
-                    setUwongTotal(prev => prev - 1);
+                  if (jumpedPos) {
+                    for (const p of jumpedPos) {
+                      newBoard[p] = null;
+                      setUwongTotal(prev => prev - 1);
+                    }
                   }
                 }
 
@@ -435,8 +487,9 @@ export const MacananGameProvider = ({ children }) => {
         }
       }
     }
-  };
-  const handleAIClick = (movePosition, currentPosition) => {
+  }, [win, gameState, currentPlayer, selectedPiece, board, place3x3Formation, setMacanPos, setBoard, setCurrentPlayer, setGameState, setUwongPawnsInHand, setMessage, setFirstMove, isValidMove, canMacanJump, findJumpPath, setSelectedPiece, setUwongTotal]);
+
+  const handleAIClick = useCallback((movePosition: number, currentPosition?: Position) => {
     if (!win) {
       if (gameState === 'initial') {
         place3x3Formation(movePosition);
@@ -497,16 +550,20 @@ export const MacananGameProvider = ({ children }) => {
           }
         } else {
           if (currentPlayer === 'macan') {
-            if ((isValidMove(currentPosition, movePosition) || canMacanJump(currentPosition, movePosition))) {
+            if ((isValidMove(currentPosition ?? -1, movePosition) || canMacanJump(currentPosition ?? -1, movePosition))) {
               const newBoard = [...board];
-              newBoard[currentPosition] = null;
+              if (currentPosition != null) {
+                newBoard[currentPosition] = null;
+              }
               newBoard[movePosition] = 'macan';
 
-              if (canMacanJump(currentPosition, movePosition)) {
-                const jumpedPos = findJumpPath(currentPosition, movePosition);
-                for (const p of jumpedPos) {
-                  newBoard[p] = null;
-                  setUwongTotal(prev => prev - 1);
+              if (canMacanJump(currentPosition ?? -1, movePosition)) {
+                const jumpedPos = findJumpPath(currentPosition ?? -1, movePosition);
+                if (jumpedPos) {
+                  for (const p of jumpedPos) {
+                    newBoard[p] = null;
+                    setUwongTotal(prev => prev - 1);
+                  }
                 }
               }
 
@@ -523,9 +580,11 @@ export const MacananGameProvider = ({ children }) => {
               setSelectedPiece(null);
             }
           } else if (currentPlayer === 'uwong') {
-            if (isValidMove(currentPosition, movePosition)) {
+            if (isValidMove(currentPosition ?? -1, movePosition)) {
               const newBoard = [...board];
-              newBoard[currentPosition] = null;
+              if (currentPosition != null) {
+                newBoard[currentPosition] = null;
+              }
               newBoard[movePosition] = 'uwong';
               setBoard(newBoard);
               setCurrentPlayer('macan');
@@ -537,10 +596,65 @@ export const MacananGameProvider = ({ children }) => {
         }
       }
     }
-  };
-  // Win condition check effect
+  }, [win, gameState, currentPlayer, board, place3x3Formation, setMacanPos, setBoard, setCurrentPlayer, setGameState, setUwongPawnsInHand, setMessage, setFirstMove, isValidMove, canMacanJump, findJumpPath, setSelectedPiece, setUwongTotal]);
+
+  // Node position calculation
+  const calculateNodePositions = useCallback(() => {
+    const positions: NodePositions = {};
+    const measurePromises: Promise<void>[] = [];
+
+    Object.keys(nodeRefs.current).forEach((key) => {
+      const node = nodeRefs.current[Number(key)];
+      if (node && node.measure) {
+        const promise = new Promise<void>((resolve) => {
+          node.measure((x, y, width, height, pageX, pageY) => {
+            positions[Number(key)] = {
+              x: pageX + width / 2,
+              y: pageY + height / 2
+            };
+            resolve();
+          });
+        });
+        measurePromises.push(promise);
+      }
+    });
+
+    Promise.all(measurePromises).then(() => {
+      setNodePositions(positions);
+    });
+  }, [nodeRefs, setNodePositions]);
+
+  // Connection rendering
+  const renderConnections = useCallback(() => {
+    const lines: ReactNode[] = [];
+
+    Object.entries(connections).forEach(([from, tos]) => {
+      tos.forEach((to) => {
+        const fromPos = nodePositions[Number(from)];
+        const toPos = nodePositions[to];
+
+        if (fromPos && toPos && Number(from) !== to) {
+          lines.push(
+            <Line
+              key={`${from}-${to}`}
+              x1={fromPos.x}
+              y1={fromPos.y}
+              x2={toPos.x}
+              y2={toPos.y}
+              stroke="#CBD5E0"
+              strokeWidth={2}
+            />
+          );
+        }
+      });
+    });
+
+    return <Svg style={StyleSheet.absoluteFill}>{lines}</Svg>;
+  }, [nodePositions, connections]);
+
+  // Win condition effect
   useEffect(() => {
-    const canMacanMove = (from) => {
+    const canMacanMove = (from: number) => {
       const walk = connections[from];
       const jump = macanJump[from];
 
@@ -585,98 +699,97 @@ export const MacananGameProvider = ({ children }) => {
         setMessage("Uwong Win!");
       }
     }
-  }, [currentPlayer, uwongTotal]);
+  }, [currentPlayer, uwongTotal, macanPos, connections, macanJump, board, setWin, setWinner, setMessage]);
 
-  // Node positions calculation effect
+  // Node position update effect
   useEffect(() => {
-    const calculateNodePositions = () => {
-      if (boardRef.current) {
-        const positions = {};
-        const nodes = boardRef.current.getElementsByTagName('button');
-
-        requestAnimationFrame(() => {
-          Array.from(nodes).forEach((node) => {
-            const rect = node.getBoundingClientRect();
-            const boardRect = boardRef.current.getBoundingClientRect();
-            positions[node.dataset.position] = {
-              x: rect.left - boardRect.left + rect.width / 2,
-              y: rect.top - boardRect.top + rect.height / 2
-            };
-          });
-
-          setNodePositions(positions);
-        });
-      }
-    };
-
     calculateNodePositions();
-    window.addEventListener('resize', calculateNodePositions);
-    document.addEventListener('visibilitychange', calculateNodePositions);
-    const timeout = setTimeout(calculateNodePositions, 100);
+    const resizeListener = navigation.addListener('focus', calculateNodePositions);
 
     return () => {
-      window.removeEventListener('resize', calculateNodePositions);
-      document.removeEventListener('visibilitychange', calculateNodePositions);
-      clearTimeout(timeout);
+      resizeListener();
     };
-  }, [board]);
+  }, [navigation, calculateNodePositions, board]);
 
-  const contextValue = {
+  const restartGame = useCallback(() => {
+    setBoard(Array(37).fill(null));
+    setCurrentPlayer('uwong');
+    setUwongPawnsInHand(21);
+    setGameState('initial');
+    setSelectedPiece(null);
+    setMessage('Uwong: Click anywhere to place initial 3x3 formation');
+    setWin(false);
+    setWinner(null);
+    setUwongTotal(21);
+    setMacanPos(null);
+    setNodePositions({});
+    setFirstMove({ uwong: true, macan: false });
+  }, [setBoard, setCurrentPlayer, setUwongPawnsInHand, setGameState, setSelectedPiece, setMessage, setWin, setWinner, setUwongTotal, setMacanPos, setNodePositions, setFirstMove]);
+
+  // Context value
+  const contextValue: GameContextValue = {
     board,
     currentPlayer,
     uwongPawnsInHand,
     gameState,
     selectedPiece,
-    setSelectedPiece,
     message,
     win,
     winner,
     uwongTotal,
     macanPos,
     nodePositions,
-    boardRef,
     connections,
     macanJump,
     handleClick,
     handleAIClick,
     firstMove,
-    renderConnections: () => {
-      const lines = [];
-
-      Object.entries(connections).forEach(([from, tos]) => {
-        tos.forEach((to) => {
-          // Only render if both positions exist and are different
-          if (nodePositions[from] && nodePositions[to] && from !== to) {
-            lines.push(
-              <line
-                key={`${from}-${to}`}
-                x1={nodePositions[from].x}
-                y1={nodePositions[from].y}
-                x2={nodePositions[to].x}
-                y2={nodePositions[to].y}
-                stroke="#CBD5E0"
-                strokeWidth="2"
-              />
-            );
-          }
-        });
-      });
-
-      return lines;
-    }
+    renderConnections,
+    setSelectedPiece,
+    boardRef,
+    restartGame,
   };
 
   return (
     <MacananGameContext.Provider value={contextValue}>
       {children}
+      {renderConnections()}
     </MacananGameContext.Provider>
   );
 };
 
-export const useMacananGame = () => {
+export const useMacananGame = (): GameContextValue => {
   const context = useContext(MacananGameContext);
   if (!context) {
     throw new Error('useMacananGame must be used within a MacananGameProvider');
   }
   return context;
 };
+
+// StyleSheet for basic layout
+const styles = StyleSheet.create({
+  boardContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  node: {
+    position: 'absolute',
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    justifyContent: 'center',
+    alignItems: 'center',
+    ...Platform.select({
+      ios: {
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.25,
+        shadowRadius: 3.84,
+      },
+      android: {
+        elevation: 5,
+      },
+    }),
+  },
+});
