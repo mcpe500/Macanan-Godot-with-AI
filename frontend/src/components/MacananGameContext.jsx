@@ -4,19 +4,19 @@ import { createContext, useContext, useState, useEffect, useRef } from 'react';
 const MacananGameContext = createContext();
 
 export const MacananGameProvider = ({ children }) => {
-  const [board, setBoard] = useState(Array(37).fill(null));
+  const [board, setBoard] = useState(Array(37).fill(null)); // butuh di pass baru ke minimax
   const [currentPlayer, setCurrentPlayer] = useState('uwong');
-  const [uwongPawnsInHand, setUwongPawnsInHand] = useState(21);
-  const [gameState, setGameState] = useState('initial');
-  const [selectedPiece, setSelectedPiece] = useState(null);
+  const [uwongPawnsInHand, setUwongPawnsInHand] = useState(21); // butuh di pass baru ke minimax
+  const [gameState, setGameState] = useState('initial'); // butuh di pass baru ke minimax
+  const [selectedPiece, setSelectedPiece] = useState(null); 
   const [message, setMessage] = useState('Uwong: Click anywhere to place initial 3x3 formation');
   const [win, setWin] = useState(false);
   const [winner, setWinner] = useState(null);
-  const [uwongTotal, setUwongTotal] = useState(21);
-  const [macanPos, setMacanPos] = useState(null);
-  const [nodePositions, setNodePositions] = useState({});
-  const boardRef = useRef(null);
-  const [firstMove, setFirstMove] = useState({ uwong: true, macan: false });
+  const [uwongTotal, setUwongTotal] = useState(21); // butuh di pass baru ke minimax
+  const [macanPos, setMacanPos] = useState(null); // setelah dipikir pikir ini buat apa kalau macan pos disimpan di board juga?
+  const [nodePositions, setNodePositions] = useState({}); // ini buat rendering
+  const boardRef = useRef(null); // ini buat rendering
+  const [firstMove, setFirstMove] = useState({ uwong: true, macan: false }); // buat apa ini anjir?
 
   const connections = {
     0: [1, 5, 6],
@@ -349,6 +349,83 @@ export const MacananGameProvider = ({ children }) => {
     return path;
   };
 
+  const canMacanMoveCounter = (from) => {
+    let ctr = 0;
+    ctr += canMacanWalkCounter(from);
+    ctr += canMacanJumpCounter(from);
+
+    // const walk = connections[from];
+    // const jump = macanJump[from];
+
+    // // for checking the current node to neighbour node
+    // for (const w of walk) {
+    //   if (board[w] !== "uwong") {
+    //     ctr += 1;
+    //   }
+    // }
+
+    // // for checking all the jump available for macan
+    // for (const key in jump) {
+    //   if (Object.prototype.hasOwnProperty.call(jump, key)) {
+    //     let value = jump[key];
+    //     let adaMusuh = true;
+
+    //     for (const wong of value) {
+    //       if (board[wong] != "uwong") {
+    //         adaMusuh = false;
+    //       }
+    //     }
+
+    //     if (adaMusuh) {
+    //       if (board[key] != "uwong") {
+    //         ctr += 1;
+    //       }
+    //     }
+    //   }
+    // }
+
+    return ctr;
+  };
+
+  const canMacanWalkCounter = (from) => {
+    let ctr = 0;
+    const walk = connections[from];
+
+    // for checking the current node to neighbour node
+    for (const w of walk) {
+      if (board[w] !== "uwong") {
+        ctr += 1;
+      }
+    }
+
+    return ctr;
+  }
+
+  const canMacanJumpCounter = (from) => {
+    const jump = macanJump[from];
+
+    for (const key in jump) {
+      if (Object.prototype.hasOwnProperty.call(jump, key)) {
+        let value = jump[key];
+        let adaMusuh = true;
+
+        for (const wong of value) {
+          if (board[wong] != "uwong") {
+            adaMusuh = false;
+          }
+        }
+
+        if (adaMusuh) {
+          if (board[key] != "uwong") {
+            ctr += 1;
+          }
+        }
+      }
+    }
+
+    return ctr;
+  }
+
   const handleClick = (position) => {
     if (!win) {
       if (gameState === 'initial') {
@@ -436,6 +513,7 @@ export const MacananGameProvider = ({ children }) => {
       }
     }
   };
+
   const handleAIClick = (movePosition, currentPosition) => {
     if (!win) {
       if (gameState === 'initial') {
@@ -538,18 +616,91 @@ export const MacananGameProvider = ({ children }) => {
       }
     }
   };
+
+  const minimax = (depth, maximizingPlayer, nextBoard, nextUwongPawnsInHand, nextGameState, nextUwongTotal) => {
+    // hmm ambil posisi currentMacan dari nextBoard buat nanti di pake
+    const macanPosNow = nextBoard.findIndex(pos => pos === "macan")
+
+    // berikan pengecekan apakah gamenya sudah game over atau belum
+    let gameOver = false
+
+    if (nextUwongTotal < 14 ){
+      gameOver = true
+    }
+
+    if(canMacanMoveCounter(macanPosNow) == 0){
+      gameOver = true
+    }
+
+    if (depth === 0 || gameOver) {
+      // nanti bagi antara macan atau uwong evaluasi gimana
+      // actually kalau kupikir tinggal * -1 jadi kebalik
+      // tapi let see lah
+
+      // semua evaluasi ini berdasarkan player macan
+      // untuk selanjutnya bisa diatur sendiri
+      let nilai = 0;
+
+      // oke sekarang pembagian buat nilainya
+      // list dibuat sesuai urutan
+      // oh kalau jumlah pionnya sudah kurang dari 14 berarti auto win
+      // tapi kalau macan sudah gak bisa gerak artinya possible movenya 0 auto loss
+      // pertama kita lihat jumlah dari pion uwongnya (harusnya ini termasuk kalau makan karena kalau berkurang ya pasti dimakan)
+      // next ada berapa banyak possible move dari macan (ini supaya macannya gak goblok goblok amat dan bisa nemuin jalannya)
+      // hmm apalagi ya yg bisa di evaluasi oh wait lets make it interesting
+      // oke setelah dipikir pikir buat jalan kita bisa bedain antara jalan yg jump dan yg walk biasa jadi bisa dibikin prioritas banyakin possible jump
+      // eh aneh deng soalnya ini kan posisi diakhirnya ya oke gak mungkin
+      // serasa kaya o1 ya tapi yah buat jelas lah minimaxnya gimana
+      nilai -= nextUwongTotal * 10;
+
+      nilai += canMacanMoveCounter(macanPosNow) * 4;
+
+      // kondisi menang sama kalah ditaruh paling akhir supaya ya kalau kalah ya segitu kalau menang ya segitu gak keefek
+      if (nextUwongTotal < 14 ){
+        nilai = 10000;
+      }
+
+      if(canMacanMoveCounter(macanPosNow) == 0){
+        nilai = -10000;
+      }
+
+      return nilai;
+    }
+
+    if(currentPlayer == "macan"){
+      if(maximizingPlayer){
+        let maxEval = -Infinity
+        // setiap kemungkinan macan (current) bisa gerak
+        // terus di max
+
+        return maxEval;
+      }
+      else{
+        let minEval = Infinity
+        // setiap kemungkinan uwong (musuh) bisa gerak
+        // terus di min
+
+        return minEval;
+      }
+    }
+  }
+  
+
   // Win condition check effect
   useEffect(() => {
+    // check all the move macan possible to take
     const canMacanMove = (from) => {
       const walk = connections[from];
       const jump = macanJump[from];
 
+      // for checking the current node to neighbour node
       for (const w of walk) {
         if (board[w] !== "uwong") {
           return true;
         }
       }
 
+      // for checking all the jump available for macan
       for (const key in jump) {
         if (Object.prototype.hasOwnProperty.call(jump, key)) {
           let value = jump[key];
