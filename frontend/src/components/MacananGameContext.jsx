@@ -315,7 +315,7 @@ export const MacananGameProvider = ({children}) => {
 
     positions.flat().forEach(pos => {
       newBoard[pos] = 'uwong';
-      setGameState((prev) => prev - 1);
+      setUwongPawnsInHand((prev) => prev - 1);
     });
 
     setBoard(newBoard);
@@ -806,6 +806,7 @@ export const MacananGameProvider = ({children}) => {
           const validCenter = [6, 7, 8, 11, 12, 13, 16, 17, 18];
           const centerPosition = validCenter[Math.floor(Math.random() * validCenter.length)];
           place3x3Formation(centerPosition); // Center position
+          setUwongPawnsInHand(uwongPawnsInHand - 9);
           console.log('pawns in hand', uwongPawnsInHand);
         } else if (gameState === 'moving') {
           // Handle movement
@@ -823,25 +824,19 @@ export const MacananGameProvider = ({children}) => {
           setBoard(newBoard);
           setMacanPos(result.move.position);
 
-
-          if (uwongPawnsInHand == 0) {
-            setCurrentPlayer('uwong');
-            setMessage('Uwong: Move existing ones');
-            setGameState('moving')
-          } else {
-            setCurrentPlayer('uwong');
-            setMessage('Uwong: Place remaining pawns');
-            setGameState('placing')
-          }
+          setCurrentPlayer('macan');
+          setGameState('moving');
+          setMessage('Macan: Move or eat Uwong piece(s)');
 
         } else if (gameState === 'placing') {
           // Handle initial placement
           const newBoard = [...board];
           newBoard[result.move.position] = 'uwong';
           setBoard(newBoard);
-          setMacanPos(result.move.position);
+          setUwongPawnsInHand(prev => prev - 1);
           setCurrentPlayer('macan');
-          setMessage('Uwong: Place remaining pawns');
+          setGameState('moving');
+          setMessage('Macan: Move or eat Uwong piece(s)');
         }
       }
     }
