@@ -3,60 +3,36 @@ import { useMacananGame } from './MacananGameContext';
 import { getBestMove } from '../utils/generic';
 
 const AIVsAIGame = () => {
+
   const {
     board,
     currentPlayer,
     uwongPawnsInHand,
-    gameState,
-    selectedPiece,
-    setSelectedPiece,
     message,
     win,
     winner,
     uwongTotal,
-    macanPos,
     nodePositions,
     boardRef,
-    connections,
-    macanJump,
     handleClick,
     renderConnections,
-    firstMove,
-    handleAIClick
+    handleAIClick,
+    goBack,
+    restartGame
   } = useMacananGame();
-  const [isRunning, setIsRunning] = useState(true);
 
+  // Trigger AI move when it's Macan's turn
   useEffect(() => {
-    if (isRunning && !win && (currentPlayer === 'macan' || currentPlayer === 'uwong')) {
-      let aiMove;
-      if(firstMove.uwong && currentPlayer === 'uwong'){
-        aiMove = [null, 12];
-      } else {
-        aiMove = getBestMove(board, currentPlayer, connections, macanPos);
-      }
-      if (aiMove) {
-        handleAIClick(aiMove[1], aiMove[0]);
-      }
-    }
-  }, [isRunning, board, currentPlayer, win, handleAIClick, handleClick, connections, macanPos, firstMove]);
+    if (!win) {
+      const delay = 35; // Adjust the delay as needed (in milliseconds)
+      const timeoutId = setTimeout(() => {
+        console.log("called");
+        handleAIClick();
+      }, delay);
 
-  console.log({
-    board,
-    currentPlayer,
-    uwongPawnsInHand,
-    gameState,
-    selectedPiece,
-    message,
-    win,
-    winner,
-    uwongTotal,
-    macanPos,
-    nodePositions,
-    boardRef,
-    connections,
-    macanJump,
-    handleClick,
-  })
+      return () => clearTimeout(timeoutId); // Cleanup timeout on unmount or dependency change
+    }
+  }, [currentPlayer, win, handleAIClick]);
 
   return (
     <div className="min-h-screen bg-gray-100 flex justify-center items-center">
@@ -73,10 +49,10 @@ const AIVsAIGame = () => {
                 <button
                   key={index}
                   data-position={index}
-                  className={`w-12 h-12 rounded-full bg-gray-200 relative z-10 ${
+                  className={`w-12 h-12 rounded-full relative z-10 ${
                     board[index] === 'uwong' ? 'bg-green-500' :
-                    board[index] === 'macan' ? 'bg-red-500' :
-                    'bg-gray-200'
+                      board[index] === 'macan' ? 'bg-red-500' :
+                        'bg-gray-200'
                   }`}
                   onClick={() => handleClick(index)}
                 >{index}</button>
@@ -87,10 +63,10 @@ const AIVsAIGame = () => {
                 <button
                   key={index}
                   data-position={index}
-                  className={`w-12 h-12 rounded-full bg-gray-200 relative z-10 ${
+                  className={`w-12 h-12 rounded-full relative z-10 ${
                     board[index] === 'uwong' ? 'bg-green-500' :
-                    board[index] === 'macan' ? 'bg-red-500' :
-                    'bg-gray-200'
+                      board[index] === 'macan' ? 'bg-red-500' :
+                        'bg-gray-200'
                   }`}
                   onClick={() => handleClick(index)}
                 >{index}</button>
@@ -103,10 +79,10 @@ const AIVsAIGame = () => {
                 <button
                   key={index}
                   data-position={index}
-                  className={`w-12 h-12 rounded-full bg-gray-200 relative z-10 ${
+                  className={`w-12 h-12 rounded-full relative z-10 ${
                     board[index] === 'uwong' ? 'bg-green-500' :
-                    board[index] === 'macan' ? 'bg-red-500' :
-                    'bg-gray-200'
+                      board[index] === 'macan' ? 'bg-red-500' :
+                        'bg-gray-200'
                   }`}
                   onClick={() => handleClick(index)}
                 >{index}</button>
@@ -119,10 +95,10 @@ const AIVsAIGame = () => {
                 <button
                   key={index}
                   data-position={index}
-                  className={`w-12 h-12 rounded-full bg-gray-200 relative z-10 ${
+                  className={`w-12 h-12 rounded-full relative z-10 ${
                     board[index] === 'uwong' ? 'bg-green-500' :
-                    board[index] === 'macan' ? 'bg-red-500' :
-                    'bg-gray-200'
+                      board[index] === 'macan' ? 'bg-red-500' :
+                        'bg-gray-200'
                   }`}
                   onClick={() => handleClick(index)}
                 >{index}</button>
@@ -133,10 +109,10 @@ const AIVsAIGame = () => {
                 <button
                   key={index}
                   data-position={index}
-                  className={`w-12 h-12 rounded-full bg-gray-200 relative z-10 ${
+                  className={`w-12 h-12 rounded-full relative z-10 ${
                     board[index] === 'uwong' ? 'bg-green-500' :
-                    board[index] === 'macan' ? 'bg-red-500' :
-                    'bg-gray-200'
+                      board[index] === 'macan' ? 'bg-red-500' :
+                        'bg-gray-200'
                   }`}
                   onClick={() => handleClick(index)}
                 >{index}</button>
@@ -149,9 +125,22 @@ const AIVsAIGame = () => {
           <div className="mt-2">
             <div className="text-sm">Total Uwong pawns: {uwongTotal}</div>
           </div>
-          <button onClick={() => setIsRunning(!isRunning)}>
-            {isRunning ? 'Stop' : 'Start'}
-          </button>
+          {win && 
+          <div className="flex gap-4">
+            <button 
+              onClick={goBack}
+              className="bg-blue-600 hover:bg-blue-700 text-white text-lg px-8 py-3 rounded-lg shadow-md transition duration-200"
+            >
+              Go Back
+            </button>
+            <button 
+              onClick={restartGame}
+              className="bg-green-600 hover:bg-green-700 text-white text-lg px-8 py-3 rounded-lg shadow-md transition duration-200"
+            >
+              Restart
+            </button>
+          </div>
+        }
         </div>
       </div>
     </div>
