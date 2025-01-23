@@ -1,6 +1,6 @@
 // MacananGameContext.jsx
 import {createContext, useContext, useState, useEffect, useRef} from 'react';
-import {useNavigate} from 'react-router-dom';
+import {useLocation, useNavigate} from 'react-router-dom';
 
 
 const MacananGameContext = createContext();
@@ -20,6 +20,8 @@ export const MacananGameProvider = ({children}) => {
   const [nodePositions, setNodePositions] = useState({});
   const boardRef = useRef(null);
   const [firstMove, setFirstMove] = useState({uwong: true, macan: false});
+  const location = useLocation(); 
+
 
 
   const connections = {
@@ -1018,6 +1020,11 @@ export const MacananGameProvider = ({children}) => {
     restartGame,
     goBack
   };
+
+  useEffect(() => {
+    restartGame();
+  }, [location]);
+
 
   return (
     <MacananGameContext.Provider value={contextValue}>
