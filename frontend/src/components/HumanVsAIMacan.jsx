@@ -15,7 +15,9 @@ const HumanVsAIMacan = () => {
     boardRef,
     handleClick,
     renderConnections,
-    handleAIClick
+    handleAIClick,
+    goBack,
+    restartGame
   } = useMacananGame();
 
   // Trigger AI move when it's Macan's turn
@@ -117,6 +119,22 @@ const HumanVsAIMacan = () => {
           <div className="mt-2">
             <div className="text-sm">Total Uwong pawns: {uwongTotal}</div>
           </div>
+          {win && 
+          <div className="flex gap-4">
+            <button 
+              onClick={goBack}
+              className="bg-blue-600 hover:bg-blue-700 text-white text-lg px-8 py-3 rounded-lg shadow-md transition duration-200"
+            >
+              Go Back
+            </button>
+            <button 
+              onClick={restartGame}
+              className="bg-green-600 hover:bg-green-700 text-white text-lg px-8 py-3 rounded-lg shadow-md transition duration-200"
+            >
+              Restart
+            </button>
+          </div>
+        }
         </div>
       </div>
     </div>
