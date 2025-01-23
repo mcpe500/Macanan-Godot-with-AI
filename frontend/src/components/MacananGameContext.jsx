@@ -1,9 +1,12 @@
 // MacananGameContext.jsx
 import {createContext, useContext, useState, useEffect, useRef} from 'react';
+import {useNavigate} from 'react-router-dom';
+
 
 const MacananGameContext = createContext();
 
 export const MacananGameProvider = ({children}) => {
+  const navigate = useNavigate();
   const [board, setBoard] = useState(Array(37).fill(null));
   const [currentPlayer, setCurrentPlayer] = useState('uwong');
   const [uwongPawnsInHand, setUwongPawnsInHand] = useState(21);
@@ -315,7 +318,7 @@ export const MacananGameProvider = ({children}) => {
 
     positions.flat().forEach(pos => {
       newBoard[pos] = 'uwong';
-      setGameState((prev) => prev - 1);
+      setUwongPawnsInHand((prev) => prev - 1);
     });
 
     setBoard(newBoard);
@@ -813,6 +816,8 @@ export const MacananGameProvider = ({children}) => {
           newBoard[result.move.position] = 'uwong';
 
           setBoard(newBoard);
+          setMacanPos(result.move.position);
+
           setCurrentPlayer('macan');
           setGameState('moving');
           setMessage('Macan: Move or eat Uwong piece(s)');
@@ -928,6 +933,65 @@ export const MacananGameProvider = ({children}) => {
     };
   }, [board, boardRef]); // Add boardRef to dependency array
 
+  const goBack = () => {
+    // Add navigation logic here if using React Router
+    // For now, just reset to initial state
+    setBoard(Array(37).fill(null));
+    setCurrentPlayer('uwong');
+    setUwongPawnsInHand(21);
+    setGameState('initial');
+    setSelectedPiece(null);
+    setMessage('Uwong: Click anywhere to place initial 3x3 formation');
+    setWin(false);
+    setWinner(null);
+    setUwongTotal(21);
+    setMacanPos(null);
+    setFirstMove({uwong: true, macan: false});
+    navigate(-1);
+  };
+
+  const restartGame = () => {
+    setBoard(Array(37).fill(null));
+    setCurrentPlayer('uwong');
+    setUwongPawnsInHand(21);
+    setGameState('initial');
+    setSelectedPiece(null);
+    setMessage('Uwong: Click anywhere to place initial 3x3 formation');
+    setWin(false);
+    setWinner(null);
+    setUwongTotal(21);
+    setMacanPos(null);
+    setFirstMove({uwong: true, macan: false});
+  };
+
+
+  const renderConnections = () => {
+    const lines = [];
+
+    Object.entries(connections).forEach(([from, tos]) => {
+      if (tos) { // Check if tos is defined
+        tos.forEach((to) => {
+          // Only render if both positions exist and are different
+          if (nodePositions[from] && nodePositions[to] && from !== to) {
+            lines.push(
+              <line
+                key={`${from}-${to}`}
+                x1={nodePositions[from].x}
+                y1={nodePositions[from].y}
+                x2={nodePositions[to].x}
+                y2={nodePositions[to].y}
+                stroke="#CBD5E0"
+                strokeWidth="2"
+              />
+            );
+          }
+        });
+      }
+    });
+
+    return lines;
+  };
+
   const contextValue = {
     board,
     currentPlayer,
@@ -948,32 +1012,9 @@ export const MacananGameProvider = ({children}) => {
     handleAIClick,
     firstMove,
     setCurrentPlayer,
-    renderConnections: () => {
-      const lines = [];
-
-      Object.entries(connections).forEach(([from, tos]) => {
-        if (tos) { // Check if tos is defined
-          tos.forEach((to) => {
-            // Only render if both positions exist and are different
-            if (nodePositions[from] && nodePositions[to] && from !== to) {
-              lines.push(
-                <line
-                  key={`${from}-${to}`}
-                  x1={nodePositions[from].x}
-                  y1={nodePositions[from].y}
-                  x2={nodePositions[to].x}
-                  y2={nodePositions[to].y}
-                  stroke="#CBD5E0"
-                  strokeWidth="2"
-                />
-              );
-            }
-          });
-        }
-      });
-
-      return lines;
-    }
+    renderConnections,
+    restartGame,
+    goBack
   };
 
   return (
