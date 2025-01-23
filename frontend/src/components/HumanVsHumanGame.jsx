@@ -8,7 +8,8 @@ const HumanVsHumanGame = () => {
     uwongTotal,
     boardRef,
     handleClick,
-    renderConnections
+    renderConnections,
+    win
   } = useMacananGame();
   console.log({
     board,
