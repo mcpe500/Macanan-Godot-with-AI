@@ -1,9 +1,12 @@
 // MacananGameContext.jsx
-import {createContext, useContext, useState, useEffect, useRef} from 'react';
+import { createContext, useContext, useState, useEffect, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
+
 
 const MacananGameContext = createContext();
 
-export const MacananGameProvider = ({children}) => {
+export const MacananGameProvider = ({ children }) => {
+  const navigate = useNavigate();
   const [board, setBoard] = useState(Array(37).fill(null));
   const [currentPlayer, setCurrentPlayer] = useState('uwong');
   const [uwongPawnsInHand, setUwongPawnsInHand] = useState(21);
@@ -16,7 +19,7 @@ export const MacananGameProvider = ({children}) => {
   const [macanPos, setMacanPos] = useState(null);
   const [nodePositions, setNodePositions] = useState({});
   const boardRef = useRef(null);
-  const [firstMove, setFirstMove] = useState({uwong: true, macan: false});
+  const [firstMove, setFirstMove] = useState({ uwong: true, macan: false });
 
 
   const connections = {
@@ -322,7 +325,7 @@ export const MacananGameProvider = ({children}) => {
     setCurrentPlayer('macan');
     setGameState('placing');
     setMessage('Macan: Place your piece');
-    setFirstMove({...firstMove, uwong: false});
+    setFirstMove({ ...firstMove, uwong: false });
   };
 
   const isValidMove = (from, to) => {
@@ -436,7 +439,7 @@ export const MacananGameProvider = ({children}) => {
               setGameState('moving');
               setMessage('Uwong: Move existing ones');
             }
-            setFirstMove({...firstMove, macan: false});
+            setFirstMove({ ...firstMove, macan: false });
           } else {
             setMessage("Macan: Choose an empty place");
           }
@@ -566,7 +569,7 @@ export const MacananGameProvider = ({children}) => {
       // Generate all empty positions for placing pawns
       board.forEach((cell, index) => {
         if (cell === null) {
-          moves.push({position: index});
+          moves.push({ position: index });
         }
       });
     } else if (gameState === 'moving') {
@@ -576,7 +579,7 @@ export const MacananGameProvider = ({children}) => {
           if (connections[index]) { // Check if connections[index] is defined
             connections[index].forEach(neighbor => {
               if (board[neighbor] === null) {
-                moves.push({from: index, to: neighbor});
+                moves.push({ from: index, to: neighbor });
               }
             });
           }
@@ -585,7 +588,7 @@ export const MacananGameProvider = ({children}) => {
     } else if (gameState === "initial") {
       const idxtaruh = [6, 7, 8, 11, 12, 13, 16, 17, 18]
       idxtaruh.forEach((value) => {
-        moves.push({position: value})
+        moves.push({ position: value })
       });
     }
 
@@ -627,11 +630,11 @@ export const MacananGameProvider = ({children}) => {
       if (winner === 'macan') score = 10000 - depth; // Prefer faster wins
       if (winner === 'uwong') score = -10000 + depth; // Prefer slower losses
 
-      return {score};
+      return { score };
     }
 
     if (maximizingPlayer) {
-      let maxEval = {score: -Infinity};
+      let maxEval = { score: -Infinity };
       let moves = null
 
       if (macanPosNow == -1) {
@@ -679,7 +682,7 @@ export const MacananGameProvider = ({children}) => {
         );
 
         if (evaluation.score > maxEval.score) {
-          maxEval = {score: evaluation.score, move};
+          maxEval = { score: evaluation.score, move };
         }
 
         alpha = Math.max(alpha, evaluation.score);
@@ -688,7 +691,7 @@ export const MacananGameProvider = ({children}) => {
 
       return maxEval;
     } else {
-      let minEval = {score: Infinity};
+      let minEval = { score: Infinity };
       const moves = generateUwongMoves(nextBoard, nextUwongPawnsInHand, nextGameState);
 
       console.log(moves);
@@ -723,7 +726,7 @@ export const MacananGameProvider = ({children}) => {
         );
 
         if (evaluation.score < minEval.score) {
-          minEval = {score: evaluation.score, move};
+          minEval = { score: evaluation.score, move };
         }
 
         beta = Math.min(beta, evaluation.score);
@@ -935,6 +938,37 @@ export const MacananGameProvider = ({children}) => {
     };
   }, [board, boardRef]); // Add boardRef to dependency array
 
+  const goBack = () => {
+    // Add navigation logic here if using React Router
+    // For now, just reset to initial state
+    setBoard(Array(37).fill(null));
+    setCurrentPlayer('uwong');
+    setUwongPawnsInHand(21);
+    setGameState('initial');
+    setSelectedPiece(null);
+    setMessage('Uwong: Click anywhere to place initial 3x3 formation');
+    setWin(false);
+    setWinner(null);
+    setUwongTotal(21);
+    setMacanPos(null);
+    setFirstMove({ uwong: true, macan: false });
+    navigate(-1);
+  };
+
+  const restartGame = () => {
+    setBoard(Array(37).fill(null));
+    setCurrentPlayer('uwong');
+    setUwongPawnsInHand(21);
+    setGameState('initial');
+    setSelectedPiece(null);
+    setMessage('Uwong: Click anywhere to place initial 3x3 formation');
+    setWin(false);
+    setWinner(null);
+    setUwongTotal(21);
+    setMacanPos(null);
+    setFirstMove({ uwong: true, macan: false });
+  };
+
   const contextValue = {
     board,
     currentPlayer,
@@ -980,7 +1014,9 @@ export const MacananGameProvider = ({children}) => {
       });
 
       return lines;
-    }
+    },
+    restartGame,
+    goBack
   };
 
   return (

@@ -9,7 +9,9 @@ const HumanVsHumanGame = () => {
     boardRef,
     handleClick,
     renderConnections,
-    win
+    win,
+    goBack,
+    restartGame
   } = useMacananGame();
   console.log({
     board,
