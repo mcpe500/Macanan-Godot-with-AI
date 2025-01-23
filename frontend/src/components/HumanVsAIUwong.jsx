@@ -1,40 +1,34 @@
 import {useEffect, useRef, useState} from 'react';
 import {useNavigate} from 'react-router';
 import MacananUAI from './MacananUAI';
+import {useMacananGame} from "./MacananGameContext.jsx";
 
 const HumanVsAIUwong = () => {
-  const [board, setBoard] = useState(Array(37).fill(null));
-  const [currentPlayer, setCurrentPlayer] = useState('uwong');
-  const [uwongPawnsInHand, setUwongPawnsInHand] = useState(21);
   const [gameState, setGameState] = useState('initial');
   const [selectedPiece, setSelectedPiece] = useState(null);
-  const [message, setMessage] = useState('Uwong: Click anywhere to place initial 3x3 formation');
-  const [win, setWin] = useState(false);
-  const [winner, setWinner] = useState(null);
-  const [uwongTotal, setUwongTotal] = useState(21);
   const [macanPos, setMacanPos] = useState(null); // Initialize to null
-  const [nodePositions, setNodePositions] = useState({});
   const [isAIThinking, setIsAIThinking] = useState(false);
-  const boardRef = useRef(null);
   const navigate = useNavigate();
 
   const goBack = () => {
     navigate('/');
   };
 
-  const restartGame = () => {
-    setBoard(Array(37).fill(null));
-    setCurrentPlayer('uwong');
-    setUwongPawnsInHand(21);
-    setGameState('initial');
-    setSelectedPiece(null);
-    setMessage('Uwong: Click anywhere to place initial 3x3 formation');
-    setWin(false);
-    setWinner(null);
-    setUwongTotal(21);
-    setMacanPos(null); // Reset macanPos to null
-    setNodePositions({});
-  };
+  const {
+    board,
+    currentPlayer,
+    uwongPawnsInHand,
+    message,
+    win,
+    winner,
+    uwongTotal,
+    nodePositions,
+    boardRef,
+    handleClick,
+    renderConnections,
+    handleAIClick,
+    setCurrentPlayer
+  } = useMacananGame();
 
   const connections = {
     0: [1, 5, 6],
@@ -354,104 +348,12 @@ const HumanVsAIUwong = () => {
   //   }
   // }, [currentPlayer, gameState, win]);
 
+  useEffect(() => setCurrentPlayer('uwong'), [])
   useEffect(() => {
-    if (currentPlayer === 'uwong' && !win && !isAIThinking) {
-      setIsAIThinking(true);
-
-      setTimeout(() => {
-        if (gameState === 'initial') {
-          // AI places initial formation in a good position (center)
-          const validCenter = [6, 7, 8, 11, 12, 13, 16, 17, 18];
-          const centerPosition = validCenter[Math.floor(Math.random() * validCenter.length)];
-          place3x3Formation(centerPosition); // Center position
-        } else if (gameState === 'placing' && uwongPawnsInHand > 0) {
-          // AI places remaining pawns
-          const validEmptySpots = Array(37)
-            .fill()
-            .map((_, i) => i)
-            .filter(i => board[i] === null);
-
-          // Pick a strategic spot using the evaluation function
-          let bestScore = -Infinity;
-          let bestSpot = validEmptySpots[0];
-
-          for (const spot of validEmptySpots) {
-            const testBoard = [...board];
-            testBoard[spot] = 'uwong';
-            const score = MacananUAI.evaluateBoard(testBoard, uwongTotal + 1, connections, macanPos, macanJump);
-
-            if (score > bestScore) {
-              bestScore = score;
-              bestSpot = spot;
-            }
-          }
-
-          const newBoard = [...board];
-          newBoard[bestSpot] = 'uwong';
-          setBoard(newBoard);
-          setUwongPawnsInHand(prev => prev - 1);
-          setCurrentPlayer('macan');
-          setGameState('moving');
-          setMessage('Macan: Move or eat Uwong piece(s)');
-        } else if (gameState === 'moving' && uwongPawnsInHand === 0) {
-          // Only move pieces after all pawns are placed
-          const bestMove = MacananUAI.getBestMove(board, uwongTotal, connections, macanPos, macanJump);
-          if (bestMove) {
-            const newBoard = [...board];
-            newBoard[bestMove.from] = null;
-            newBoard[bestMove.to] = 'uwong';
-            setBoard(newBoard);
-            setCurrentPlayer('macan');
-            setMessage('Macan: Move or eat Uwong piece(s)');
-          }
-        }
-        setIsAIThinking(false);
-      }, 500);
+    if (!win && currentPlayer === 'uwong') {
+      handleAIClick();
     }
-  }, [currentPlayer, gameState, win]);
-
-  // Updated useEffect to handle window resize and page refresh
-  useEffect(() => {
-    const calculateNodePositions = () => {
-      if (boardRef.current) {
-        const positions = {};
-        const nodes = boardRef.current.getElementsByTagName('button');
-
-        // Wait for next frame to ensure DOM is fully rendered
-        requestAnimationFrame(() => {
-          Array.from(nodes).forEach((node) => {
-            const rect = node.getBoundingClientRect();
-            const boardRect = boardRef.current.getBoundingClientRect();
-            positions[node.dataset.position] = {
-              x: rect.left - boardRect.left + rect.width / 2,
-              y: rect.top - boardRect.top + rect.height / 2
-            };
-          });
-
-          setNodePositions(positions);
-        });
-      }
-    };
-
-    // Initial calculation
-    calculateNodePositions();
-
-    // Add resize event listener
-    window.addEventListener('resize', calculateNodePositions);
-
-    // Add visibility change listener for when page becomes visible again
-    document.addEventListener('visibilitychange', calculateNodePositions);
-
-    // Recalculate positions after a short delay to ensure all elements are properly rendered
-    const timeout = setTimeout(calculateNodePositions, 100);
-
-    // Cleanup function
-    return () => {
-      window.removeEventListener('resize', calculateNodePositions);
-      document.removeEventListener('visibilitychange', calculateNodePositions);
-      clearTimeout(timeout);
-    };
-  }, [board]); // Added board as dependency to recalculate when game state changes
+  }, [currentPlayer, win, handleAIClick]);
 
   // Check macan player condition for win
   useEffect(() => {
@@ -500,31 +402,6 @@ const HumanVsAIUwong = () => {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentPlayer, uwongTotal, macanPos, board, connections]);
-
-  const renderConnections = () => {
-    const lines = [];
-
-    Object.entries(connections).forEach(([from, tos]) => {
-      tos.forEach((to) => {
-        // Only render if both positions exist and are different
-        if (nodePositions[from] && nodePositions[to] && from !== to) {
-          lines.push(
-            <line
-              key={`${from}-${to}`}
-              x1={nodePositions[from].x}
-              y1={nodePositions[from].y}
-              x2={nodePositions[to].x}
-              y2={nodePositions[to].y}
-              stroke="#CBD5E0"
-              strokeWidth="2"
-            />
-          );
-        }
-      });
-    });
-
-    return lines;
-  };
 
   const place3x3Formation = (centerPosition) => {
     const newBoard = [...board];
@@ -588,62 +465,6 @@ const HumanVsAIUwong = () => {
   };
 
   // Modified handleClick to validate macanPos
-  const handleClick = (position) => {
-    if (!win && currentPlayer === 'macan') {
-      if (gameState === 'placing') {
-        if (board[position] === null) {
-          const newBoard = [...board];
-          newBoard[position] = 'macan';
-          setMacanPos(position); // Set macanPos to the new position
-          setBoard(newBoard);
-          setCurrentPlayer('uwong');
-          if (uwongPawnsInHand > 0) {
-            setGameState('placing');
-            setMessage('Uwong: Place remaining pawns');
-          } else {
-            setGameState('moving');
-            setMessage('Uwong: Move existing ones');
-          }
-        } else {
-          setMessage("Macan: Choose an empty place");
-        }
-      } else if (gameState === 'moving') {
-        if (board[position] !== null) {
-          if (board[position] === currentPlayer) {
-            setSelectedPiece(position);
-            setMessage(`Macan: Selected piece at position ${position}`);
-          }
-        } else if (selectedPiece !== null) {
-          if ((isValidMove(selectedPiece, position) || canMacanJump(selectedPiece, position))) {
-            const newBoard = [...board];
-            newBoard[selectedPiece] = null;
-            newBoard[position] = 'macan';
-
-            if (canMacanJump(selectedPiece, position)) {
-              const jumpedPos = macanJump[selectedPiece][position];
-              for (const p of jumpedPos) {
-                newBoard[p] = null;
-                setUwongTotal(prev => prev - 1);
-              }
-            }
-
-            setBoard(newBoard);
-            setMacanPos(position); // Update macanPos to the new position
-            setCurrentPlayer('uwong');
-            if (uwongPawnsInHand > 0) {
-              setGameState('placing');
-              setMessage('Uwong: Place remaining pawns');
-            } else {
-              setGameState('moving');
-              setMessage('Uwong: Move existing ones');
-            }
-            setSelectedPiece(null);
-          }
-        }
-      }
-    }
-  };
-
 
   return (
     <div className="min-h-screen bg-gray-100 flex justify-center items-center">

@@ -601,14 +601,13 @@ export const MacananGameProvider = ({children}) => {
 
     let macanCanMove = 0;
 
-    if(macanPosNow != -1){
+    if (macanPosNow != -1) {
       macanCanMove = canMacanMoveCounter(macanPosNow, nextBoard);
       if (macanCanMove === 0) {
         gameOver = true;
         winner = 'uwong';
       }
-    }
-    else{
+    } else {
       macanCanMove = 37 - 9
     }
 
@@ -627,13 +626,12 @@ export const MacananGameProvider = ({children}) => {
     }
 
     if (maximizingPlayer) {
-      let maxEval = { score: -Infinity };
+      let maxEval = {score: -Infinity};
       let moves = null
 
-      if(macanPosNow == -1){
+      if (macanPosNow == -1) {
         moves = generatePlacingMacanMoves(nextBoard)
-      }
-      else{
+      } else {
         moves = generateMacanMoves(macanPosNow, nextBoard);
       }
 
@@ -742,8 +740,6 @@ export const MacananGameProvider = ({children}) => {
         uwongTotal
       );
 
-      console.log(gameState);
-      console.log(result);
 
       if (result.move) {
         if (gameState === 'moving') {
@@ -794,8 +790,16 @@ export const MacananGameProvider = ({children}) => {
         uwongTotal
       );
 
+      console.log('gameState', gameState);
+      console.log('result', result);
       if (result.move) {
-        if (gameState === 'moving') {
+        console.log(gameState);
+        if (gameState === 'initial') {
+          // AI places initial formation in a good position (center)
+          const validCenter = [6, 7, 8, 11, 12, 13, 16, 17, 18];
+          const centerPosition = validCenter[Math.floor(Math.random() * validCenter.length)];
+          place3x3Formation(centerPosition); // Center position
+        } else if (gameState === 'moving') {
           // Handle movement
           const newBoard = [...board];
           newBoard[macanPos] = null;
@@ -947,6 +951,7 @@ export const MacananGameProvider = ({children}) => {
     handleClick,
     handleAIClick,
     firstMove,
+    setCurrentPlayer,
     renderConnections: () => {
       const lines = [];
 
