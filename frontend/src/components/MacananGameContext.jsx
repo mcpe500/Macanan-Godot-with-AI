@@ -571,9 +571,9 @@ export const MacananGameProvider = ({ children }) => {
     return moves;
   };
 
-  // Updated minimax function and related helpers in MacananGameContext.js
+  // Updated minimaxForMacan function and related helpers in MacananGameContext.js
 
-  const minimax = (depth, maximizingPlayer, nextBoard, nextUwongPawnsInHand, nextGameState, nextUwongTotal, alpha = -Infinity, beta = Infinity) => {
+  const minimaxForMacan = (depth, maximizingPlayer, nextBoard, nextUwongPawnsInHand, nextGameState, nextUwongTotal, alpha = -Infinity, beta = Infinity) => {
     const macanPosNow = nextBoard.findIndex(pos => pos === "macan");
     let gameOver = false;
     let winner = null;
@@ -624,12 +624,24 @@ export const MacananGameProvider = ({ children }) => {
           });
         }
 
-        const evaluation = minimax(
+        let uwongGameState = "";
+
+        if(nextUwongPawnsInHand == 0){
+          uwongGameState = 'moving'
+        }
+        else{
+          uwongGameState = 'placing'
+        }        
+        
+        console.log("maximizing");
+        console.log(depth -1, false, newBoard, nextUwongPawnsInHand, uwongGameState, newUwongTotal, alpha, beta);
+
+        const evaluation = minimaxForMacan(
           depth - 1,
           false,
           newBoard,
           nextUwongPawnsInHand,
-          'moving',
+          uwongGameState,
           newUwongTotal,
           alpha,
           beta
@@ -663,7 +675,10 @@ export const MacananGameProvider = ({ children }) => {
           newBoard[move.to] = 'uwong';
         }
 
-        const evaluation = minimax(
+        console.log("minimazing");
+        console.log(depth -1, false, newBoard, newUwongPawns, newGameState, nextUwongTotal, alpha, beta);
+
+        const evaluation = minimaxForMacan(
           depth - 1,
           true,
           newBoard,
@@ -691,7 +706,7 @@ export const MacananGameProvider = ({ children }) => {
   const handleAIClick = () => {
     if (currentPlayer === 'macan' && !win) {
       const depth = 3; // Adjust depth based on difficulty
-      const result = minimax(
+      const result = minimaxForMacan(
         depth,
         true,
         board,
@@ -716,8 +731,19 @@ export const MacananGameProvider = ({ children }) => {
 
           setBoard(newBoard);
           setMacanPos(result.move.position);
-          setCurrentPlayer('uwong');
-          setMessage('Uwong: Move existing ones');
+
+
+          if(uwongPawnsInHand == 0){
+            setCurrentPlayer('uwong');
+            setMessage('Uwong: Move existing ones');
+            setGameState('moving')
+          }
+          else{
+            setCurrentPlayer('uwong');
+            setMessage('Uwong: Place remaining pawns');
+            setGameState('placing')
+          }      
+          
         } else if (gameState === 'placing') {
           // Handle initial placement
           const newBoard = [...board];
