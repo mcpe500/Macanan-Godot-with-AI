@@ -1,1 +1,0 @@
-please convert and make the @/components/ to be react native, and make the code to run good react native, basically some of the code in this repo is running reactjs not react native, please help me convert it
