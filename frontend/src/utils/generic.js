@@ -58,7 +58,7 @@ const getPossibleUwongMoves = (board, connections) => {
 }
 
 const getPossibleMacanMoves = (board, connections, macanPos) => {
-    console.log("getPossibleMacanMoves:",{ board, connections, macanPos })
+    console.log("getPossibleMacanMoves:", {board, connections, macanPos})
     if (macanPos === null) return [];
     const possibleMoves = [];
     const connectionsIlength = connections[macanPos].length;
@@ -73,14 +73,14 @@ const getPossibleMacanMoves = (board, connections, macanPos) => {
 
 const minimax = (board, depth, alpha, beta, isMaximizing, player, macanPos, connections) => {
     if (depth === 0) {
-        return { score: evaluateBoard(board, player, macanPos, connections) };
+        return {score: evaluateBoard(board, player, macanPos, connections)};
     }
 
     const moves = getPossibleMoves(board, player, connections, macanPos);
     console.log('minimax');
-    console.log({ moves })
+    console.log({moves})
     if (moves.length === 0) {
-        return { score: isMaximizing ? -Infinity : Infinity };
+        return {score: isMaximizing ? -Infinity : Infinity};
     }
 
     let bestMove = null;
@@ -94,7 +94,7 @@ const minimax = (board, depth, alpha, beta, isMaximizing, player, macanPos, conn
         }
 
         const nextMacanPos = player === 'macan' ? move[1] : macanPos;
-        const { score } = minimax(
+        const {score} = minimax(
             newBoard,
             depth - 1,
             alpha,
@@ -124,7 +124,7 @@ const minimax = (board, depth, alpha, beta, isMaximizing, player, macanPos, conn
         }
     }
 
-    return { score: bestScore, move: bestMove };
+    return {score: bestScore, move: bestMove};
 };
 
 export const getBestMove = (board, currentPlayer, connections, macanPos) => {
