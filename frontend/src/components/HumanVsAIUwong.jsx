@@ -4,16 +4,6 @@ import MacananUAI from './MacananUAI';
 import {useMacananGame} from "./MacananGameContext.jsx";
 
 const HumanVsAIUwong = () => {
-  const [gameState, setGameState] = useState('initial');
-  const [selectedPiece, setSelectedPiece] = useState(null);
-  const [macanPos, setMacanPos] = useState(null); // Initialize to null
-  const [isAIThinking, setIsAIThinking] = useState(false);
-  const navigate = useNavigate();
-
-  const goBack = () => {
-    navigate('/');
-  };
-
   const {
     board,
     currentPlayer,
@@ -30,332 +20,12 @@ const HumanVsAIUwong = () => {
     setCurrentPlayer
   } = useMacananGame();
 
-  const connections = {
-    0: [1, 5, 6],
-    1: [0, 2, 6],
-    2: [1, 3, 6, 7, 8],
-    3: [2, 4, 8],
-    4: [3, 8, 9],
-    5: [0, 6, 10],
-    6: [0, 1, 2, 5, 7, 10, 11, 12],
-    7: [2, 6, 8, 12],
-    8: [2, 3, 4, 7, 9, 12, 13, 14],
-    9: [4, 8, 14],
-    10: [5, 6, 11, 15, 16, 26, 28, 30],
-    11: [6, 10, 12, 16],
-    12: [6, 7, 8, 11, 13, 16, 17, 18],
-    13: [8, 12, 14, 18],
-    14: [8, 9, 13, 18, 19, 31, 33, 35],
-    15: [10, 16, 20],
-    16: [10, 11, 12, 15, 17, 20, 21, 22],
-    17: [12, 16, 18, 22],
-    18: [12, 13, 14, 17, 19, 22, 23, 24],
-    19: [14, 18, 24],
-    20: [15, 16, 21],
-    21: [16, 20, 22],
-    22: [16, 17, 18, 21, 23],
-    23: [18, 22, 24],
-    24: [18, 19, 23],
-    25: [26, 27],
-    26: [25, 28, 10],
-    27: [25, 28, 29],
-    28: [26, 27, 10, 30],
-    29: [27, 30],
-    30: [28, 29, 10],
-    31: [14, 32, 33],
-    32: [31, 34],
-    33: [14, 31, 34, 35],
-    34: [32, 33, 36],
-    35: [14, 33, 36],
-    36: [34, 35]
-  };
-
-  const macanJump = {
-    0: {
-      2: [1],
-      4: [1, 2, 3],
-      12: [6],
-      24: [6, 12, 18],
-      10: [5],
-      20: [5, 10, 15]
-    },
-    1: {
-      3: [2],
-      11: [6],
-      21: [6, 11, 16]
-    },
-    2: {
-      4: [3],
-      14: [8],
-      36: [8, 14, 35],
-      12: [7],
-      22: [7, 12, 17],
-      10: [6],
-      29: [6, 10, 30],
-      0: [1]
-    },
-    3: {
-      13: [8],
-      23: [8, 13, 18],
-      1: [2]
-    },
-    4: {
-      14: [9],
-      24: [9, 14, 19],
-      12: [8],
-      20: [8, 12, 16],
-      2: [3],
-      0: [3, 2, 1]
-    },
-    5: {
-      7: [6],
-      9: [6, 7, 8],
-      15: [10]
-    },
-    6: {
-      8: [7],
-      18: [12],
-      16: [11],
-      30: [10]
-    },
-    7: {
-      9: [8],
-      17: [12],
-      5: [6]
-    },
-    8: {
-      35: [14],
-      18: [13],
-      16: [12],
-      6: [7]
-    },
-    9: {
-      19: [14],
-      7: [8],
-      5: [8, 7, 6]
-    },
-    10: {
-      12: [11],
-      14: [11, 12, 13],
-      34: [11, 12, 13, 14, 33],
-      22: [16],
-      20: [15],
-      29: [30],
-      27: [28],
-      25: [26],
-      0: [5],
-      2: [6]
-    },
-    11: {
-      13: [12],
-      33: [12, 13, 14],
-      21: [16],
-      28: [10],
-      1: [6]
-    },
-    12: {
-      14: [13],
-      34: [13, 14, 33],
-      24: [18],
-      22: [17],
-      20: [16],
-      10: [11],
-      27: [11, 10, 28],
-      0: [6],
-      2: [7],
-      4: [8]
-    },
-    13: {
-      33: [14],
-      23: [18],
-      11: [12],
-      28: [12, 11, 10],
-      3: [8]
-    },
-    14: {
-      34: [33],
-      36: [35],
-      24: [19],
-      22: [18],
-      12: [13],
-      10: [13, 12, 11],
-      27: [13, 12, 11, 10, 28],
-      2: [8],
-      4: [9],
-      32: [31]
-    },
-    15: {
-      17: [16],
-      19: [16, 17, 18],
-      5: [10]
-    },
-    16: {
-      18: [17],
-      26: [10],
-      6: [11],
-      8: [12]
-    },
-    17: {
-      19: [18],
-      15: [16],
-      7: [12]
-    },
-    18: {
-      16: [17],
-      6: [12],
-      8: [13],
-      31: [14]
-    },
-    19: {
-      17: [18],
-      15: [18, 17, 16],
-      9: [14]
-    },
-    20: {
-      22: [21],
-      24: [21, 22, 23],
-      10: [15],
-      0: [15, 10, 5],
-      12: [16],
-      4: [16, 12, 8]
-    },
-    21: {
-      23: [22],
-      11: [16],
-      1: [16, 11, 6]
-    },
-    22: {
-      24: [23],
-      20: [21],
-      10: [16],
-      25: [16, 10, 26],
-      12: [17],
-      2: [17, 12, 7],
-      14: [18],
-      32: [18, 14, 31]
-    },
-    23: {
-      21: [22],
-      13: [18],
-      3: [18, 13, 8]
-    },
-    24: {
-      22: [23],
-      20: [23, 22, 21],
-      12: [18],
-      0: [18, 12, 6],
-      14: [19],
-      4: [19, 14, 9]
-    },
-    25: {
-      10: [26],
-      22: [26, 10, 16],
-      29: [27]
-    },
-    26: {
-      16: [10],
-      30: [28]
-    },
-    27: {
-      10: [28],
-      12: [28, 10, 11],
-      14: [28, 10, 11, 12, 13],
-      34: [28, 10, 11, 12, 13, 14, 33]
-    },
-    28: {
-      11: [10],
-      13: [10, 11, 12],
-      33: [10, 11, 12, 13, 14]
-    },
-    29: {
-      25: [27],
-      10: [30],
-      2: [30, 10, 6]
-    },
-    30: {
-      26: [28],
-      6: [10]
-    },
-    31: {
-      35: [33],
-      18: [14]
-    },
-    32: {
-      36: [34],
-      14: [31],
-      22: [31, 14, 18]
-    },
-    33: {
-      13: [14],
-      11: [14, 13, 12],
-      28: [14, 13, 12, 11, 10]
-    },
-    34: {
-      14: [33],
-      12: [33, 14, 13],
-      10: [33, 14, 13, 12, 11],
-      27: [33, 14, 13, 12, 11, 10, 28]
-    },
-    35: {
-      8: [14],
-      31: [33]
-    },
-    36: {
-      14: [35],
-      2: [35, 14, 8],
-      32: [34]
-    }
-  }
-
-  // // Add useEffect for AI moves
-  // useEffect(() => {
-  //   if (currentPlayer === 'uwong' && !win && !isAIThinking) {
-  //     setIsAIThinking(true);
-
-  //     // Small delay to make AI moves feel more natural
-  //     setTimeout(() => {
-  //       if (gameState === 'initial') {
-  //         // AI places initial formation in a good position (center)
-  //         place3x3Formation(12); // Center position
-  //       } else if (gameState === 'placing') {
-  //         // AI places remaining pawns
-  //         const bestMove = MacananUAI.getBestMove(board, uwongTotal, connections, macanPos, macanJump);
-  //         const validEmptySpots = Array(37).fill().map((_, i) => i).filter(i => board[i] === null);
-  //         const randomSpot = validEmptySpots[Math.floor(Math.random() * validEmptySpots.length)];
-
-  //         const newBoard = [...board];
-  //         newBoard[randomSpot] = 'uwong';
-  //         setBoard(newBoard);
-  //         setUwongPawnsInHand(prev => prev - 1);
-  //         setCurrentPlayer('macan');
-  //         setGameState('moving');
-  //         setMessage('Macan: Move or eat Uwong piece(s)');
-  //       } else if (gameState === 'moving') {
-  //         // AI moves existing pawns
-  //         const bestMove = MacananUAI.getBestMove(board, uwongTotal, connections, macanPos, macanJump);
-  //         if (bestMove) {
-  //           const newBoard = [...board];
-  //           newBoard[bestMove.from] = null;
-  //           newBoard[bestMove.to] = 'uwong';
-  //           setBoard(newBoard);
-  //           setCurrentPlayer('macan');
-  //           setGameState('moving');
-  //           setMessage('Macan: Move or eat Uwong piece(s)');
-  //         }
-  //       }
-  //       setIsAIThinking(false);
-  //     }, 500);
-  //   }
-  // }, [currentPlayer, gameState, win]);
-
-  useEffect(() => setCurrentPlayer('uwong'), [])
   useEffect(() => {
     if (!win && currentPlayer === 'uwong') {
       handleAIClick();
     }
   }, [currentPlayer, win, handleAIClick]);
 
-  // Check macan player condition for win
 
   return (
     <div className="min-h-screen bg-gray-100 flex justify-center items-center">
@@ -364,9 +34,7 @@ const HumanVsAIUwong = () => {
           {renderConnections()}
         </svg>
         <div className="flex flex-col items-center gap-4">
-          <div className="text-xl font-bold text-center">
-            {isAIThinking ? "AI is thinking..." : message}
-          </div>
+          <div className="text-xl font-bold text-center">{message}</div>
           <div className="flex justify-center items-center gap-8">
             {/* Left Wing */}
             <div className="grid grid-cols-1 gap-20">
@@ -374,7 +42,7 @@ const HumanVsAIUwong = () => {
                 <button
                   key={index}
                   data-position={index}
-                  className={`w-12 h-12 rounded-full bg-gray-200 relative z-10 ${
+                  className={`w-12 h-12 rounded-full relative z-10 ${
                     board[index] === 'uwong' ? 'bg-green-500' :
                       board[index] === 'macan' ? 'bg-red-500' :
                         'bg-gray-200'
@@ -388,7 +56,7 @@ const HumanVsAIUwong = () => {
                 <button
                   key={index}
                   data-position={index}
-                  className={`w-12 h-12 rounded-full bg-gray-200 relative z-10 ${
+                  className={`w-12 h-12 rounded-full relative z-10 ${
                     board[index] === 'uwong' ? 'bg-green-500' :
                       board[index] === 'macan' ? 'bg-red-500' :
                         'bg-gray-200'
@@ -404,7 +72,7 @@ const HumanVsAIUwong = () => {
                 <button
                   key={index}
                   data-position={index}
-                  className={`w-12 h-12 rounded-full bg-gray-200 relative z-10 ${
+                  className={`w-12 h-12 rounded-full relative z-10 ${
                     board[index] === 'uwong' ? 'bg-green-500' :
                       board[index] === 'macan' ? 'bg-red-500' :
                         'bg-gray-200'
@@ -420,7 +88,7 @@ const HumanVsAIUwong = () => {
                 <button
                   key={index}
                   data-position={index}
-                  className={`w-12 h-12 rounded-full bg-gray-200 relative z-10 ${
+                  className={`w-12 h-12 rounded-full relative z-10 ${
                     board[index] === 'uwong' ? 'bg-green-500' :
                       board[index] === 'macan' ? 'bg-red-500' :
                         'bg-gray-200'
@@ -434,7 +102,7 @@ const HumanVsAIUwong = () => {
                 <button
                   key={index}
                   data-position={index}
-                  className={`w-12 h-12 rounded-full bg-gray-200 relative z-10 ${
+                  className={`w-12 h-12 rounded-full relative z-10 ${
                     board[index] === 'uwong' ? 'bg-green-500' :
                       board[index] === 'macan' ? 'bg-red-500' :
                         'bg-gray-200'
@@ -450,16 +118,6 @@ const HumanVsAIUwong = () => {
           <div className="mt-2">
             <div className="text-sm">Total Uwong pawns: {uwongTotal}</div>
           </div>
-          {win &&
-            <div className="flex gap-4">
-              <button
-                onClick={goBack}
-                className="bg-blue-600 hover:bg-blue-700 text-white text-lg px-8 py-3 rounded-lg shadow-md transition duration-200"
-              >
-                Go Back
-              </button>
-            </div>
-          }
         </div>
       </div>
     </div>

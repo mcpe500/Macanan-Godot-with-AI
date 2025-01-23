@@ -801,6 +801,9 @@ export const MacananGameProvider = ({children}) => {
         uwongTotal
       );
 
+      console.log("uwong move");
+      console.log(result);
+
       if (result.move) {
         console.log(gameState);
         if (gameState === 'initial') {
@@ -813,7 +816,8 @@ export const MacananGameProvider = ({children}) => {
         } else if (gameState === 'moving') {
           // Handle movement
           const newBoard = [...board];
-          newBoard[result.move.position] = 'uwong';
+          newBoard[result.move.from] = null;
+          newBoard[result.move.to] = 'uwong'
 
           setBoard(newBoard);
           setCurrentPlayer('macan');
