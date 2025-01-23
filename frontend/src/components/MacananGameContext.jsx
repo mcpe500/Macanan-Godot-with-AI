@@ -664,8 +664,8 @@ export const MacananGameProvider = ({children}) => {
           uwongGameState = 'placing'
         }
 
-        console.log("maximizing");
-        console.log(depth - 1, false, newBoard, nextUwongPawnsInHand, uwongGameState, newUwongTotal, alpha, beta);
+//        console.log("maximizing");
+//        console.log(depth - 1, false, newBoard, nextUwongPawnsInHand, uwongGameState, newUwongTotal, alpha, beta);
 
         const evaluation = minimaxForMacan(
           depth - 1,
@@ -691,7 +691,7 @@ export const MacananGameProvider = ({children}) => {
       let minEval = {score: Infinity};
       const moves = generateUwongMoves(nextBoard, nextUwongPawnsInHand, nextGameState);
 
-      console.log(moves);
+//      console.log(moves);
 
       for (const move of moves) {
         const newBoard = [...nextBoard];
@@ -708,8 +708,8 @@ export const MacananGameProvider = ({children}) => {
           newBoard[move.to] = 'uwong';
         }
 
-        console.log("minimazing");
-        console.log(depth - 1, false, newBoard, newUwongPawns, newGameState, nextUwongTotal, alpha, beta);
+//        console.log("minimazing");
+//        console.log(depth - 1, false, newBoard, newUwongPawns, newGameState, nextUwongTotal, alpha, beta);
 
         const evaluation = minimaxForMacan(
           depth - 1,
@@ -737,6 +737,7 @@ export const MacananGameProvider = ({children}) => {
   // Updated AI click handler
   const handleAIClick = () => {
     const depth = 3; // Adjust depth based on difficulty
+    console.warn('macan pos', macanPos);
     if (currentPlayer === 'macan' && !win) {
       const result = minimaxForMacan(
         depth,
@@ -797,8 +798,6 @@ export const MacananGameProvider = ({children}) => {
         uwongTotal
       );
 
-      console.log('gameState', gameState);
-      console.log('result', result);
       if (result.move) {
         console.log(gameState);
         if (gameState === 'initial') {
@@ -806,45 +805,34 @@ export const MacananGameProvider = ({children}) => {
           const validCenter = [6, 7, 8, 11, 12, 13, 16, 17, 18];
           const centerPosition = validCenter[Math.floor(Math.random() * validCenter.length)];
           place3x3Formation(centerPosition); // Center position
+          setUwongPawnsInHand(uwongPawnsInHand - 9);
           console.log('pawns in hand', uwongPawnsInHand);
         } else if (gameState === 'moving') {
           // Handle movement
           const newBoard = [...board];
-          newBoard[macanPos] = null;
-          newBoard[result.move.position] = 'macan';
-
-          if (result.move.isJump) {
-            result.move.captured.forEach(pos => {
-              newBoard[pos] = null;
-              setUwongTotal(prev => prev - result.move.captured.length);
-            });
-          }
+          newBoard[result.move.position] = 'uwong';
 
           setBoard(newBoard);
-          setMacanPos(result.move.position);
-
-
-          if (uwongPawnsInHand == 0) {
-            setCurrentPlayer('uwong');
-            setMessage('Uwong: Move existing ones');
-            setGameState('moving')
-          } else {
-            setCurrentPlayer('uwong');
-            setMessage('Uwong: Place remaining pawns');
-            setGameState('placing')
-          }
+          setCurrentPlayer('macan');
+          setGameState('moving');
+          setMessage('Macan: Move or eat Uwong piece(s)');
 
         } else if (gameState === 'placing') {
           // Handle initial placement
           const newBoard = [...board];
           newBoard[result.move.position] = 'uwong';
           setBoard(newBoard);
-          setMacanPos(result.move.position);
+          setUwongPawnsInHand(prev => prev - 1);
           setCurrentPlayer('macan');
-          setMessage('Uwong: Place remaining pawns');
+          setGameState('moving');
+          setMessage('Macan: Move or eat Uwong piece(s)');
         }
       }
+
     }
+
+
+    console.log('board', board);
   };
 
 
