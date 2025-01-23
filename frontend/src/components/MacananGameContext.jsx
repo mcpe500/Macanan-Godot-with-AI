@@ -505,6 +505,22 @@ export const MacananGameProvider = ({children}) => {
     }
   };
 
+  const generatePlacingMacanMoves = (board) => {
+    const moves = [];
+
+    board.forEach((value, index) => {
+      if (board[index] === null) {
+        moves.push({
+          position: index,
+          captured: [],
+          isJump: false
+        });
+      }
+    });
+
+    return moves
+  }
+
   // Helper functions for move generation
   const generateMacanMoves = (currentPos, board) => {
     const moves = [];
@@ -578,16 +594,22 @@ export const MacananGameProvider = ({children}) => {
     let gameOver = false;
     let winner = null;
 
-    // Check win conditions
     if (nextUwongTotal < 14) {
       gameOver = true;
       winner = 'macan';
     }
 
-    const macanCanMove = canMacanMoveCounter(macanPosNow, nextBoard);
-    if (macanCanMove === 0) {
-      gameOver = true;
-      winner = 'uwong';
+    let macanCanMove = 0;
+
+    if(macanPosNow != -1){
+      macanCanMove = canMacanMoveCounter(macanPosNow, nextBoard);
+      if (macanCanMove === 0) {
+        gameOver = true;
+        winner = 'uwong';
+      }
+    }
+    else{
+      macanCanMove = 37 - 9
     }
 
     if (depth === 0 || gameOver) {
@@ -605,8 +627,15 @@ export const MacananGameProvider = ({children}) => {
     }
 
     if (maximizingPlayer) {
-      let maxEval = {score: -Infinity};
-      const moves = generateMacanMoves(macanPosNow, nextBoard);
+      let maxEval = { score: -Infinity };
+      let moves = null
+
+      if(macanPosNow == -1){
+        moves = generatePlacingMacanMoves(nextBoard)
+      }
+      else{
+        moves = generateMacanMoves(macanPosNow, nextBoard);
+      }
 
       for (const move of moves) {
         const newBoard = [...nextBoard];
@@ -700,7 +729,6 @@ export const MacananGameProvider = ({children}) => {
     }
   };
 
-
   // Updated AI click handler
   const handleAIClick = () => {
     const depth = 3; // Adjust depth based on difficulty
@@ -714,6 +742,9 @@ export const MacananGameProvider = ({children}) => {
         uwongTotal
       );
 
+      console.log(gameState);
+      console.log(result);
+
       if (result.move) {
         if (gameState === 'moving') {
           // Handle movement
@@ -724,7 +755,7 @@ export const MacananGameProvider = ({children}) => {
           if (result.move.isJump) {
             result.move.captured.forEach(pos => {
               newBoard[pos] = null;
-              setUwongTotal(prev => prev - result.move.captured.length);
+              setUwongTotal(prev => prev - 1);
             });
           }
 
@@ -743,6 +774,7 @@ export const MacananGameProvider = ({children}) => {
           }
 
         } else if (gameState === 'placing') {
+          console.log("masuk ke mode placing macan");
           // Handle initial placement
           const newBoard = [...board];
           newBoard[result.move.position] = 'macan';
