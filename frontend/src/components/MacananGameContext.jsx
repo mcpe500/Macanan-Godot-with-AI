@@ -816,8 +816,6 @@ export const MacananGameProvider = ({children}) => {
           newBoard[result.move.position] = 'uwong';
 
           setBoard(newBoard);
-          setMacanPos(result.move.position);
-
           setCurrentPlayer('macan');
           setGameState('moving');
           setMessage('Macan: Move or eat Uwong piece(s)');
