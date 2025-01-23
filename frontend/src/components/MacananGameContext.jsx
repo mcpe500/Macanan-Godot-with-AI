@@ -315,12 +315,12 @@ export const MacananGameProvider = ({children}) => {
 
     positions.flat().forEach(pos => {
       newBoard[pos] = 'uwong';
+      setGameState((prev) => prev - 1);
     });
 
     setBoard(newBoard);
     setCurrentPlayer('macan');
     setGameState('placing');
-    setUwongPawnsInHand(12);
     setMessage('Macan: Place your piece');
     setFirstMove({...firstMove, uwong: false});
   };
@@ -569,7 +569,7 @@ export const MacananGameProvider = ({children}) => {
           moves.push({position: index});
         }
       });
-    } else if(gameState === 'moving') {
+    } else if (gameState === 'moving') {
       // Generate all possible moves for existing pawns
       board.forEach((cell, index) => {
         if (cell === 'uwong') {
@@ -582,8 +582,7 @@ export const MacananGameProvider = ({children}) => {
           }
         }
       });
-    }
-    else if(gameState === "initial") {
+    } else if (gameState === "initial") {
       const idxtaruh = [6, 7, 8, 11, 12, 13, 16, 17, 18]
       idxtaruh.forEach((value) => {
         moves.push({position: value})
@@ -807,6 +806,7 @@ export const MacananGameProvider = ({children}) => {
           const validCenter = [6, 7, 8, 11, 12, 13, 16, 17, 18];
           const centerPosition = validCenter[Math.floor(Math.random() * validCenter.length)];
           place3x3Formation(centerPosition); // Center position
+          console.log('pawns in hand', uwongPawnsInHand);
         } else if (gameState === 'moving') {
           // Handle movement
           const newBoard = [...board];
@@ -837,10 +837,10 @@ export const MacananGameProvider = ({children}) => {
         } else if (gameState === 'placing') {
           // Handle initial placement
           const newBoard = [...board];
-          newBoard[result.move.position] = 'macan';
+          newBoard[result.move.position] = 'uwong';
           setBoard(newBoard);
           setMacanPos(result.move.position);
-          setCurrentPlayer('uwong');
+          setCurrentPlayer('macan');
           setMessage('Uwong: Place remaining pawns');
         }
       }

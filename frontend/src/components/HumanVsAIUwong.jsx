@@ -356,115 +356,6 @@ const HumanVsAIUwong = () => {
   }, [currentPlayer, win, handleAIClick]);
 
   // Check macan player condition for win
-  useEffect(() => {
-    const canMacanMove = (from) => {
-      if (from === null || !macanJump[from]) return false; // Validate from position
-
-      const walk = connections[from];
-      const jump = macanJump[from];
-
-      for (const w of walk) {
-        if (board[w] !== "uwong") {
-          return true;
-        }
-      }
-
-      for (const key in jump) {
-        if (Object.prototype.hasOwnProperty.call(jump, key)) {
-          const value = jump[key];
-          let adaMusuh = true;
-
-          for (const wong of value) {
-            if (board[wong] !== "uwong") {
-              adaMusuh = false;
-            }
-          }
-
-          if (adaMusuh && board[key] !== "uwong") {
-            return true;
-          }
-        }
-      }
-
-      return false;
-    };
-
-    if (uwongTotal < 14) {
-      setWin(true);
-      setWinner("macan");
-      setMessage("Macan Win!");
-    }
-
-    if (macanPos !== null && !canMacanMove(macanPos)) {
-      setWin(true);
-      setWinner("uwong");
-      setMessage("Uwong Win!");
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [currentPlayer, uwongTotal, macanPos, board, connections]);
-
-  const place3x3Formation = (centerPosition) => {
-    const newBoard = [...board];
-    const row = Math.floor(centerPosition / 5);
-    const col = centerPosition % 5;
-
-    if (row < 1 || row > 3 || col < 1 || col > 3) {
-      setMessage('Invalid position. Choose center position for 3x3 formation');
-      return;
-    }
-
-    const positions = [
-      [(row - 1) * 5 + (col - 1), (row - 1) * 5 + col, (row - 1) * 5 + (col + 1)],
-      [row * 5 + (col - 1), row * 5 + col, row * 5 + (col + 1)],
-      [(row + 1) * 5 + (col - 1), (row + 1) * 5 + col, (row + 1) * 5 + (col + 1)]
-    ];
-
-    positions.flat().forEach(pos => {
-      newBoard[pos] = 'uwong';
-    });
-
-    setBoard(newBoard);
-    setCurrentPlayer('macan');
-    setGameState('placing');
-    setUwongPawnsInHand(12);
-    setMessage('Macan: Place your piece');
-  };
-
-  const isValidMove = (from, to) => {
-    return connections[from]?.includes(to);
-  };
-
-  // Validate macanPos before accessing macanJump
-  const canMacanJump = (from, to) => {
-    if (board[to] !== null) return false;
-
-    // Validate from and to positions
-    if (from === null || to === null || !macanJump[from] || !macanJump[from][to]) {
-      return false;
-    }
-
-    const path = macanJump[from][to];
-
-    if (path == null) return false;
-
-    let eat = true;
-    for (const p of path) {
-      if (board[p] !== "uwong") {
-        eat = false;
-      }
-    }
-
-    return eat;
-  };
-
-  const findJumpPath = (from, to) => {
-    const listJump = macanJump[from];
-    const path = listJump[to];
-
-    return path;
-  };
-
-  // Modified handleClick to validate macanPos
 
   return (
     <div className="min-h-screen bg-gray-100 flex justify-center items-center">
@@ -566,12 +457,6 @@ const HumanVsAIUwong = () => {
                 className="bg-blue-600 hover:bg-blue-700 text-white text-lg px-8 py-3 rounded-lg shadow-md transition duration-200"
               >
                 Go Back
-              </button>
-              <button
-                onClick={restartGame}
-                className="bg-green-600 hover:bg-green-700 text-white text-lg px-8 py-3 rounded-lg shadow-md transition duration-200"
-              >
-                Restart
               </button>
             </div>
           }
