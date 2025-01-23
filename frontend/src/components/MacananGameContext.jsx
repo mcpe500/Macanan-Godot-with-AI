@@ -969,6 +969,34 @@ export const MacananGameProvider = ({ children }) => {
     setFirstMove({ uwong: true, macan: false });
   };
 
+
+  const renderConnections = () => {
+    const lines = [];
+
+    Object.entries(connections).forEach(([from, tos]) => {
+      if (tos) { // Check if tos is defined
+        tos.forEach((to) => {
+          // Only render if both positions exist and are different
+          if (nodePositions[from] && nodePositions[to] && from !== to) {
+            lines.push(
+              <line
+                key={`${from}-${to}`}
+                x1={nodePositions[from].x}
+                y1={nodePositions[from].y}
+                x2={nodePositions[to].x}
+                y2={nodePositions[to].y}
+                stroke="#CBD5E0"
+                strokeWidth="2"
+              />
+            );
+          }
+        });
+      }
+    });
+
+    return lines;
+  };
+
   const contextValue = {
     board,
     currentPlayer,
@@ -989,32 +1017,7 @@ export const MacananGameProvider = ({ children }) => {
     handleAIClick,
     firstMove,
     setCurrentPlayer,
-    renderConnections: () => {
-      const lines = [];
-
-      Object.entries(connections).forEach(([from, tos]) => {
-        if (tos) { // Check if tos is defined
-          tos.forEach((to) => {
-            // Only render if both positions exist and are different
-            if (nodePositions[from] && nodePositions[to] && from !== to) {
-              lines.push(
-                <line
-                  key={`${from}-${to}`}
-                  x1={nodePositions[from].x}
-                  y1={nodePositions[from].y}
-                  x2={nodePositions[to].x}
-                  y2={nodePositions[to].y}
-                  stroke="#CBD5E0"
-                  strokeWidth="2"
-                />
-              );
-            }
-          });
-        }
-      });
-
-      return lines;
-    },
+    renderConnections,
     restartGame,
     goBack
   };
