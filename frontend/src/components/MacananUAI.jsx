@@ -9,7 +9,7 @@ const MacananUAI = {
     if (connections[macanPos]) {
       connections[macanPos].forEach(to => {
         if (board[to] === null) {
-          moves.push({ from: macanPos, to, captures: [] });
+          moves.push({from: macanPos, to, captures: []});
         }
       });
     }
@@ -17,7 +17,7 @@ const MacananUAI = {
     if (macanJump && macanJump[macanPos]) {
       for (const [to, path] of Object.entries(macanJump[macanPos])) {
         if (board[to] === null && path.every(pos => board[pos] === 'uwong')) {
-          moves.push({ from: macanPos, to: parseInt(to), captures: path });
+          moves.push({from: macanPos, to: parseInt(to), captures: path});
         }
       }
     }
@@ -108,12 +108,12 @@ const MacananUAI = {
   evaluatePathBlocking: (board, macanPos, connections, macanJump) => {
     let score = 0;
     if (!macanPos) return score;
-    
+
     const possiblePaths = MacananUAI.getAllMacanPaths(macanPos, connections);
 
     for (const path of possiblePaths) {
       const blockingPieces = path.filter(pos => board[pos] === 'uwong');
-      
+
       if (blockingPieces.length >= 2 && blockingPieces.length % 2 === 0) {
         score += 20 * (blockingPieces.length / 2);
       }
@@ -128,14 +128,14 @@ const MacananUAI = {
 
   getAllMacanPaths: (macanPos, connections) => {
     if (!macanPos || !connections[macanPos]) return [];
-    
+
     const paths = [];
     const visited = new Set();
     const maxDepth = 4;
 
     const findPaths = (current, path, depth) => {
       if (depth >= maxDepth) return;
-      
+
       visited.add(current);
       const neighbors = connections[current] || [];
 
@@ -161,16 +161,16 @@ const MacananUAI = {
       if (board[i] === 'uwong' && !visited.has(i)) {
         visited.add(i);
         const adjacentUwongs = connections[i]?.filter(pos => board[pos] === 'uwong') || [];
-        
+
         for (const adj of adjacentUwongs) {
           if (!visited.has(adj)) {
             visited.add(adj);
             score += 10;
-            
-            const sharedNeighbors = connections[i]?.filter(pos => 
+
+            const sharedNeighbors = connections[i]?.filter(pos =>
               connections[adj]?.includes(pos)
             ) || [];
-            
+
             if (sharedNeighbors.length > 0) {
               score += 15;
             }
@@ -189,11 +189,11 @@ const MacananUAI = {
     const jumpPaths = macanJump[macanPos];
     for (const [to, path] of Object.entries(jumpPaths)) {
       const pathPieces = path.filter(pos => board[pos] === 'uwong');
-      
+
       if (pathPieces.length % 2 === 0) {
         score += 25;
       }
-      
+
       if (pathPieces.length === path.length) {
         score += 35;
       }
@@ -245,7 +245,7 @@ const MacananUAI = {
 
   evaluateMobility: (board, connections) => {
     let score = 0;
-    
+
     for (let i = 0; i < board.length; i++) {
       if (board[i] === 'uwong' && connections[i]) {
         const moveOptions = connections[i].filter(pos => board[pos] === null).length;
@@ -284,12 +284,12 @@ const MacananUAI = {
 
   getValidUwongMoves: (board, connections) => {
     const moves = [];
-    
+
     for (let i = 0; i < board.length; i++) {
       if (board[i] === 'uwong' && connections[i]) {
         connections[i].forEach(to => {
           if (board[to] === null) {
-            moves.push({ from: i, to });
+            moves.push({from: i, to});
           }
         });
       }
@@ -313,8 +313,8 @@ const MacananUAI = {
   },
 
   minimax: (board, depth, alpha, beta, isMaximizing, uwongTotal, connections, macanPos, macanJump) => {
-    if (depth === 0 || uwongTotal < MacananUAI.MIN_UWONG_PIECES || 
-        MacananUAI.getValidMacanMoves(board, macanPos, connections, macanJump).length === 0) {
+    if (depth === 0 || uwongTotal < MacananUAI.MIN_UWONG_PIECES ||
+      MacananUAI.getValidMacanMoves(board, macanPos, connections, macanJump).length === 0) {
       return {
         score: MacananUAI.evaluateBoard(board, uwongTotal, connections, macanPos, macanJump)
       };
@@ -338,7 +338,7 @@ const MacananUAI = {
         if (beta <= alpha) break;
       }
 
-      return { score: bestScore, move: bestMove };
+      return {score: bestScore, move: bestMove};
     } else {
       let bestScore = Infinity;
       let bestMove = null;
@@ -358,7 +358,7 @@ const MacananUAI = {
         if (beta <= alpha) break;
       }
 
-      return { score: bestScore, move: bestMove };
+      return {score: bestScore, move: bestMove};
     }
   },
 

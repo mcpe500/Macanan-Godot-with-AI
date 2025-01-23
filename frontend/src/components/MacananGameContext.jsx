@@ -1,9 +1,9 @@
 // MacananGameContext.jsx
-import { createContext, useContext, useState, useEffect, useRef } from 'react';
+import {createContext, useContext, useState, useEffect, useRef} from 'react';
 
 const MacananGameContext = createContext();
 
-export const MacananGameProvider = ({ children }) => {
+export const MacananGameProvider = ({children}) => {
   const [board, setBoard] = useState(Array(37).fill(null));
   const [currentPlayer, setCurrentPlayer] = useState('uwong');
   const [uwongPawnsInHand, setUwongPawnsInHand] = useState(21);
@@ -16,7 +16,7 @@ export const MacananGameProvider = ({ children }) => {
   const [macanPos, setMacanPos] = useState(null);
   const [nodePositions, setNodePositions] = useState({});
   const boardRef = useRef(null);
-  const [firstMove, setFirstMove] = useState({ uwong: true, macan: false });
+  const [firstMove, setFirstMove] = useState({uwong: true, macan: false});
 
 
   const connections = {
@@ -322,7 +322,7 @@ export const MacananGameProvider = ({ children }) => {
     setGameState('placing');
     setUwongPawnsInHand(12);
     setMessage('Macan: Place your piece');
-    setFirstMove({ ...firstMove, uwong: false });
+    setFirstMove({...firstMove, uwong: false});
   };
 
   const isValidMove = (from, to) => {
@@ -364,11 +364,11 @@ export const MacananGameProvider = ({ children }) => {
     // Count jump moves
     const jumpPaths = macanJump[from];
     if (jumpPaths) { // Add check if jumpPaths is undefined
-        for (const targetPos in jumpPaths) {
-          const path = jumpPaths[targetPos];
-          const allUwong = path.every(pos => board[pos] === 'uwong');
-          if (board[targetPos] === null && allUwong) ctr++;
-        }
+      for (const targetPos in jumpPaths) {
+        const path = jumpPaths[targetPos];
+        const allUwong = path.every(pos => board[pos] === 'uwong');
+        if (board[targetPos] === null && allUwong) ctr++;
+      }
     }
 
     return ctr;
@@ -436,7 +436,7 @@ export const MacananGameProvider = ({ children }) => {
               setGameState('moving');
               setMessage('Uwong: Move existing ones');
             }
-            setFirstMove({ ...firstMove, macan: false });
+            setFirstMove({...firstMove, macan: false});
           } else {
             setMessage("Macan: Choose an empty place");
           }
@@ -511,32 +511,32 @@ export const MacananGameProvider = ({ children }) => {
 
     // Generate normal moves
     if (connections[currentPos]) { // Check if connections[currentPos] is defined
-        connections[currentPos].forEach(neighbor => {
-          if (board[neighbor] === null) {
-            moves.push({
-              position: neighbor,
-              captured: [],
-              isJump: false
-            });
-          }
-        });
+      connections[currentPos].forEach(neighbor => {
+        if (board[neighbor] === null) {
+          moves.push({
+            position: neighbor,
+            captured: [],
+            isJump: false
+          });
+        }
+      });
     }
 
 
     // Generate jump moves
     const jumpPaths = macanJump[currentPos];
     if (jumpPaths) { // Check if jumpPaths is defined
-        for (const targetPos in jumpPaths) {
-          const path = jumpPaths[targetPos];
-          const allUwong = path.every(pos => board[pos] === 'uwong');
-          if (board[targetPos] === null && allUwong) {
-            moves.push({
-              position: parseInt(targetPos),
-              captured: path,
-              isJump: true
-            });
-          }
+      for (const targetPos in jumpPaths) {
+        const path = jumpPaths[targetPos];
+        const allUwong = path.every(pos => board[pos] === 'uwong');
+        if (board[targetPos] === null && allUwong) {
+          moves.push({
+            position: parseInt(targetPos),
+            captured: path,
+            isJump: true
+          });
         }
+      }
     }
 
 
@@ -550,20 +550,20 @@ export const MacananGameProvider = ({ children }) => {
       // Generate all empty positions for placing pawns
       board.forEach((cell, index) => {
         if (cell === null) {
-          moves.push({ position: index });
+          moves.push({position: index});
         }
       });
     } else {
       // Generate all possible moves for existing pawns
       board.forEach((cell, index) => {
         if (cell === 'uwong') {
-            if (connections[index]) { // Check if connections[index] is defined
-                connections[index].forEach(neighbor => {
-                  if (board[neighbor] === null) {
-                    moves.push({ from: index, to: neighbor });
-                  }
-                });
-            }
+          if (connections[index]) { // Check if connections[index] is defined
+            connections[index].forEach(neighbor => {
+              if (board[neighbor] === null) {
+                moves.push({from: index, to: neighbor});
+              }
+            });
+          }
         }
       });
     }
@@ -601,11 +601,11 @@ export const MacananGameProvider = ({ children }) => {
       if (winner === 'macan') score = 10000 - depth; // Prefer faster wins
       if (winner === 'uwong') score = -10000 + depth; // Prefer slower losses
 
-      return { score };
+      return {score};
     }
 
     if (maximizingPlayer) {
-      let maxEval = { score: -Infinity };
+      let maxEval = {score: -Infinity};
       const moves = generateMacanMoves(macanPosNow, nextBoard);
 
       for (const move of moves) {
@@ -626,15 +626,14 @@ export const MacananGameProvider = ({ children }) => {
 
         let uwongGameState = "";
 
-        if(nextUwongPawnsInHand == 0){
+        if (nextUwongPawnsInHand == 0) {
           uwongGameState = 'moving'
-        }
-        else{
+        } else {
           uwongGameState = 'placing'
-        }        
-        
+        }
+
         console.log("maximizing");
-        console.log(depth -1, false, newBoard, nextUwongPawnsInHand, uwongGameState, newUwongTotal, alpha, beta);
+        console.log(depth - 1, false, newBoard, nextUwongPawnsInHand, uwongGameState, newUwongTotal, alpha, beta);
 
         const evaluation = minimaxForMacan(
           depth - 1,
@@ -648,7 +647,7 @@ export const MacananGameProvider = ({ children }) => {
         );
 
         if (evaluation.score > maxEval.score) {
-          maxEval = { score: evaluation.score, move };
+          maxEval = {score: evaluation.score, move};
         }
 
         alpha = Math.max(alpha, evaluation.score);
@@ -657,7 +656,7 @@ export const MacananGameProvider = ({ children }) => {
 
       return maxEval;
     } else {
-      let minEval = { score: Infinity };
+      let minEval = {score: Infinity};
       const moves = generateUwongMoves(nextBoard, nextUwongPawnsInHand, nextGameState);
 
       for (const move of moves) {
@@ -676,7 +675,7 @@ export const MacananGameProvider = ({ children }) => {
         }
 
         console.log("minimazing");
-        console.log(depth -1, false, newBoard, newUwongPawns, newGameState, nextUwongTotal, alpha, beta);
+        console.log(depth - 1, false, newBoard, newUwongPawns, newGameState, nextUwongTotal, alpha, beta);
 
         const evaluation = minimaxForMacan(
           depth - 1,
@@ -690,7 +689,7 @@ export const MacananGameProvider = ({ children }) => {
         );
 
         if (evaluation.score < minEval.score) {
-          minEval = { score: evaluation.score, move };
+          minEval = {score: evaluation.score, move};
         }
 
         beta = Math.min(beta, evaluation.score);
@@ -704,8 +703,8 @@ export const MacananGameProvider = ({ children }) => {
 
   // Updated AI click handler
   const handleAIClick = () => {
+    const depth = 3; // Adjust depth based on difficulty
     if (currentPlayer === 'macan' && !win) {
-      const depth = 3; // Adjust depth based on difficulty
       const result = minimaxForMacan(
         depth,
         true,
@@ -733,17 +732,64 @@ export const MacananGameProvider = ({ children }) => {
           setMacanPos(result.move.position);
 
 
-          if(uwongPawnsInHand == 0){
+          if (uwongPawnsInHand == 0) {
             setCurrentPlayer('uwong');
             setMessage('Uwong: Move existing ones');
             setGameState('moving')
-          }
-          else{
+          } else {
             setCurrentPlayer('uwong');
             setMessage('Uwong: Place remaining pawns');
             setGameState('placing')
-          }      
-          
+          }
+
+        } else if (gameState === 'placing') {
+          // Handle initial placement
+          const newBoard = [...board];
+          newBoard[result.move.position] = 'macan';
+          setBoard(newBoard);
+          setMacanPos(result.move.position);
+          setCurrentPlayer('uwong');
+          setMessage('Uwong: Place remaining pawns');
+        }
+      }
+    } else if (currentPlayer === 'uwong' && !win) {
+      const result = minimaxForMacan(
+        depth,
+        false,
+        board,
+        uwongPawnsInHand,
+        gameState,
+        uwongTotal
+      );
+
+      if (result.move) {
+        if (gameState === 'moving') {
+          // Handle movement
+          const newBoard = [...board];
+          newBoard[macanPos] = null;
+          newBoard[result.move.position] = 'macan';
+
+          if (result.move.isJump) {
+            result.move.captured.forEach(pos => {
+              newBoard[pos] = null;
+              setUwongTotal(prev => prev - result.move.captured.length);
+            });
+          }
+
+          setBoard(newBoard);
+          setMacanPos(result.move.position);
+
+
+          if (uwongPawnsInHand == 0) {
+            setCurrentPlayer('uwong');
+            setMessage('Uwong: Move existing ones');
+            setGameState('moving')
+          } else {
+            setCurrentPlayer('uwong');
+            setMessage('Uwong: Place remaining pawns');
+            setGameState('placing')
+          }
+
         } else if (gameState === 'placing') {
           // Handle initial placement
           const newBoard = [...board];
@@ -766,35 +812,35 @@ export const MacananGameProvider = ({ children }) => {
       const jump = macanJump[from];
 
       if (walk) {
-          // for checking the current node to neighbour node
-          for (const w of walk) {
-            if (board[w] !== "uwong") {
-              return true;
-            }
+        // for checking the current node to neighbour node
+        for (const w of walk) {
+          if (board[w] !== "uwong") {
+            return true;
           }
+        }
       }
 
 
       if (jump) {
-          // for checking all the jump available for macan
-          for (const key in jump) {
-            if (Object.prototype.hasOwnProperty.call(jump, key)) {
-              let value = jump[key];
-              let adaMusuh = true;
+        // for checking all the jump available for macan
+        for (const key in jump) {
+          if (Object.prototype.hasOwnProperty.call(jump, key)) {
+            let value = jump[key];
+            let adaMusuh = true;
 
-              for (const wong of value) {
-                if (board[wong] != "uwong") {
-                  adaMusuh = false;
-                }
+            for (const wong of value) {
+              if (board[wong] != "uwong") {
+                adaMusuh = false;
               }
+            }
 
-              if (adaMusuh) {
-                if (board[key] != "uwong") {
-                  return true;
-                }
+            if (adaMusuh) {
+              if (board[key] != "uwong") {
+                return true;
               }
             }
           }
+        }
       }
 
 
@@ -874,22 +920,22 @@ export const MacananGameProvider = ({ children }) => {
 
       Object.entries(connections).forEach(([from, tos]) => {
         if (tos) { // Check if tos is defined
-            tos.forEach((to) => {
-              // Only render if both positions exist and are different
-              if (nodePositions[from] && nodePositions[to] && from !== to) {
-                lines.push(
-                  <line
-                    key={`${from}-${to}`}
-                    x1={nodePositions[from].x}
-                    y1={nodePositions[from].y}
-                    x2={nodePositions[to].x}
-                    y2={nodePositions[to].y}
-                    stroke="#CBD5E0"
-                    strokeWidth="2"
-                  />
-                );
-              }
-            });
+          tos.forEach((to) => {
+            // Only render if both positions exist and are different
+            if (nodePositions[from] && nodePositions[to] && from !== to) {
+              lines.push(
+                <line
+                  key={`${from}-${to}`}
+                  x1={nodePositions[from].x}
+                  y1={nodePositions[from].y}
+                  x2={nodePositions[to].x}
+                  y2={nodePositions[to].y}
+                  stroke="#CBD5E0"
+                  strokeWidth="2"
+                />
+              );
+            }
+          });
         }
       });
 

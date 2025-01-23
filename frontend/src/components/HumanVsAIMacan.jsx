@@ -1,6 +1,6 @@
 // AiUwong.jsx
-import React, { useEffect } from 'react';
-import { MacananGameProvider, useMacananGame } from './MacananGameContext';
+import React, {useEffect} from 'react';
+import {MacananGameProvider, useMacananGame} from './MacananGameContext';
 
 const HumanVsAIMacan = () => {
   const {
@@ -42,8 +42,8 @@ const HumanVsAIMacan = () => {
                   data-position={index}
                   className={`w-12 h-12 rounded-full relative z-10 ${
                     board[index] === 'uwong' ? 'bg-green-500' :
-                    board[index] === 'macan' ? 'bg-red-500' :
-                    'bg-gray-200'
+                      board[index] === 'macan' ? 'bg-red-500' :
+                        'bg-gray-200'
                   }`}
                   onClick={() => handleClick(index)}
                 >{index}</button>
@@ -56,8 +56,8 @@ const HumanVsAIMacan = () => {
                   data-position={index}
                   className={`w-12 h-12 rounded-full relative z-10 ${
                     board[index] === 'uwong' ? 'bg-green-500' :
-                    board[index] === 'macan' ? 'bg-red-500' :
-                    'bg-gray-200'
+                      board[index] === 'macan' ? 'bg-red-500' :
+                        'bg-gray-200'
                   }`}
                   onClick={() => handleClick(index)}
                 >{index}</button>
@@ -72,8 +72,8 @@ const HumanVsAIMacan = () => {
                   data-position={index}
                   className={`w-12 h-12 rounded-full relative z-10 ${
                     board[index] === 'uwong' ? 'bg-green-500' :
-                    board[index] === 'macan' ? 'bg-red-500' :
-                    'bg-gray-200'
+                      board[index] === 'macan' ? 'bg-red-500' :
+                        'bg-gray-200'
                   }`}
                   onClick={() => handleClick(index)}
                 >{index}</button>
@@ -88,8 +88,8 @@ const HumanVsAIMacan = () => {
                   data-position={index}
                   className={`w-12 h-12 rounded-full relative z-10 ${
                     board[index] === 'uwong' ? 'bg-green-500' :
-                    board[index] === 'macan' ? 'bg-red-500' :
-                    'bg-gray-200'
+                      board[index] === 'macan' ? 'bg-red-500' :
+                        'bg-gray-200'
                   }`}
                   onClick={() => handleClick(index)}
                 >{index}</button>
@@ -102,8 +102,8 @@ const HumanVsAIMacan = () => {
                   data-position={index}
                   className={`w-12 h-12 rounded-full relative z-10 ${
                     board[index] === 'uwong' ? 'bg-green-500' :
-                    board[index] === 'macan' ? 'bg-red-500' :
-                    'bg-gray-200'
+                      board[index] === 'macan' ? 'bg-red-500' :
+                        'bg-gray-200'
                   }`}
                   onClick={() => handleClick(index)}
                 >{index}</button>

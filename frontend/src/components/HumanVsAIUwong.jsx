@@ -1,5 +1,5 @@
-import { useEffect, useRef, useState } from 'react';
-import { useNavigate } from 'react-router';
+import {useEffect, useRef, useState} from 'react';
+import {useNavigate} from 'react-router';
 import MacananUAI from './MacananUAI';
 
 const HumanVsAIUwong = () => {
@@ -184,7 +184,7 @@ const HumanVsAIUwong = () => {
       24: [19],
       22: [18],
       12: [13],
-      10: [13, 12 , 11],
+      10: [13, 12, 11],
       27: [13, 12, 11, 10, 28],
       2: [8],
       4: [9],
@@ -317,7 +317,7 @@ const HumanVsAIUwong = () => {
   // useEffect(() => {
   //   if (currentPlayer === 'uwong' && !win && !isAIThinking) {
   //     setIsAIThinking(true);
-      
+
   //     // Small delay to make AI moves feel more natural
   //     setTimeout(() => {
   //       if (gameState === 'initial') {
@@ -328,7 +328,7 @@ const HumanVsAIUwong = () => {
   //         const bestMove = MacananUAI.getBestMove(board, uwongTotal, connections, macanPos, macanJump);
   //         const validEmptySpots = Array(37).fill().map((_, i) => i).filter(i => board[i] === null);
   //         const randomSpot = validEmptySpots[Math.floor(Math.random() * validEmptySpots.length)];
-          
+
   //         const newBoard = [...board];
   //         newBoard[randomSpot] = 'uwong';
   //         setBoard(newBoard);
@@ -357,33 +357,35 @@ const HumanVsAIUwong = () => {
   useEffect(() => {
     if (currentPlayer === 'uwong' && !win && !isAIThinking) {
       setIsAIThinking(true);
-  
+
       setTimeout(() => {
         if (gameState === 'initial') {
           // AI places initial formation in a good position (center)
-          place3x3Formation(12); // Center position
+          const validCenter = [6, 7, 8, 11, 12, 13, 16, 17, 18];
+          const centerPosition = validCenter[Math.floor(Math.random() * validCenter.length)];
+          place3x3Formation(centerPosition); // Center position
         } else if (gameState === 'placing' && uwongPawnsInHand > 0) {
           // AI places remaining pawns
           const validEmptySpots = Array(37)
             .fill()
             .map((_, i) => i)
             .filter(i => board[i] === null);
-  
+
           // Pick a strategic spot using the evaluation function
           let bestScore = -Infinity;
           let bestSpot = validEmptySpots[0];
-  
+
           for (const spot of validEmptySpots) {
             const testBoard = [...board];
             testBoard[spot] = 'uwong';
             const score = MacananUAI.evaluateBoard(testBoard, uwongTotal + 1, connections, macanPos, macanJump);
-  
+
             if (score > bestScore) {
               bestScore = score;
               bestSpot = spot;
             }
           }
-  
+
           const newBoard = [...board];
           newBoard[bestSpot] = 'uwong';
           setBoard(newBoard);
@@ -408,136 +410,136 @@ const HumanVsAIUwong = () => {
     }
   }, [currentPlayer, gameState, win]);
 
- // Updated useEffect to handle window resize and page refresh
- useEffect(() => {
-  const calculateNodePositions = () => {
-    if (boardRef.current) {
-      const positions = {};
-      const nodes = boardRef.current.getElementsByTagName('button');
-      
-      // Wait for next frame to ensure DOM is fully rendered
-      requestAnimationFrame(() => {
-        Array.from(nodes).forEach((node) => {
-          const rect = node.getBoundingClientRect();
-          const boardRect = boardRef.current.getBoundingClientRect();
-          positions[node.dataset.position] = {
-            x: rect.left - boardRect.left + rect.width / 2,
-            y: rect.top - boardRect.top + rect.height / 2
-          };
+  // Updated useEffect to handle window resize and page refresh
+  useEffect(() => {
+    const calculateNodePositions = () => {
+      if (boardRef.current) {
+        const positions = {};
+        const nodes = boardRef.current.getElementsByTagName('button');
+
+        // Wait for next frame to ensure DOM is fully rendered
+        requestAnimationFrame(() => {
+          Array.from(nodes).forEach((node) => {
+            const rect = node.getBoundingClientRect();
+            const boardRect = boardRef.current.getBoundingClientRect();
+            positions[node.dataset.position] = {
+              x: rect.left - boardRect.left + rect.width / 2,
+              y: rect.top - boardRect.top + rect.height / 2
+            };
+          });
+
+          setNodePositions(positions);
         });
-        
-        setNodePositions(positions);
-      });
-    }
-  };
+      }
+    };
 
-  // Initial calculation
-  calculateNodePositions();
+    // Initial calculation
+    calculateNodePositions();
 
-  // Add resize event listener
-  window.addEventListener('resize', calculateNodePositions);
+    // Add resize event listener
+    window.addEventListener('resize', calculateNodePositions);
 
-  // Add visibility change listener for when page becomes visible again
-  document.addEventListener('visibilitychange', calculateNodePositions);
+    // Add visibility change listener for when page becomes visible again
+    document.addEventListener('visibilitychange', calculateNodePositions);
 
-  // Recalculate positions after a short delay to ensure all elements are properly rendered
-  const timeout = setTimeout(calculateNodePositions, 100);
+    // Recalculate positions after a short delay to ensure all elements are properly rendered
+    const timeout = setTimeout(calculateNodePositions, 100);
 
-  // Cleanup function
-  return () => {
-    window.removeEventListener('resize', calculateNodePositions);
-    document.removeEventListener('visibilitychange', calculateNodePositions);
-    clearTimeout(timeout);
-  };
-}, [board]); // Added board as dependency to recalculate when game state changes
+    // Cleanup function
+    return () => {
+      window.removeEventListener('resize', calculateNodePositions);
+      document.removeEventListener('visibilitychange', calculateNodePositions);
+      clearTimeout(timeout);
+    };
+  }, [board]); // Added board as dependency to recalculate when game state changes
 
-    // Check macan player condition for win
-    useEffect(() => {
-      const canMacanMove = (from) => {
-        if (from === null || !macanJump[from]) return false; // Validate from position
-      
-        const walk = connections[from];
-        const jump = macanJump[from];
-      
-        for (const w of walk) {
-          if (board[w] !== "uwong") {
+  // Check macan player condition for win
+  useEffect(() => {
+    const canMacanMove = (from) => {
+      if (from === null || !macanJump[from]) return false; // Validate from position
+
+      const walk = connections[from];
+      const jump = macanJump[from];
+
+      for (const w of walk) {
+        if (board[w] !== "uwong") {
+          return true;
+        }
+      }
+
+      for (const key in jump) {
+        if (Object.prototype.hasOwnProperty.call(jump, key)) {
+          const value = jump[key];
+          let adaMusuh = true;
+
+          for (const wong of value) {
+            if (board[wong] !== "uwong") {
+              adaMusuh = false;
+            }
+          }
+
+          if (adaMusuh && board[key] !== "uwong") {
             return true;
           }
         }
-      
-        for (const key in jump) {
-          if (Object.prototype.hasOwnProperty.call(jump, key)) {
-            const value = jump[key];
-            let adaMusuh = true;
-      
-            for (const wong of value) {
-              if (board[wong] !== "uwong") {
-                adaMusuh = false;
-              }
-            }
-      
-            if (adaMusuh && board[key] !== "uwong") {
-              return true;
-            }
-          }
-        }
-      
-        return false;
-      };
-  
-      if (uwongTotal < 14) {
-        setWin(true);
-        setWinner("macan");
-        setMessage("Macan Win!");
       }
-  
-      if (macanPos !== null && !canMacanMove(macanPos)) {
-        setWin(true);
-        setWinner("uwong");
-        setMessage("Uwong Win!");
-      }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [currentPlayer, uwongTotal, macanPos, board, connections]);
 
-const renderConnections = () => {
-  const lines = [];
-  
-  Object.entries(connections).forEach(([from, tos]) => {
-    tos.forEach((to) => {
-      // Only render if both positions exist and are different
-      if (nodePositions[from] && nodePositions[to] && from !== to) {
-        lines.push(
-          <line
-            key={`${from}-${to}`}
-            x1={nodePositions[from].x}
-            y1={nodePositions[from].y}
-            x2={nodePositions[to].x}
-            y2={nodePositions[to].y}
-            stroke="#CBD5E0"
-            strokeWidth="2"
-          />
-        );
-      }
+      return false;
+    };
+
+    if (uwongTotal < 14) {
+      setWin(true);
+      setWinner("macan");
+      setMessage("Macan Win!");
+    }
+
+    if (macanPos !== null && !canMacanMove(macanPos)) {
+      setWin(true);
+      setWinner("uwong");
+      setMessage("Uwong Win!");
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentPlayer, uwongTotal, macanPos, board, connections]);
+
+  const renderConnections = () => {
+    const lines = [];
+
+    Object.entries(connections).forEach(([from, tos]) => {
+      tos.forEach((to) => {
+        // Only render if both positions exist and are different
+        if (nodePositions[from] && nodePositions[to] && from !== to) {
+          lines.push(
+            <line
+              key={`${from}-${to}`}
+              x1={nodePositions[from].x}
+              y1={nodePositions[from].y}
+              x2={nodePositions[to].x}
+              y2={nodePositions[to].y}
+              stroke="#CBD5E0"
+              strokeWidth="2"
+            />
+          );
+        }
+      });
     });
-  });
-  
-  return lines;
-};
+
+    return lines;
+  };
 
   const place3x3Formation = (centerPosition) => {
     const newBoard = [...board];
     const row = Math.floor(centerPosition / 5);
     const col = centerPosition % 5;
-    
+
     if (row < 1 || row > 3 || col < 1 || col > 3) {
       setMessage('Invalid position. Choose center position for 3x3 formation');
       return;
     }
 
     const positions = [
-      [(row-1)*5 + (col-1), (row-1)*5 + col, (row-1)*5 + (col+1)],
-      [row*5 + (col-1), row*5 + col, row*5 + (col+1)],
-      [(row+1)*5 + (col-1), (row+1)*5 + col, (row+1)*5 + (col+1)]
+      [(row - 1) * 5 + (col - 1), (row - 1) * 5 + col, (row - 1) * 5 + (col + 1)],
+      [row * 5 + (col - 1), row * 5 + col, row * 5 + (col + 1)],
+      [(row + 1) * 5 + (col - 1), (row + 1) * 5 + col, (row + 1) * 5 + (col + 1)]
     ];
 
     positions.flat().forEach(pos => {
@@ -581,7 +583,7 @@ const renderConnections = () => {
   const findJumpPath = (from, to) => {
     const listJump = macanJump[from];
     const path = listJump[to];
-    
+
     return path;
   };
 
@@ -643,7 +645,6 @@ const renderConnections = () => {
   };
 
 
-
   return (
     <div className="min-h-screen bg-gray-100 flex justify-center items-center">
       <div className="relative w-full max-w-4xl mx-auto" ref={boardRef}>
@@ -663,8 +664,8 @@ const renderConnections = () => {
                   data-position={index}
                   className={`w-12 h-12 rounded-full bg-gray-200 relative z-10 ${
                     board[index] === 'uwong' ? 'bg-green-500' :
-                    board[index] === 'macan' ? 'bg-red-500' :
-                    'bg-gray-200'
+                      board[index] === 'macan' ? 'bg-red-500' :
+                        'bg-gray-200'
                   }`}
                   onClick={() => handleClick(index)}
                 >{index}</button>
@@ -677,8 +678,8 @@ const renderConnections = () => {
                   data-position={index}
                   className={`w-12 h-12 rounded-full bg-gray-200 relative z-10 ${
                     board[index] === 'uwong' ? 'bg-green-500' :
-                    board[index] === 'macan' ? 'bg-red-500' :
-                    'bg-gray-200'
+                      board[index] === 'macan' ? 'bg-red-500' :
+                        'bg-gray-200'
                   }`}
                   onClick={() => handleClick(index)}
                 >{index}</button>
@@ -693,8 +694,8 @@ const renderConnections = () => {
                   data-position={index}
                   className={`w-12 h-12 rounded-full bg-gray-200 relative z-10 ${
                     board[index] === 'uwong' ? 'bg-green-500' :
-                    board[index] === 'macan' ? 'bg-red-500' :
-                    'bg-gray-200'
+                      board[index] === 'macan' ? 'bg-red-500' :
+                        'bg-gray-200'
                   }`}
                   onClick={() => handleClick(index)}
                 >{index}</button>
@@ -709,8 +710,8 @@ const renderConnections = () => {
                   data-position={index}
                   className={`w-12 h-12 rounded-full bg-gray-200 relative z-10 ${
                     board[index] === 'uwong' ? 'bg-green-500' :
-                    board[index] === 'macan' ? 'bg-red-500' :
-                    'bg-gray-200'
+                      board[index] === 'macan' ? 'bg-red-500' :
+                        'bg-gray-200'
                   }`}
                   onClick={() => handleClick(index)}
                 >{index}</button>
@@ -723,8 +724,8 @@ const renderConnections = () => {
                   data-position={index}
                   className={`w-12 h-12 rounded-full bg-gray-200 relative z-10 ${
                     board[index] === 'uwong' ? 'bg-green-500' :
-                    board[index] === 'macan' ? 'bg-red-500' :
-                    'bg-gray-200'
+                      board[index] === 'macan' ? 'bg-red-500' :
+                        'bg-gray-200'
                   }`}
                   onClick={() => handleClick(index)}
                 >{index}</button>
@@ -732,27 +733,27 @@ const renderConnections = () => {
             </div>
           </div>
           <div className="mt-4">
-              <div className="text-sm">Remaining Unused Uwong pawns: {uwongPawnsInHand}</div>
+            <div className="text-sm">Remaining Unused Uwong pawns: {uwongPawnsInHand}</div>
           </div>
           <div className="mt-2">
-              <div className="text-sm">Total Uwong pawns: {uwongTotal}</div>
+            <div className="text-sm">Total Uwong pawns: {uwongTotal}</div>
           </div>
-          {win && 
-          <div className="flex gap-4">
-            <button 
-              onClick={goBack}
-              className="bg-blue-600 hover:bg-blue-700 text-white text-lg px-8 py-3 rounded-lg shadow-md transition duration-200"
-            >
-              Go Back
-            </button>
-            <button 
-              onClick={restartGame}
-              className="bg-green-600 hover:bg-green-700 text-white text-lg px-8 py-3 rounded-lg shadow-md transition duration-200"
-            >
-              Restart
-            </button>
-          </div>
-        }
+          {win &&
+            <div className="flex gap-4">
+              <button
+                onClick={goBack}
+                className="bg-blue-600 hover:bg-blue-700 text-white text-lg px-8 py-3 rounded-lg shadow-md transition duration-200"
+              >
+                Go Back
+              </button>
+              <button
+                onClick={restartGame}
+                className="bg-green-600 hover:bg-green-700 text-white text-lg px-8 py-3 rounded-lg shadow-md transition duration-200"
+              >
+                Restart
+              </button>
+            </div>
+          }
         </div>
       </div>
     </div>
