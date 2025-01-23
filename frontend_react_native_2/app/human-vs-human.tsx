@@ -1,261 +1,171 @@
 import React from 'react';
-import { View, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, ScrollView } from 'react-native';
 import { useMacananGame } from '@/components/MacananGameContext';
-import { ThemedText } from '@/components/ThemedText';
-import { ThemedView } from '@/components/ThemedView';
-import { Svg, Line } from 'react-native-svg';
 
-const HumanVsHumanGame = () => {
+const GameScreen = () => {
   const {
     board,
     message,
     uwongPawnsInHand,
     uwongTotal,
-    boardRef, // In React Native, refs are handled differently for layout calculations if needed. Consider if boardRef is necessary for layout in RN.
-    handleInitialPlacement,
-    handleMacanPlacement,
-    handlePawnMove,
-    renderLines, // Assuming this is adapted for React Native SVG
+    handleClick,
     win,
-    resetGame,
-    setGameState,
+    goBack,
+    restartGame,
+    renderConnections, // Add renderConnections from context
+    boardRef, // Add boardRef from context
   } = useMacananGame();
 
-  const handleClick = (index: number) => {
-    if (win) return;
-    if (board[index] === null) {
-      if (uwongPawnsInHand > 0) {
-        handleInitialPlacement(index);
-      } else if (board.filter(x => x === 'macan').length === 0) {
-        handleMacanPlacement(index);
-      }
-    } else {
-      handlePawnMove(index);
+  const renderPosition = (index: number) => {
+    let bgColor = '#e0e0e0'; // Default position color (like bg-gray-200)
+
+    if (board[index] === 'uwong') {
+      bgColor = '#4CAF50'; // uwong color (like bg-green-500)
+    } else if (board[index] === 'macan') {
+      bgColor = '#F44336'; // macan color (like bg-red-500)
     }
-  };
 
-  const restartGame = () => {
-    resetGame();
-    setGameState('initial');
+    return (
+      <TouchableOpacity
+        key={index}
+        data-position={index}
+        style={{ // Inline styles to mimic HumanVsHumanGame.jsx styling
+          width: 40, // w-12 in Tailwind (12 * 4px = 48px)
+          height: 40, // h-12 in Tailwind
+          borderRadius: 24, // rounded-full
+          backgroundColor: bgColor,
+          justifyContent: 'center',
+          alignItems: 'center',
+          margin: 4, // gap-4 in parent grid might imply margin: 4
+          zIndex: 10, // relative z-10
+        }}
+        onPress={() => handleClick(index)}
+        disabled={win}
+      >
+        <Text style={{ color: '#666' }}>{index}</Text> {/* positionText style - adjust as needed */}
+      </TouchableOpacity>
+    );
   };
-
-  const goBack = () => {
-    setGameState('initial');
-  };
-
-  console.log({
-    board,
-    message,
-    uwongPawnsInHand,
-    uwongTotal,
-    boardRef,
-    handleClick,
-    renderLines,
-  });
 
   return (
-    <ThemedView style={styles.container}>
-      <View style={styles.boardContainer} ref={boardRef as any}> {/* Adjust ref type if necessary */}
-        <Svg style={styles.svgOverlay}>
-          {renderLines()}
-        </Svg>
-        <View style={styles.gameInfoContainer}>
-          <ThemedText style={styles.messageText}>{message}</ThemedText>
-          <View style={styles.pawnsContainer}>
+    <ScrollView contentContainerStyle={{ flexGrow: 1, backgroundColor: '#f0f0f0', alignItems: 'center', justifyContent: 'center', padding: 20 }}> {/* container style - adjust as needed */}
+      <View ref={boardRef} style={{ position: 'relative', width: '100%', maxWidth: 896, marginHorizontal: 'auto' }}> {/* mimicking relative w-full max-w-4xl mx-auto and boardRef application */}
+        {/* SVG for connections - ensure react-native-svg is setup */}
+        <View style={{ position: 'absolute', width: '100%', height: '100%', pointerEvents: 'none' }}>
+          {renderConnections()}
+        </View>
+
+        <View style={{ flexDirection: 'column', alignItems: 'center', gap: 20 }}> {/* flex flex-col items-center gap-4 */}
+          <Text style={{ fontSize: 24, fontWeight: 'bold', textAlign: 'center', marginBottom: 10 }}>{message}</Text> {/* text-xl font-bold text-center and some margin */}
+          <View style={{ flexDirection: 'row', justifyContent: 'center', alignItems: 'center', gap: 32 }}> {/* flex justify-center items-center gap-8 */}
             {/* Left Wing */}
-            <View style={styles.wingContainer}>
-              {[25, 27, 29].map((index) => (
-                <TouchableOpacity
-                  key={index}
-                  onPress={() => handleClick(index)}
-                  style={[
-                    styles.pieceButton,
-                    board[index] === 'uwong' ? styles.uwongPiece : (board[index] === 'macan' ? styles.macanPiece : styles.emptyPiece),
-                  ]}
-                >
-                  {/* <Text>{index}</Text>  Remove index display for cleaner UI in RN*/}
-                </TouchableOpacity>
-              ))}
+            <View style={{ flexDirection: 'column', gap: 80 }}> {/* grid grid-cols-1 gap-20 - vertical gap is larger */}
+              {[25, 27, 29].map((index) => renderPosition(index))}
             </View>
-            <View style={styles.wingContainer}>
-              {[26, 28, 30].map((index) => (
-                <TouchableOpacity
-                  key={index}
-                  onPress={() => handleClick(index)}
-                  style={[
-                    styles.pieceButton,
-                    board[index] === 'uwong' ? styles.uwongPiece : (board[index] === 'macan' ? styles.macanPiece : styles.emptyPiece),
-                  ]}
-                >
-                  {/* <Text>{index}</Text> Remove index display for cleaner UI in RN */}
-                </TouchableOpacity>
-              ))}
+            <View style={{ flexDirection: 'column', gap: 16 }}> {/* grid grid-cols-1 gap-4 - vertical gap is smaller */}
+              {[26, 28, 30].map((index) => renderPosition(index))}
             </View>
 
             {/* Main 5x5 Grid */}
-            <View style={styles.mainGridContainer}>
-              {Array(25).fill(null).map((_, index) => (
-                <TouchableOpacity
-                  key={index}
-                  onPress={() => handleClick(index)}
-                  style={[
-                    styles.pieceButton,
-                    board[index] === 'uwong' ? styles.uwongPiece : (board[index] === 'macan' ? styles.macanPiece : styles.emptyPiece),
-                  ]}
-                >
-                  {/* <Text>{index}</Text> Remove index display for cleaner UI in RN */}
-                </TouchableOpacity>
-              ))}
+            <View style={{ flexDirection: 'row', flexWrap: 'wrap', width: 250 }}> {/* grid grid-cols-5 gap-4 and width */}
+              {Array(25  ).fill(null).map((_, index) => renderPosition(index))}
             </View>
 
             {/* Right Wing */}
-            <View style={styles.wingContainer}>
-              {[31, 33, 35].map((index) => (
-                <TouchableOpacity
-                  key={index}
-                  onPress={() => handleClick(index)}
-                  style={[
-                    styles.pieceButton,
-                    board[index] === 'uwong' ? styles.uwongPiece : (board[index] === 'macan' ? styles.macanPiece : styles.emptyPiece),
-                  ]}
-                >
-                  {/* <Text>{index}</Text> Remove index display for cleaner UI in RN */}
-                </TouchableOpacity>
-              ))}
+            <View style={{ flexDirection: 'column', gap: 16 }}> {/* grid grid-cols-1 gap-4 - vertical gap is smaller */}
+              {[31, 33, 35].map((index) => renderPosition(index))}
             </View>
-            <View style={styles.wingContainer}>
-              {[32, 34, 36].map((index) => (
-                <TouchableOpacity
-                  key={index}
-                  onPress={() => handleClick(index)}
-                  style={[
-                    styles.pieceButton,
-                    board[index] === 'uwong' ? styles.uwongPiece : (board[index] === 'macan' ? styles.macanPiece : styles.emptyPiece),
-                  ]}
-                >
-                  {/* <Text>{index}</Text> Remove index display for cleaner UI in RN */}
-                </TouchableOpacity>
-              ))}
+            <View style={{ flexDirection: 'column', gap: 80 }}> {/* grid grid-cols-1 gap-20 - vertical gap is larger */}
+              {[32, 34, 36].map((index) => renderPosition(index))}
             </View>
           </View>
-          <View style={styles.infoTextContainer}>
-            <ThemedText style={styles.infoText}>Remaining Unused Uwong pawns: {uwongPawnsInHand}</ThemedText>
+          <View style={{ marginTop: 16, alignItems: 'center' }}> {/* mt-4 and centering */}
+            <Text style={{ fontSize: 16 }}>Remaining Unused Uwong pawns: {uwongPawnsInHand}</Text> {/* text-sm */}
+            <Text style={{ fontSize: 16 }}>Total Uwong pawns: {uwongTotal}</Text> {/* text-sm */}
           </View>
-          <View style={styles.infoTextContainer}>
-            <ThemedText style={styles.infoText}>Total Uwong pawns: {uwongTotal}</ThemedText>
-          </View>
-
           {win && (
-            <View style={styles.winButtonsContainer}>
+            <View style={{ flexDirection: 'row', gap: 16, marginTop: 16 }}> {/* flex gap-4 and mt-4 */}
               <TouchableOpacity
                 onPress={goBack}
-                style={styles.winButton}
-              >
-                <ThemedText style={styles.winButtonText}>Go Back</ThemedText>
+                style={{ backgroundColor: '#2196F3', paddingVertical: 12, paddingHorizontal: 32, borderRadius: 8 }}> {/* button styles - adjust padding for px-8 py-3 and bg-blue-600 hover:bg-blue-700 etc. */}
+                <Text style={{ color: 'white', fontWeight: 'bold', fontSize: 18 }}>Go Back</Text> {/* buttonText styles - adjust fontSize for text-lg */}
               </TouchableOpacity>
               <TouchableOpacity
                 onPress={restartGame}
-                style={styles.winButton}
-              >
-                <ThemedText style={styles.winButtonText}>Restart</ThemedText>
+                style={{ backgroundColor: '#4CAF50', paddingVertical: 12, paddingHorizontal: 32, borderRadius: 8 }}> {/* button styles - adjust padding for px-8 py-3 and bg-green-600 hover:bg-green-700 etc. */}
+                <Text style={{ color: 'white', fontWeight: 'bold', fontSize: 18 }}>Restart</Text> {/* buttonText styles - adjust fontSize for text-lg */}
               </TouchableOpacity>
             </View>
           )}
         </View>
       </View>
-    </ThemedView>
+    </ScrollView>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
-    backgroundColor: '#f0f0f0', // Adjust background color as needed
+    flexGrow: 1,
+    padding: 20,
+    backgroundColor: '#f0f0f0',
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  message: {
+    fontSize: 18,
+    marginBottom: 20,
+    textAlign: 'center',
   },
   boardContainer: {
-    width: '90%', // Adjust board width as needed
-    maxWidth: 400, // Maximum width for larger screens
-    aspectRatio: 1, // Ensure it's a square
-    position: 'relative', // To position SVG overlay
-  },
-  svgOverlay: {
-    position: 'absolute',
-    width: '100%',
-    height: '100%',
-    zIndex: 0, // Ensure it's behind the buttons
-  },
-  gameInfoContainer: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 10, // Spacing between elements
-  },
-  messageText: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    textAlign: 'center',
-    marginVertical: 10,
-  },
-  pawnsContainer: {
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
-    gap: 8,
   },
-  wingContainer: {
-    gap: 10,
-  },
-  mainGridContainer: {
-    gridTemplateColumns: 'repeat(5, minmax(0, 1fr))', // Not directly applicable in RN styles
+  mainGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    width: 5 * 40 + 4 * 8, // 5 buttons * 40 width + 4 gaps * 8 width, adjust as needed, assuming pieceButton size is 40 and gap is 8
-    justifyContent: 'center',
+    width: 250,
   },
-  pieceButton: {
-    width: 40, // Adjust piece button size
+  wingContainer: {
+    justifyContent: 'space-between',
+    marginHorizontal: 10,
+  },
+  position: {
+    width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: 'gray',
-    margin: 4, // Adjust spacing between buttons
+    backgroundColor: '#e0e0e0',
     justifyContent: 'center',
     alignItems: 'center',
-    zIndex: 10, // Ensure pieces are above the svg
+    margin: 4,
   },
-  emptyPiece: {
-    backgroundColor: '#d4d4d4', // Light gray for empty spots
+  positionText: {
+    color: '#666',
   },
-  uwongPiece: {
-    backgroundColor: 'green',
+  uwong: {
+    backgroundColor: '#4CAF50',
   },
-  macanPiece: {
-    backgroundColor: 'red',
+  macan: {
+    backgroundColor: '#F44336',
   },
-  infoTextContainer: {
-    marginTop: 10,
+  stats: {
+    marginBottom: 20,
+    alignItems: 'center',
   },
-  infoText: {
-    fontSize: 16,
-  },
-  winButtonsContainer: {
+  controls: {
     flexDirection: 'row',
-    gap: 15,
-    marginTop: 20,
+    justifyContent: 'center',
+    gap: 20,
   },
-  winButton: {
-    backgroundColor: 'blue', // Example button style
-    paddingVertical: 10,
-    paddingHorizontal: 20,
+  button: {
+    backgroundColor: '#2196F3',
+    padding: 15,
     borderRadius: 8,
   },
-  winButtonText: {
+  buttonText: {
     color: 'white',
-    fontSize: 16,
     fontWeight: 'bold',
-    textAlign: 'center',
   },
 });
 
-export default HumanVsHumanGame;
+export default GameScreen;
