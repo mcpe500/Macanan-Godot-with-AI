@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router';
 import MacananUAI from './MacananUAI';
 
-const MacananUwongAI = () => {
+const HumanVsAIUwong = () => {
   const [board, setBoard] = useState(Array(37).fill(null));
   const [currentPlayer, setCurrentPlayer] = useState('uwong');
   const [uwongPawnsInHand, setUwongPawnsInHand] = useState(21);
@@ -759,4 +759,4 @@ const renderConnections = () => {
   );
 };
 
-export default MacananUwongAI;
+export default HumanVsAIUwong;

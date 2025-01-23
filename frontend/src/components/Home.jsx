@@ -7,7 +7,7 @@ const Home = () => {
         <h1 className="text-4xl mb-4 text-blue-600 font-bold">Welcome to the Macanan Game</h1>
         <p className="text-xl mb-4 text-gray-600">Get ready for an exciting adventure!</p>
         <a 
-          href="/option"
+          href="/game-modes"
           className="bg-blue-600 hover:bg-blue-700 text-white text-lg px-8 py-3 rounded-lg shadow-md transition duration-200 inline-block"
         >
           Start Game

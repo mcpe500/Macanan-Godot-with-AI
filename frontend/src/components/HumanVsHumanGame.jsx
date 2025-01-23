@@ -1,6 +1,6 @@
 import { useMacananGame } from './MacananGameContext';
 
-const MacananGame = () => {
+const HumanVsHumanGame = () => {
   const {
     board,
     message,
@@ -132,4 +132,4 @@ const MacananGame = () => {
   );
 };
 
-export default MacananGame;
+export default HumanVsHumanGame;

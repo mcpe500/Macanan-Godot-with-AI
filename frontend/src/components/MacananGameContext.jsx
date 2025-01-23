@@ -1,22 +1,22 @@
-// MacananGameContext.js
+// MacananGameContext.jsx
 import { createContext, useContext, useState, useEffect, useRef } from 'react';
 
 const MacananGameContext = createContext();
 
 export const MacananGameProvider = ({ children }) => {
-  const [board, setBoard] = useState(Array(37).fill(null)); // butuh di pass baru ke minimax
+  const [board, setBoard] = useState(Array(37).fill(null));
   const [currentPlayer, setCurrentPlayer] = useState('uwong');
-  const [uwongPawnsInHand, setUwongPawnsInHand] = useState(21); // butuh di pass baru ke minimax
-  const [gameState, setGameState] = useState('initial'); // butuh di pass baru ke minimax
+  const [uwongPawnsInHand, setUwongPawnsInHand] = useState(21);
+  const [gameState, setGameState] = useState('initial');
   const [selectedPiece, setSelectedPiece] = useState(null);
   const [message, setMessage] = useState('Uwong: Click anywhere to place initial 3x3 formation');
   const [win, setWin] = useState(false);
   const [winner, setWinner] = useState(null);
-  const [uwongTotal, setUwongTotal] = useState(21); // butuh di pass baru ke minimax
-  const [macanPos, setMacanPos] = useState(null); // setelah dipikir pikir ini buat apa kalau macan pos disimpan di board juga?
-  const [nodePositions, setNodePositions] = useState({}); // ini buat rendering
-  const boardRef = useRef(null); // ini buat rendering
-  const [firstMove, setFirstMove] = useState({ uwong: true, macan: false }); // buat apa ini anjir?
+  const [uwongTotal, setUwongTotal] = useState(21);
+  const [macanPos, setMacanPos] = useState(null);
+  const [nodePositions, setNodePositions] = useState({});
+  const boardRef = useRef(null);
+  const [firstMove, setFirstMove] = useState({ uwong: true, macan: false });
 
 
   const connections = {
@@ -351,32 +351,36 @@ export const MacananGameProvider = ({ children }) => {
     return path;
   };
 
-  // Updated canMacanMoveCounter to accept board as parameter (done)
   const canMacanMoveCounter = (from, board) => {
     let ctr = 0;
     const walk = connections[from];
+    if (!walk) return 0; // Add check if walk is undefined
 
-    // Count walk moves (done)
+    // Count walk moves
     walk.forEach(neighbor => {
       if (board[neighbor] === null) ctr++;
     });
 
-    // Count jump moves (done)
+    // Count jump moves
     const jumpPaths = macanJump[from];
-    for (const targetPos in jumpPaths) {
-      const path = jumpPaths[targetPos];
-      const allUwong = path.every(pos => board[pos] === 'uwong');
-      if (board[targetPos] === null && allUwong) ctr++;
+    if (jumpPaths) { // Add check if jumpPaths is undefined
+        for (const targetPos in jumpPaths) {
+          const path = jumpPaths[targetPos];
+          const allUwong = path.every(pos => board[pos] === 'uwong');
+          if (board[targetPos] === null && allUwong) ctr++;
+        }
     }
 
     return ctr;
   };
 
-  const canMacanWalkCounter = (from) => { // (not done)
+
+  const canMacanWalkCounter = (from) => {
     let ctr = 0;
     const walk = connections[from];
+    if (!walk) return 0; // Add check if walk is undefined
 
-    // for checking the current node to neighbour node (not done)
+    // for checking the current node to neighbour node
     for (const w of walk) {
       if (board[w] !== "uwong") {
         ctr += 1;
@@ -386,8 +390,10 @@ export const MacananGameProvider = ({ children }) => {
     return ctr;
   }
 
-  const canMacanJumpCounter = (from) => { // (not done)
+  const canMacanJumpCounter = (from) => {
+    let ctr = 0;
     const jump = macanJump[from];
+    if (!jump) return 0; // Add check if jump is undefined
 
     for (const key in jump) {
       if (Object.prototype.hasOwnProperty.call(jump, key)) {
@@ -499,219 +505,227 @@ export const MacananGameProvider = ({ children }) => {
     }
   };
 
-  // Helper functions for move generation (done)
-  const generateMacanMoves = (currentPos, board) => { // (done)
-    const moves = []; // (done)
+  // Helper functions for move generation
+  const generateMacanMoves = (currentPos, board) => {
+    const moves = [];
 
-    // Generate normal moves (done)
-    connections[currentPos].forEach(neighbor => { // (done)
-      if (board[neighbor] === null) { // (done)
-        moves.push({ // (done)
-          position: neighbor, // (done)
-          captured: [], // (done)
-          isJump: false // (done)
+    // Generate normal moves
+    if (connections[currentPos]) { // Check if connections[currentPos] is defined
+        connections[currentPos].forEach(neighbor => {
+          if (board[neighbor] === null) {
+            moves.push({
+              position: neighbor,
+              captured: [],
+              isJump: false
+            });
+          }
         });
-      }
-    });
-
-    // Generate jump moves (done)
-    const jumpPaths = macanJump[currentPos]; // (done)
-    for (const targetPos in jumpPaths) { // (done)
-      const path = jumpPaths[targetPos]; // (done)
-      const allUwong = path.every(pos => board[pos] === 'uwong'); // (done)
-      if (board[targetPos] === null && allUwong) { // (done)
-        moves.push({ // (done)
-          position: parseInt(targetPos), // (done)
-          captured: path, // (done)
-          isJump: true // (done)
-        });
-      }
     }
 
-    return moves; // (done)
+
+    // Generate jump moves
+    const jumpPaths = macanJump[currentPos];
+    if (jumpPaths) { // Check if jumpPaths is defined
+        for (const targetPos in jumpPaths) {
+          const path = jumpPaths[targetPos];
+          const allUwong = path.every(pos => board[pos] === 'uwong');
+          if (board[targetPos] === null && allUwong) {
+            moves.push({
+              position: parseInt(targetPos),
+              captured: path,
+              isJump: true
+            });
+          }
+        }
+    }
+
+
+    return moves;
   };
 
-  const generateUwongMoves = (board, uwongPawnsInHand, gameState) => { // (done)
-    const moves = []; // (done)
+  const generateUwongMoves = (board, uwongPawnsInHand, gameState) => {
+    const moves = [];
 
-    if (gameState === 'placing') { // (done)
-      // Generate all empty positions for placing pawns (done)
-      board.forEach((cell, index) => { // (done)
-        if (cell === null) { // (done)
-          moves.push({ position: index }); // (done)
+    if (gameState === 'placing') {
+      // Generate all empty positions for placing pawns
+      board.forEach((cell, index) => {
+        if (cell === null) {
+          moves.push({ position: index });
         }
       });
-    } else { // (done)
-      // Generate all possible moves for existing pawns (done)
-      board.forEach((cell, index) => { // (done)
-        if (cell === 'uwong') { // (done)
-          connections[index].forEach(neighbor => { // (done)
-            if (board[neighbor] === null) { // (done)
-              moves.push({ from: index, to: neighbor }); // (done)
+    } else {
+      // Generate all possible moves for existing pawns
+      board.forEach((cell, index) => {
+        if (cell === 'uwong') {
+            if (connections[index]) { // Check if connections[index] is defined
+                connections[index].forEach(neighbor => {
+                  if (board[neighbor] === null) {
+                    moves.push({ from: index, to: neighbor });
+                  }
+                });
             }
-          });
         }
       });
     }
 
-    return moves; // (done)
+    return moves;
   };
 
-  // Updated minimax function and related helpers in MacananGameContext.js (done)
+  // Updated minimax function and related helpers in MacananGameContext.js
 
-  const minimax = (depth, maximizingPlayer, nextBoard, nextUwongPawnsInHand, nextGameState, nextUwongTotal, alpha = -Infinity, beta = Infinity) => { // (done)
-    const macanPosNow = nextBoard.findIndex(pos => pos === "macan"); // (done)
-    let gameOver = false; // (done)
-    let winner = null; // (done)
+  const minimax = (depth, maximizingPlayer, nextBoard, nextUwongPawnsInHand, nextGameState, nextUwongTotal, alpha = -Infinity, beta = Infinity) => {
+    const macanPosNow = nextBoard.findIndex(pos => pos === "macan");
+    let gameOver = false;
+    let winner = null;
 
-    // Check win conditions (done)
-    if (nextUwongTotal < 14) { // (done)
-      gameOver = true; // (done)
-      winner = 'macan'; // (done)
+    // Check win conditions
+    if (nextUwongTotal < 14) {
+      gameOver = true;
+      winner = 'macan';
     }
 
-    const macanCanMove = canMacanMoveCounter(macanPosNow, nextBoard); // (done)
-    if (macanCanMove === 0) { // (done)
-      gameOver = true; // (done)
-      winner = 'uwong'; // (done)
+    const macanCanMove = canMacanMoveCounter(macanPosNow, nextBoard);
+    if (macanCanMove === 0) {
+      gameOver = true;
+      winner = 'uwong';
     }
 
-    if (depth === 0 || gameOver) { // (done)
-      let score = 0; // (done)
+    if (depth === 0 || gameOver) {
+      let score = 0;
 
-      // Base scoring (done)
-      score -= nextUwongTotal * 10;  // Prioritize reducing Uwong pawns (done)
-      score += macanCanMove * 4;     // Encourage keeping movement options (done)
+      // Base scoring
+      score -= nextUwongTotal * 10;  // Prioritize reducing Uwong pawns
+      score += macanCanMove * 4;     // Encourage keeping movement options
 
-      // Win/loss conditions (done)
-      if (winner === 'macan') score = 10000 - depth; // Prefer faster wins (done)
-      if (winner === 'uwong') score = -10000 + depth; // Prefer slower losses (done)
+      // Win/loss conditions
+      if (winner === 'macan') score = 10000 - depth; // Prefer faster wins
+      if (winner === 'uwong') score = -10000 + depth; // Prefer slower losses
 
-      return { score }; // (done)
+      return { score };
     }
 
-    if (maximizingPlayer) { // (done)
-      let maxEval = { score: -Infinity }; // (done)
-      const moves = generateMacanMoves(macanPosNow, nextBoard); // (done)
+    if (maximizingPlayer) {
+      let maxEval = { score: -Infinity };
+      const moves = generateMacanMoves(macanPosNow, nextBoard);
 
-      for (const move of moves) { // (done)
-        const newBoard = [...nextBoard]; // (done)
-        let newUwongTotal = nextUwongTotal; // (done)
+      for (const move of moves) {
+        const newBoard = [...nextBoard];
+        let newUwongTotal = nextUwongTotal;
 
-        // Apply move (done)
-        newBoard[macanPosNow] = null; // (done)
-        newBoard[move.position] = 'macan'; // (done)
+        // Apply move
+        newBoard[macanPosNow] = null;
+        newBoard[move.position] = 'macan';
 
-        // Handle jumps and captures (done)
-        if (move.isJump) { // (done)
-          move.captured.forEach(pos => { // (done)
-            newBoard[pos] = null; // (done)
-            newUwongTotal--; // (done)
+        // Handle jumps and captures
+        if (move.isJump) {
+          move.captured.forEach(pos => {
+            newBoard[pos] = null;
+            newUwongTotal--;
           });
         }
 
-        const evaluation = minimax( // (done)
-          depth - 1, // (done)
-          false, // (done)
-          newBoard, // (done)
-          nextUwongPawnsInHand, // (done)
-          'moving', // (done)
-          newUwongTotal, // (done)
-          alpha, // (done)
-          beta // (done)
+        const evaluation = minimax(
+          depth - 1,
+          false,
+          newBoard,
+          nextUwongPawnsInHand,
+          'moving',
+          newUwongTotal,
+          alpha,
+          beta
         );
 
-        if (evaluation.score > maxEval.score) { // (done)
-          maxEval = { score: evaluation.score, move }; // (done)
+        if (evaluation.score > maxEval.score) {
+          maxEval = { score: evaluation.score, move };
         }
 
-        alpha = Math.max(alpha, evaluation.score); // (done)
-        if (beta <= alpha) break; // Alpha-beta pruning (done)
+        alpha = Math.max(alpha, evaluation.score);
+        if (beta <= alpha) break; // Alpha-beta pruning
       }
 
-      return maxEval; // (done)
-    } else { // (done)
-      let minEval = { score: Infinity }; // (done)
-      const moves = generateUwongMoves(nextBoard, nextUwongPawnsInHand, nextGameState); // (done)
+      return maxEval;
+    } else {
+      let minEval = { score: Infinity };
+      const moves = generateUwongMoves(nextBoard, nextUwongPawnsInHand, nextGameState);
 
-      for (const move of moves) { // (done)
-        const newBoard = [...nextBoard]; // (done)
-        let newUwongPawns = nextUwongPawnsInHand; // (done)
-        let newGameState = nextGameState; // (done)
+      for (const move of moves) {
+        const newBoard = [...nextBoard];
+        let newUwongPawns = nextUwongPawnsInHand;
+        let newGameState = nextGameState;
 
-        // Apply Uwong move (done)
-        if (nextGameState === 'placing') { // (done)
-          newBoard[move.position] = 'uwong'; // (done)
-          newUwongPawns--; // (done)
-          if (newUwongPawns === 0) newGameState = 'moving'; // (done)
-        } else { // (done)
-          newBoard[move.from] = null; // (done)
-          newBoard[move.to] = 'uwong'; // (done)
+        // Apply Uwong move
+        if (nextGameState === 'placing') {
+          newBoard[move.position] = 'uwong';
+          newUwongPawns--;
+          if (newUwongPawns === 0) newGameState = 'moving';
+        } else {
+          newBoard[move.from] = null;
+          newBoard[move.to] = 'uwong';
         }
 
-        const evaluation = minimax( // (done)
-          depth - 1, // (done)
-          true, // (done)
-          newBoard, // (done)
-          newUwongPawns, // (done)
-          newGameState, // (done)
-          nextUwongTotal, // (done)
-          alpha, // (done)
-          beta // (done)
+        const evaluation = minimax(
+          depth - 1,
+          true,
+          newBoard,
+          newUwongPawns,
+          newGameState,
+          nextUwongTotal,
+          alpha,
+          beta
         );
 
-        if (evaluation.score < minEval.score) { // (done)
-          minEval = { score: evaluation.score, move }; // (done)
+        if (evaluation.score < minEval.score) {
+          minEval = { score: evaluation.score, move };
         }
 
-        beta = Math.min(beta, evaluation.score); // (done)
-        if (beta <= alpha) break; // Alpha-beta pruning (done)
+        beta = Math.min(beta, evaluation.score);
+        if (beta <= alpha) break; // Alpha-beta pruning
       }
 
-      return minEval; // (done)
+      return minEval;
     }
   };
 
 
-  // Updated AI click handler (done)
-  const handleAIClick = () => { // (done)
-    if (currentPlayer === 'macan' && !win) { // (done)
-      const depth = 3; // Adjust depth based on difficulty (done)
-      const result = minimax( // (done)
-        depth, // (done)
-        true, // (done)
-        board, // (done)
-        uwongPawnsInHand, // (done)
-        gameState, // (done)
-        uwongTotal // (done)
+  // Updated AI click handler
+  const handleAIClick = () => {
+    if (currentPlayer === 'macan' && !win) {
+      const depth = 3; // Adjust depth based on difficulty
+      const result = minimax(
+        depth,
+        true,
+        board,
+        uwongPawnsInHand,
+        gameState,
+        uwongTotal
       );
 
-      if (result.move) { // (done)
-        if (gameState === 'moving') { // (done)
-          // Handle movement (done)
-          const newBoard = [...board]; // (done)
-          newBoard[macanPos] = null; // (done)
-          newBoard[result.move.position] = 'macan'; // (done)
+      if (result.move) {
+        if (gameState === 'moving') {
+          // Handle movement
+          const newBoard = [...board];
+          newBoard[macanPos] = null;
+          newBoard[result.move.position] = 'macan';
 
-          if (result.move.isJump) { // (done)
-            result.move.captured.forEach(pos => { // (done)
-              newBoard[pos] = null; // (done)
-              setUwongTotal(prev => prev - result.move.captured.length); // (done)
+          if (result.move.isJump) {
+            result.move.captured.forEach(pos => {
+              newBoard[pos] = null;
+              setUwongTotal(prev => prev - result.move.captured.length);
             });
           }
 
-          setBoard(newBoard); // (done)
-          setMacanPos(result.move.position); // (done)
-          setCurrentPlayer('uwong'); // (done)
-          setMessage('Uwong: Move existing ones'); // (done)
-        } else if (gameState === 'placing') { // (done)
-          // Handle initial placement (done)
-          const newBoard = [...board]; // (done)
-          newBoard[result.move.position] = 'macan'; // (done)
-          setBoard(newBoard); // (done)
-          setMacanPos(result.move.position); // (done)
-          setCurrentPlayer('uwong'); // (done)
-          setMessage('Uwong: Place remaining pawns'); // (done)
+          setBoard(newBoard);
+          setMacanPos(result.move.position);
+          setCurrentPlayer('uwong');
+          setMessage('Uwong: Move existing ones');
+        } else if (gameState === 'placing') {
+          // Handle initial placement
+          const newBoard = [...board];
+          newBoard[result.move.position] = 'macan';
+          setBoard(newBoard);
+          setMacanPos(result.move.position);
+          setCurrentPlayer('uwong');
+          setMessage('Uwong: Place remaining pawns');
         }
       }
     }
@@ -720,37 +734,43 @@ export const MacananGameProvider = ({ children }) => {
 
   // Win condition check effect
   useEffect(() => {
-    // check all the move macan possible to take (not done)
+    // check all the move macan possible to take
     const canMacanMove = (from) => {
       const walk = connections[from];
       const jump = macanJump[from];
 
-      // for checking the current node to neighbour node (not done)
-      for (const w of walk) {
-        if (board[w] !== "uwong") {
-          return true;
-        }
-      }
-
-      // for checking all the jump available for macan (not done)
-      for (const key in jump) {
-        if (Object.prototype.hasOwnProperty.call(jump, key)) {
-          let value = jump[key];
-          let adaMusuh = true;
-
-          for (const wong of value) {
-            if (board[wong] != "uwong") {
-              adaMusuh = false;
-            }
-          }
-
-          if (adaMusuh) {
-            if (board[key] != "uwong") {
+      if (walk) {
+          // for checking the current node to neighbour node
+          for (const w of walk) {
+            if (board[w] !== "uwong") {
               return true;
             }
           }
-        }
       }
+
+
+      if (jump) {
+          // for checking all the jump available for macan
+          for (const key in jump) {
+            if (Object.prototype.hasOwnProperty.call(jump, key)) {
+              let value = jump[key];
+              let adaMusuh = true;
+
+              for (const wong of value) {
+                if (board[wong] != "uwong") {
+                  adaMusuh = false;
+                }
+              }
+
+              if (adaMusuh) {
+                if (board[key] != "uwong") {
+                  return true;
+                }
+              }
+            }
+          }
+      }
+
 
       return false;
     };
@@ -768,12 +788,12 @@ export const MacananGameProvider = ({ children }) => {
         setMessage("Uwong Win!");
       }
     }
-  }, [currentPlayer, uwongTotal]);
+  }, [currentPlayer, uwongTotal, macanPos, connections, macanJump, board]);
 
   // Node positions calculation effect
   useEffect(() => {
     const calculateNodePositions = () => {
-      if (boardRef.current) {
+      if (boardRef.current) { // Check if boardRef.current exists
         const positions = {};
         const nodes = boardRef.current.getElementsByTagName('button');
 
@@ -802,7 +822,7 @@ export const MacananGameProvider = ({ children }) => {
       document.removeEventListener('visibilitychange', calculateNodePositions);
       clearTimeout(timeout);
     };
-  }, [board]);
+  }, [board, boardRef]); // Add boardRef to dependency array
 
   const contextValue = {
     board,
@@ -827,22 +847,24 @@ export const MacananGameProvider = ({ children }) => {
       const lines = [];
 
       Object.entries(connections).forEach(([from, tos]) => {
-        tos.forEach((to) => {
-          // Only render if both positions exist and are different (not done)
-          if (nodePositions[from] && nodePositions[to] && from !== to) {
-            lines.push(
-              <line
-                key={`${from}-${to}`}
-                x1={nodePositions[from].x}
-                y1={nodePositions[from].y}
-                x2={nodePositions[to].x}
-                y2={nodePositions[to].y}
-                stroke="#CBD5E0"
-                strokeWidth="2"
-              />
-            );
-          }
-        });
+        if (tos) { // Check if tos is defined
+            tos.forEach((to) => {
+              // Only render if both positions exist and are different
+              if (nodePositions[from] && nodePositions[to] && from !== to) {
+                lines.push(
+                  <line
+                    key={`${from}-${to}`}
+                    x1={nodePositions[from].x}
+                    y1={nodePositions[from].y}
+                    x2={nodePositions[to].x}
+                    y2={nodePositions[to].y}
+                    stroke="#CBD5E0"
+                    strokeWidth="2"
+                  />
+                );
+              }
+            });
+        }
       });
 
       return lines;

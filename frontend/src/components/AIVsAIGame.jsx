@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useMacananGame } from './MacananGameContext';
 import { getBestMove } from '../utils/generic';
 
-const AIvsAI = () => {
+const AIVsAIGame = () => {
   const {
     board,
     currentPlayer,
@@ -158,4 +158,4 @@ const AIvsAI = () => {
   );
 };
 
-export default AIvsAI;
+export default AIVsAIGame;
