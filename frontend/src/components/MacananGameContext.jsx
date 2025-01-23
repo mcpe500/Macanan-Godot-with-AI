@@ -569,7 +569,7 @@ export const MacananGameProvider = ({children}) => {
           moves.push({position: index});
         }
       });
-    } else {
+    } else if(gameState === 'moving') {
       // Generate all possible moves for existing pawns
       board.forEach((cell, index) => {
         if (cell === 'uwong') {
@@ -581,6 +581,12 @@ export const MacananGameProvider = ({children}) => {
             });
           }
         }
+      });
+    }
+    else if(gameState === "initial") {
+      const idxtaruh = [6, 7, 8, 11, 12, 13, 16, 17, 18]
+      idxtaruh.forEach((value) => {
+        moves.push({position: value})
       });
     }
 
@@ -685,6 +691,8 @@ export const MacananGameProvider = ({children}) => {
     } else {
       let minEval = {score: Infinity};
       const moves = generateUwongMoves(nextBoard, nextUwongPawnsInHand, nextGameState);
+
+      console.log(moves);
 
       for (const move of moves) {
         const newBoard = [...nextBoard];
