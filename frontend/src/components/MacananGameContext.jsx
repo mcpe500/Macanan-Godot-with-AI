@@ -1,12 +1,17 @@
 // MacananGameContext.jsx
-import {createContext, useContext, useState, useEffect, useRef} from 'react';
-import {useLocation, useNavigate} from 'react-router-dom';
+import { createContext, useContext, useState, useEffect, useRef } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { CONNECTIONS, MACAN_JUMP } from './ContextComponents/constants';
-
+import {
+  isValidMove,
+  canMacanJump,
+  calculateFormationPositions,
+  checkMacanMovement
+} from './ContextComponents/logic';
 
 const MacananGameContext = createContext();
 
-export const MacananGameProvider = ({children}) => {
+export const MacananGameProvider = ({ children }) => {
   const navigate = useNavigate();
   const [board, setBoard] = useState(Array(37).fill(null));
   const [currentPlayer, setCurrentPlayer] = useState('uwong');
@@ -20,8 +25,8 @@ export const MacananGameProvider = ({children}) => {
   const [macanPos, setMacanPos] = useState(null);
   const [nodePositions, setNodePositions] = useState({});
   const boardRef = useRef(null);
-  const [firstMove, setFirstMove] = useState({uwong: true, macan: false});
-  const location = useLocation(); 
+  const [firstMove, setFirstMove] = useState({ uwong: true, macan: false });
+  const location = useLocation();
 
   const place3x3Formation = (centerPosition) => {
     const newBoard = [...board];
@@ -33,13 +38,9 @@ export const MacananGameProvider = ({children}) => {
       return;
     }
 
-    const positions = [
-      [(row - 1) * 5 + (col - 1), (row - 1) * 5 + col, (row - 1) * 5 + (col + 1)],
-      [row * 5 + (col - 1), row * 5 + col, row * 5 + (col + 1)],
-      [(row + 1) * 5 + (col - 1), (row + 1) * 5 + col, (row + 1) * 5 + (col + 1)]
-    ];
+    const positions = calculateFormationPositions(centerPosition);
 
-    positions.flat().forEach(pos => {
+    positions.forEach(pos => {
       newBoard[pos] = 'uwong';
       setUwongPawnsInHand((prev) => prev - 1);
     });
@@ -48,48 +49,20 @@ export const MacananGameProvider = ({children}) => {
     setCurrentPlayer('macan');
     setGameState('placing');
     setMessage('Macan: Place your piece');
-    setFirstMove({...firstMove, uwong: false});
-  };
-  
-  const isValidMove = (from, to) => {
-    return connections[from]?.includes(to);
-  };
-
-  const canMacanJump = (from, to) => {
-    if (board[to] !== null) return false;
-
-    const path = findJumpPath(from, to);
-    if (path == null) return false;
-
-    let eat = true;
-    for (const p of path) {
-      if (board[p] !== "uwong") {
-        eat = false;
-      }
-    }
-
-    return eat;
-  };
-
-  const findJumpPath = (from, to) => {
-    const listJump = macanJump[from];
-    const path = listJump[to];
-    return path;
+    setFirstMove({ ...firstMove, uwong: false });
   };
 
   const canMacanMoveCounter = (from, board) => {
     let ctr = 0;
     const walk = CONNECTIONS[from];
-    if (!walk) return 0; // Add check if walk is undefined
+    if (!walk) return 0;
 
-    // Count walk moves
     walk.forEach(neighbor => {
       if (board[neighbor] === null) ctr++;
     });
 
-    // Count jump moves
     const jumpPaths = MACAN_JUMP[from];
-    if (jumpPaths) { // Add check if jumpPaths is undefined
+    if (jumpPaths) {
       for (const targetPos in jumpPaths) {
         const path = jumpPaths[targetPos];
         const allUwong = path.every(pos => board[pos] === 'uwong');
@@ -100,13 +73,11 @@ export const MacananGameProvider = ({children}) => {
     return ctr;
   };
 
-
   const canMacanWalkCounter = (from) => {
     let ctr = 0;
-    const walk = connections[from];
-    if (!walk) return 0; // Add check if walk is undefined
+    const walk = CONNECTIONS[from];
+    if (!walk) return 0;
 
-    // for checking the current node to neighbour node
     for (const w of walk) {
       if (board[w] !== "uwong") {
         ctr += 1;
@@ -114,16 +85,16 @@ export const MacananGameProvider = ({children}) => {
     }
 
     return ctr;
-  }
+  };
 
   const canMacanJumpCounter = (from) => {
     let ctr = 0;
-    const jump = macanJump[from];
-    if (!jump) return 0; // Add check if jump is undefined
+    const jump = MACAN_JUMP[from];
+    if (!jump) return 0;
 
     for (const key in jump) {
       if (Object.prototype.hasOwnProperty.call(jump, key)) {
-        let value = jump[key];
+        const value = jump[key];
         let adaMusuh = true;
 
         for (const wong of value) {
@@ -141,7 +112,7 @@ export const MacananGameProvider = ({children}) => {
     }
 
     return ctr;
-  }
+  };
 
   const handleClick = (position) => {
     if (!win) {
@@ -162,7 +133,7 @@ export const MacananGameProvider = ({children}) => {
               setGameState('moving');
               setMessage('Uwong: Move existing ones');
             }
-            setFirstMove({...firstMove, macan: false});
+            setFirstMove({ ...firstMove, macan: false });
           } else {
             setMessage("Macan: Choose an empty place");
           }
@@ -188,13 +159,13 @@ export const MacananGameProvider = ({children}) => {
         } else {
           if (selectedPiece !== null) {
             if (currentPlayer === 'macan') {
-              if ((isValidMove(selectedPiece, position) || canMacanJump(selectedPiece, position))) {
+              if (isValidMove(selectedPiece, position) || canMacanJump(selectedPiece, position, board)) {
                 const newBoard = [...board];
                 newBoard[selectedPiece] = null;
                 newBoard[position] = 'macan';
 
-                if (canMacanJump(selectedPiece, position)) {
-                  const jumpedPos = findJumpPath(selectedPiece, position);
+                if (canMacanJump(selectedPiece, position, board)) {
+                  const jumpedPos = MACAN_JUMP[selectedPiece][position];
                   for (const p of jumpedPos) {
                     newBoard[p] = null;
                     setUwongTotal(prev => prev - 1);
@@ -299,8 +270,8 @@ export const MacananGameProvider = ({children}) => {
       // Generate all possible moves for existing pawns
       board.forEach((cell, index) => {
         if (cell === 'uwong') {
-          if (connections[index]) { // Check if connections[index] is defined
-            connections[index].forEach(neighbor => {
+          if (CONNECTIONS[index]) { // Check if connections[index] is defined
+            CONNECTIONS[index].forEach(neighbor => {
               if (board[neighbor] === null) {
                 moves.push({from: index, to: neighbor});
               }
@@ -568,61 +539,20 @@ export const MacananGameProvider = ({children}) => {
 
   // Win condition check effect
   useEffect(() => {
-    // check all the move macan possible to take
-    const canMacanMove = (from) => {
-      const walk = CONNECTIONS[from];
-      const jump = MACAN_JUMP[from];
-
-      if (walk) {
-        // for checking the current node to neighbour node
-        for (const w of walk) {
-          if (board[w] !== "uwong") {
-            return true;
-          }
-        }
-      }
-
-
-      if (jump) {
-        // for checking all the jump available for macan
-        for (const key in jump) {
-          if (Object.prototype.hasOwnProperty.call(jump, key)) {
-            let value = jump[key];
-            let adaMusuh = true;
-
-            for (const wong of value) {
-              if (board[wong] != "uwong") {
-                adaMusuh = false;
-              }
-            }
-
-            if (adaMusuh) {
-              if (board[key] != "uwong") {
-                return true;
-              }
-            }
-          }
-        }
-      }
-
-
-      return false;
-    };
-
-    if (currentPlayer == "uwong" && uwongTotal < 14) {
+    if (currentPlayer === "uwong" && uwongTotal < 14) {
       setWin(true);
       setWinner("macan");
       setMessage("Macan Win!");
     }
 
     if (macanPos != null) {
-      if (!canMacanMove(macanPos)) {
+      if (!checkMacanMovement(macanPos, board)) {
         setWin(true);
         setWinner("uwong");
         setMessage("Uwong Win!");
       }
     }
-  }, [currentPlayer, uwongTotal, macanPos, CONNECTIONS, MACAN_JUMP, board]);
+  }, [currentPlayer, uwongTotal, macanPos, board]);
 
   // Node positions calculation effect
   useEffect(() => {
