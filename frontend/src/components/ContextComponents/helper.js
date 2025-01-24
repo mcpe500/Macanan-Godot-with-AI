@@ -3,6 +3,7 @@
 // import { CONNECTIONS, MACAN_JUMP, INITIAL_FORMATION_POSITIONS, WINNING_UWONG_COUNT } from './gameConstants';
 
 import { CONNECTIONS, MACAN_JUMP, INITIAL_FORMATION_POSITIONS, WINNING_UWONG_COUNT } from "./constants";
+import { checkMacanMovement } from "./logic";
 
 
 export const evaluateGameState = (board, uwongTotal, macanPos, depth, winner) => {
