@@ -292,6 +292,7 @@ export const MacananGameProvider = ({ children }) => {
   // Updated minimaxForMacan function and related helpers in MacananGameContext.js
 
   const minimaxForMacan = (depth, maximizingPlayer, nextBoard, nextUwongPawnsInHand, nextGameState, nextUwongTotal, alpha = -Infinity, beta = Infinity) => {
+    // const discourageNode = [25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36]
     const macanPosNow = nextBoard.findIndex(pos => pos === "macan");
     let gameOver = false;
     let winner = null;
@@ -318,7 +319,12 @@ export const MacananGameProvider = ({ children }) => {
 
       // Base scoring
       score -= nextUwongTotal * 10;  // Prioritize reducing Uwong pawns
-      score += macanCanMove * 4;     // Encourage keeping movement options
+      score += macanCanMove * 5;     // Encourage keeping movement options
+
+      // for (const node of discourageNode) {
+      //   // console.log(macanPosNow, " == ", node);
+      //   if(macanPosNow == node) score -= 15;
+      // }
 
       // Win/loss conditions
       if (winner === 'macan') score = 10000 - depth; // Prefer faster wins
@@ -433,8 +439,8 @@ export const MacananGameProvider = ({ children }) => {
 
   // Updated AI click handler
   const handleAIClick = () => {
-    const depth = 3; // Adjust depth based on difficulty
-    console.warn('macan pos', macanPos);
+    const depth = 8; // Adjust depth based on difficulty
+    // console.warn('macan pos', macanPos);
     if (currentPlayer === 'macan' && !win) {
       const result = minimaxForMacan(
         depth,
@@ -475,7 +481,7 @@ export const MacananGameProvider = ({ children }) => {
           }
 
         } else if (gameState === 'placing') {
-          console.log("masuk ke mode placing macan");
+          // console.log("masuk ke mode placing macan");
           // Handle initial placement
           const newBoard = [...board];
           newBoard[result.move.position] = 'macan';
@@ -495,18 +501,18 @@ export const MacananGameProvider = ({ children }) => {
         uwongTotal
       );
 
-      console.log("uwong move");
-      console.log(result);
+      // console.log("uwong move");
+      // console.log(result);
 
       if (result.move) {
-        console.log(gameState);
+        // console.log(gameState);
         if (gameState === 'initial') {
           // AI places initial formation in a good position (center)
           const validCenter = [6, 7, 8, 11, 12, 13, 16, 17, 18];
           const centerPosition = validCenter[Math.floor(Math.random() * validCenter.length)];
           place3x3Formation(centerPosition); // Center position
           setUwongPawnsInHand(uwongPawnsInHand - 9);
-          console.log('pawns in hand', uwongPawnsInHand);
+          // console.log('pawns in hand', uwongPawnsInHand);
         } else if (gameState === 'moving') {
           // Handle movement
           const newBoard = [...board];
@@ -533,7 +539,7 @@ export const MacananGameProvider = ({ children }) => {
     }
 
 
-    console.log('board', board);
+    // console.log('board', board);
   };
 
 

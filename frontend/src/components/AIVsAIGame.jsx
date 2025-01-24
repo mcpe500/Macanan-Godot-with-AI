@@ -24,9 +24,8 @@ const AIVsAIGame = () => {
   // Trigger AI move when it's Macan's turn
   useEffect(() => {
     if (!win) {
-      const delay = 35; // Adjust the delay as needed (in milliseconds)
+      const delay = 100; // Adjust the delay as needed (in milliseconds)
       const timeoutId = setTimeout(() => {
-        console.log("called");
         handleAIClick();
       }, delay);
 

@@ -23,7 +23,6 @@ const HumanVsAIMacan = () => {
   // Trigger AI move when it's Macan's turn
   useEffect(() => {
     if (!win && currentPlayer === 'macan') {
-      console.log("called");
       handleAIClick();
     }
   }, [currentPlayer, win, handleAIClick]);
